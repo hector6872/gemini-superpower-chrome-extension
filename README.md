@@ -21,11 +21,12 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
 3. **User Prompt Navigator (`⤒`, `^` and `v`)**:
    - Jump smoothly and instantly between your previous and next user query prompts without tedious manual scrolling, skipping long model responses.
    - **Direct Scroll to Top (`⤒`)**: Dynamic button that reveals itself whenever you scroll down to take you straight to the beginning of the conversation in one click.
+   - **Smart Disabled States**: Navigation buttons automatically disable when reaching the top, bottom, or in an empty conversation.
 
 4. **Single-Word Quick Prompts (`//`) & In-Page Editor**:
-   - Type `//` inside the chat box or click `// Prompts` to open the autocomplete command menu (`//fix`, `//test`, `//review`, `//explain`, `//optimize`, `//doc`, `//summary`, `//translate`).
+   - Type `//` inside the chat box or click `// Prompts` to open the autocomplete command menu (`//doc`, `//explain`, `//fix`, `//optimize`, `//review`, `//summary`, `//test`, `//translate`).
    - Type `//fix` + `Space`, `Tab`, or `Enter` to instantly prepend the prompt template at the beginning of your text with the cursor positioned at the end.
-   - **Integrated Editor**: Click `✏️ Edit Prompts` in the menu to add, edit, or delete single-word commands right within Gemini.
+   - **Integrated Editor**: Click `✏️ Edit Prompts` in the menu header to add, customize, or delete single-word commands right within Gemini.
    - **Auto-Model Switcher**: Assign specific models (*Gemini Flash*, *Gemini Pro*, *Flash Thinking*, or *No change*) to any command.
 
 5. **Smart Auto-Focus**:
@@ -40,9 +41,6 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
 7. **Bulk Delete Recent Conversations**:
    - Clean "Delete all" action integrated into the recent conversations sidebar header.
    - Confirmation dialog with a real-time progress bar and cancellation support.
-
-8. **In-Page Prompt Library Manager**:
-   - Create, edit, and delete custom single-word prompt templates directly inside Gemini via the `✏️ Edit Prompts` action.
 
 ---
 
