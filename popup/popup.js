@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       title: 'optimize',
       desc: 'Optimize performance, efficiency, and clarity',
       template: 'Please analyze and optimize the following for maximum efficiency, speed, and clarity. Explain the key improvements made:',
-      model: 'thinking'
+      model: 'pro'
     },
     {
       id: 'review',
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       title: 'summary',
       desc: 'Condense into key takeaways and conclusions',
       template: 'Please provide a concise summary of the following content, highlighting core takeaways, key conclusions, and recommended next steps:',
-      model: 'flash'
+      model: 'flash-lite'
     },
     {
       id: 'test',
@@ -100,7 +100,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   function getModelLabel(model) {
     switch (model) {
       case 'pro': return 'Gemini Pro';
-      case 'thinking': return 'Thinking';
+      case 'flash-lite':
+      case 'flash_lite': return 'Flash Lite';
       case 'flash': return 'Flash';
       default: return 'No change';
     }

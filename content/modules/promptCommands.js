@@ -33,7 +33,7 @@
       title: 'optimize',
       desc: 'Optimize performance, efficiency, and clarity',
       template: 'Please analyze and optimize the following for maximum efficiency, speed, and clarity. Explain the key improvements made:',
-      model: 'thinking'
+      model: 'pro'
     },
     {
       id: 'review',
@@ -47,7 +47,7 @@
       title: 'summary',
       desc: 'Condense into key takeaways and conclusions',
       template: 'Please provide a concise summary of the following content, highlighting core takeaways, key conclusions, and recommended next steps:',
-      model: 'flash'
+      model: 'flash-lite'
     },
     {
       id: 'test',
@@ -76,7 +76,7 @@
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         const data = await chrome.storage.local.get('gsp_custom_prompts');
         const stored = data.gsp_custom_prompts;
-        const isOldFormat = Array.isArray(stored) && stored.some(p => p.id === 'code-review' || p.desc?.includes('JSDoc') || p.title.includes(' '));
+        const isOldFormat = Array.isArray(stored) && stored.some(p => p.id === 'code-review' || p.desc?.includes('JSDoc') || p.title.includes(' ') || p.model === 'thinking');
         
         if (!stored || !Array.isArray(stored) || stored.length === 0 || isOldFormat) {
           activePrompts = [...DEFAULT_PROMPTS];
@@ -102,37 +102,197 @@
 
   function getModelBadgeText(modelKey) {
     switch (modelKey) {
+      case 'flash-lite':
+      case 'flash_lite': return '⚡ Flash Lite';
       case 'flash': return '⚡ Flash';
       case 'pro': return '🌟 Pro';
-      case 'thinking': return '🧠 Thinking';
       default: return '';
     }
   }
 
-  function switchGeminiModel(targetModel) {
+  function triggerClick(el) {
+    if (!el) return;
+    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+    el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    el.click();
+  }
+
+  function findGeminiModelPickerButton() {
+    const selectors = [
+      '[data-test-id="bard-mode-menu-button"]',
+      '[data-test-id="model-selector"]',
+      '[data-test-id*="model-picker"]',
+      'model-selector button',
+      '.model-picker-btn',
+      '.model-selector-btn',
+      'button.input-area-model-picker',
+      'button[aria-label*="model" i]',
+      'button[aria-label*="modelo" i]',
+      'button[aria-label*="Flash" i]',
+      'button[aria-label*="Pro" i]',
+      'header button[aria-haspopup="menu"]',
+      'mat-toolbar button[aria-haspopup="menu"]',
+      '.top-bar-container button[aria-haspopup="menu"]'
+    ];
+
+    for (const sel of selectors) {
+      const el = document.querySelector(sel);
+      if (el && el.offsetHeight > 0 && !el.closest('user-query, model-response, #gsp-floating-toolbar')) {
+        return el;
+      }
+    }
+
+    const allButtons = Array.from(document.querySelectorAll('button[aria-haspopup="menu"], button[aria-expanded], button'));
+    for (const btn of allButtons) {
+      if (btn.id?.startsWith('gsp-') || btn.closest('user-query, model-response, #gsp-floating-toolbar')) continue;
+      const text = (btn.innerText || btn.textContent || '').toLowerCase().trim();
+      const aria = (btn.getAttribute('aria-label') || '').toLowerCase();
+      
+      if (text.includes('flash') || text.includes('pro') || text.includes('lite') ||
+          aria.includes('flash') || aria.includes('pro') || aria.includes('lite') ||
+          aria.includes('model') || aria.includes('modelo')) {
+        if (btn.offsetHeight > 0 && btn.offsetWidth > 0) {
+          return btn;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  function findActiveChipsWithDismissButton() {
+    const dismissButtons = [];
+    const inputArea = document.querySelector('rich-textarea, [class*="input-area"], [class*="prompt"], form, main') || document.body;
+    const buttons = Array.from(inputArea.querySelectorAll('button, [role="button"]'));
+
+    for (const btn of buttons) {
+      if (btn.id?.startsWith('gsp-') || btn.closest('#gsp-floating-toolbar')) continue;
+      
+      const svg = btn.querySelector('svg, mat-icon');
+      const aria = (btn.getAttribute('aria-label') || '').toLowerCase();
+      const hasCloseSvg = svg && (
+        svg.innerHTML.includes('19 6.41') ||
+        svg.innerHTML.includes('close') ||
+        svg.innerHTML.includes('18 6') ||
+        svg.innerHTML.includes('M19 6') ||
+        svg.innerHTML.includes('M18.3 5.71')
+      );
+      
+      if (hasCloseSvg || aria.includes('close') || aria.includes('remove') || aria.includes('quitar') || aria.includes('entfern') || aria.includes('supprim') || aria.includes('schließen')) {
+        if (btn.offsetHeight > 0 && btn.offsetWidth > 0) {
+          dismissButtons.push(btn);
+        }
+      }
+    }
+
+    return dismissButtons;
+  }
+
+  function getActiveSwitches() {
+    const switches = Array.from(document.querySelectorAll('mat-slide-toggle, .mat-mdc-slide-toggle, [role="switch"], [role="checkbox"]'));
+    return switches.filter(s => {
+      if (s.closest('#gsp-floating-toolbar')) return false;
+      const isChecked = s.getAttribute('aria-checked') === 'true' || s.classList.contains('mdc-switch--checked') || !!s.querySelector('input:checked');
+      return isChecked && s.offsetHeight > 0;
+    });
+  }
+
+  async function disableExtendedThinking() {
+    const dismissBtns = findActiveChipsWithDismissButton();
+    for (const btn of dismissBtns) {
+      triggerClick(btn);
+      await new Promise(r => setTimeout(r, 80));
+    }
+
+    const activeSwitches = getActiveSwitches();
+    for (const sw of activeSwitches) {
+      triggerClick(sw);
+      await new Promise(r => setTimeout(r, 80));
+    }
+  }
+
+  async function selectModelFromDropdown(targetModel) {
+    const rawOptions = Array.from(document.querySelectorAll('.cdk-overlay-container [role="menuitem"], [role="menu"] [role="menuitem"], .cdk-overlay-pane button, [role="option"], mat-option, .mat-mdc-menu-item'));
+    
+    const options = rawOptions.filter(el => {
+      return el.offsetHeight > 0 && (el.tagName === 'BUTTON' || el.tagName === 'A' || el.getAttribute('role') === 'menuitem' || el.getAttribute('role') === 'option' || el.classList.contains('mat-mdc-menu-item'));
+    });
+
+    if (options.length === 0) return false;
+
+    let chosen = null;
+
+    if (targetModel === 'flash-lite' || targetModel === 'flash_lite') {
+      chosen = options.find(opt => {
+        const text = (opt.innerText || opt.textContent || '').toLowerCase();
+        return text.includes('lite');
+      }) || options[0];
+    } else if (targetModel === 'flash') {
+      chosen = options.find(opt => {
+        const text = (opt.innerText || opt.textContent || '').toLowerCase();
+        const hasFlash = text.includes('flash') || text.includes('2.0');
+        const hasLite = text.includes('lite');
+        const hasThinking = text.includes('thinking') || text.includes('pens') || text.includes('denk') || text.includes('thought');
+        return hasFlash && !hasLite && !hasThinking;
+      }) || options[0];
+    } else if (targetModel === 'pro') {
+      chosen = options.find(opt => {
+        const text = (opt.innerText || opt.textContent || '').toLowerCase();
+        return text.includes('pro') || text.includes('1.5');
+      }) || options[options.length - 1];
+    }
+
+    if (chosen) {
+      triggerClick(chosen);
+      await new Promise(r => setTimeout(r, 120));
+      return true;
+    }
+
+    return false;
+  }
+
+  function focusChatInputAtEnd() {
+    const input = window.GSP?.getGeminiInput ? window.GSP.getGeminiInput() : null;
+    if (!input) return;
+
+    input.focus();
+
+    if (input.isContentEditable || input.getAttribute('contenteditable') === 'true') {
+      const range = document.createRange();
+      const selection = window.getSelection();
+      range.selectNodeContents(input);
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } else if (typeof input.setSelectionRange === 'function') {
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    }
+  }
+
+  async function switchGeminiModel(targetModel) {
     if (!targetModel || targetModel === 'keep') return;
 
-    const pickerBtn = document.querySelector('button[aria-label*="model" i], button[aria-label*="modelo" i], .model-picker-button, [data-test-id="model-selector"]');
-    if (!pickerBtn) return;
+    await disableExtendedThinking();
 
-    pickerBtn.click();
+    const pickerBtn = findGeminiModelPickerButton();
+    if (pickerBtn) {
+      triggerClick(pickerBtn);
+      await new Promise(r => setTimeout(r, 220));
 
-    setTimeout(() => {
-      const options = Array.from(document.querySelectorAll('[role="menuitem"], [role="option"], mat-option, .mat-mdc-menu-item, button'));
-      const targetOption = options.find(opt => {
-        const text = (opt.innerText || opt.textContent || '').toLowerCase();
-        if (targetModel === 'thinking' && (text.includes('thinking') || text.includes('pensamiento'))) return true;
-        if (targetModel === 'pro' && text.includes('pro') && !text.includes('thinking')) return true;
-        if (targetModel === 'flash' && text.includes('flash') && !text.includes('thinking')) return true;
-        return false;
-      });
-
-      if (targetOption) {
-        targetOption.click();
-      } else {
+      const success = await selectModelFromDropdown(targetModel);
+      if (!success) {
         document.body.click();
       }
-    }, 120);
+    }
+
+    await disableExtendedThinking();
+    setTimeout(disableExtendedThinking, 150);
+
+    focusChatInputAtEnd();
+    setTimeout(focusChatInputAtEnd, 120);
   }
 
   function insertPromptIntoGemini(templateText) {
@@ -300,15 +460,16 @@
     }
   }
 
-  function selectPrompt(promptItem) {
+  async function selectPrompt(promptItem) {
     closePromptMenu();
     if (!promptItem) return;
 
     if (promptItem.model && promptItem.model !== 'keep') {
-      switchGeminiModel(promptItem.model);
+      await switchGeminiModel(promptItem.model);
     }
 
     insertPromptIntoGemini(promptItem.template);
+    focusChatInputAtEnd();
   }
 
   // In-Page Prompt Library Editor Modal
@@ -382,9 +543,9 @@
                 <label class="gsp-input-label" for="gsp-form-model">Automatic Model Switch</label>
                 <select id="gsp-form-model" class="gsp-input-field">
                   <option value="keep" ${targetPrompt.model === 'keep' ? 'selected' : ''}>No change (keep active model)</option>
+                  <option value="flash-lite" ${(targetPrompt.model === 'flash-lite' || targetPrompt.model === 'flash_lite') ? 'selected' : ''}>Gemini Flash Lite</option>
                   <option value="flash" ${targetPrompt.model === 'flash' ? 'selected' : ''}>Gemini Flash</option>
                   <option value="pro" ${targetPrompt.model === 'pro' ? 'selected' : ''}>Gemini Pro</option>
-                  <option value="thinking" ${targetPrompt.model === 'thinking' ? 'selected' : ''}>Flash Thinking</option>
                 </select>
               </div>
 
