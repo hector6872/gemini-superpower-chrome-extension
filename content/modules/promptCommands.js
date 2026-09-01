@@ -387,13 +387,13 @@
         : '';
 
       itemsHtml += `
-        <li class="gsp-prompt-item ${isSelected ? 'gsp-selected' : ''}" data-idx="${idx}" aria-selected="${isSelected ? 'true' : 'false'}">
+        <div class="gsp-prompt-item ${isSelected ? 'gsp-selected' : ''}" data-idx="${idx}" aria-selected="${isSelected ? 'true' : 'false'}">
           <div class="gsp-prompt-item-left">
             <span class="gsp-prompt-title">/${p.title}</span>
             ${p.desc ? `<span class="gsp-prompt-desc">${p.desc}</span>` : ''}
           </div>
           ${modelBadge}
-        </li>
+        </div>
       `;
     });
 
@@ -413,9 +413,9 @@
           </button>
         </div>
       </div>
-      <ul class="gsp-prompt-list">
+      <div class="gsp-prompt-list">
         ${itemsHtml}
-      </ul>
+      </div>
       <div class="gsp-prompt-footer">
         <span>${t('menu_footer')}</span>
       </div>
@@ -432,8 +432,16 @@
       });
     }
 
-    // Click handlers for items
+    // Hover and Click handlers for items
     menuElement.querySelectorAll('.gsp-prompt-item').forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        const idx = parseInt(item.getAttribute('data-idx'), 10);
+        if (!isNaN(idx)) {
+          selectedIndex = idx;
+          updateSelectedMenuItem();
+        }
+      });
+
       item.addEventListener('mousedown', (e) => {
         e.preventDefault();
         e.stopPropagation();

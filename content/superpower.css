@@ -337,19 +337,23 @@ body[class*="dark"],
 /* --------------------------------------------------------------------------
    // Prompt Autocomplete Menu
    -------------------------------------------------------------------------- */
+#gsp-prompt-menu-root,
 .gsp-prompt-menu {
-  position: absolute;
-  width: 380px;
-  max-height: 320px;
-  background: var(--gsp-bg-card);
-  border: 1px solid var(--gsp-border-card);
-  border-radius: 16px;
-  box-shadow: var(--gsp-card-shadow);
-  z-index: 10000;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  font-family: var(--gsp-font-family);
+  position: absolute !important;
+  width: 380px !important;
+  max-height: 420px !important;
+  background: var(--gsp-bg-card) !important;
+  border: 1px solid var(--gsp-border-card) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--gsp-card-shadow) !important;
+  z-index: 10000 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  font-family: var(--gsp-font-family) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
   animation: gsp-fade-in 0.15s ease-out;
 }
 
@@ -358,15 +362,20 @@ body[class*="dark"],
   to { opacity: 1; transform: translateY(0); }
 }
 
-.gsp-prompt-header {
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--gsp-border-card);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12px;
-  color: var(--gsp-text-muted);
-  background: rgba(0, 0, 0, 0.02);
+#gsp-prompt-menu-root .gsp-prompt-header,
+.gsp-prompt-menu .gsp-prompt-header {
+  padding: 8px 14px !important;
+  margin: 0 !important;
+  border-bottom: 1px solid var(--gsp-border-card) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  font-size: 12px !important;
+  color: var(--gsp-text-muted) !important;
+  background: rgba(0, 0, 0, 0.02) !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  flex-shrink: 0 !important;
 }
 
 .gsp-prompt-header-left {
@@ -398,13 +407,18 @@ body[class*="dark"],
   border-color: var(--gsp-accent);
 }
 
-.gsp-prompt-footer {
-  padding: 6px 12px;
-  border-top: 1px solid var(--gsp-border-card);
-  font-size: 11px;
-  color: var(--gsp-text-muted);
-  background: rgba(0, 0, 0, 0.015);
-  text-align: center;
+#gsp-prompt-menu-root .gsp-prompt-footer,
+.gsp-prompt-menu .gsp-prompt-footer {
+  padding: 6px 12px !important;
+  margin: 0 !important;
+  border-top: 1px solid var(--gsp-border-card) !important;
+  font-size: 11px !important;
+  color: var(--gsp-text-muted) !important;
+  background: rgba(0, 0, 0, 0.015) !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  flex-shrink: 0 !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -561,44 +575,94 @@ body[class*="dark"],
   color: var(--gsp-text-primary);
 }
 
+#gsp-prompt-menu-root .gsp-prompt-list,
+.gsp-prompt-menu .gsp-prompt-list,
 .gsp-prompt-list {
-  overflow-y: auto;
-  max-height: 260px;
-  padding: 6px 0;
-  margin: 0;
-  list-style: none;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: 310px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  display: block !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(var(--gsp-accent-rgb), 0.3) transparent !important;
 }
 
+#gsp-prompt-menu-root .gsp-prompt-list::-webkit-scrollbar,
+.gsp-prompt-menu .gsp-prompt-list::-webkit-scrollbar {
+  width: 5px !important;
+}
+
+#gsp-prompt-menu-root .gsp-prompt-list::-webkit-scrollbar-track,
+.gsp-prompt-menu .gsp-prompt-list::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+#gsp-prompt-menu-root .gsp-prompt-list::-webkit-scrollbar-thumb,
+.gsp-prompt-menu .gsp-prompt-list::-webkit-scrollbar-thumb {
+  background: rgba(var(--gsp-accent-rgb), 0.25) !important;
+  border-radius: 4px !important;
+}
+
+#gsp-prompt-menu-root .gsp-prompt-list::-webkit-scrollbar-thumb:hover,
+.gsp-prompt-menu .gsp-prompt-list::-webkit-scrollbar-thumb:hover {
+  background: var(--gsp-accent) !important;
+}
+
+#gsp-prompt-menu-root .gsp-prompt-item,
+.gsp-prompt-menu .gsp-prompt-item,
 .gsp-prompt-item {
-  padding: 9px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  transition: background 0.12s ease;
-  gap: 12px;
+  padding: 9px 16px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  cursor: pointer !important;
+  transition: background 0.12s ease !important;
+  gap: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent;
 }
 
-.gsp-prompt-item:hover,
-.gsp-prompt-item.gsp-selected {
-  background: var(--gsp-bg-pill-hover);
+#gsp-prompt-menu-root .gsp-prompt-item:hover,
+.gsp-prompt-menu .gsp-prompt-item:hover {
+  background: var(--gsp-bg-pill-hover) !important;
 }
 
-.gsp-prompt-item.gsp-selected {
-  background: rgba(var(--gsp-accent-rgb), 0.12) !important;
-  border-left: 3px solid var(--gsp-accent);
-  padding-left: 11px;
+#gsp-prompt-menu-root .gsp-prompt-item.gsp-selected,
+.gsp-prompt-menu .gsp-prompt-item.gsp-selected {
+  background: var(--gsp-bg-pill-active) !important;
 }
 
-.gsp-prompt-item.gsp-selected .gsp-prompt-title {
+#gsp-prompt-menu-root .gsp-prompt-item.gsp-selected::before,
+.gsp-prompt-menu .gsp-prompt-item.gsp-selected::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 3.5px !important;
+  background: var(--gsp-accent) !important;
+}
+
+#gsp-prompt-menu-root .gsp-prompt-item.gsp-selected .gsp-prompt-title,
+.gsp-prompt-menu .gsp-prompt-item.gsp-selected .gsp-prompt-title {
   color: var(--gsp-accent) !important;
 }
 
 .gsp-prompt-item-left {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  gap: 2px;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  gap: 2px !important;
+  flex: 1 !important;
+  min-width: 0 !important;
 }
 
 .gsp-prompt-title {
