@@ -42,8 +42,8 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
    - Remembers your wide mode preference in local storage.
 
 7. **Bulk Delete Recent Conversations**:
-   - Clean "Delete all" action integrated into the recent conversations sidebar header.
-   - Confirmation dialog with a real-time progress bar and cancellation support.
+   - Clean "Delete all" action integrated into the recent conversations sidebar header using the native Material delete icon.
+   - Native confirmation dialog with silent, background batch deletion.
 
 ---
 

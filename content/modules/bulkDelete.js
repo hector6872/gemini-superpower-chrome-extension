@@ -1,7 +1,7 @@
 /**
  * Bulk Delete Module for Gemini Superpowers
- * Injects a "Delete all" button in the recent conversations sidebar
- * using native browser confirmation dialog.
+ * Performs direct RPC and silent background deletion of conversations
+ * with native browser confirmation dialog.
  */
 (function () {
   'use strict';
@@ -16,8 +16,13 @@
     });
   }
 
+  function extractConversationId(item) {
+    const href = item.getAttribute('href') || item.querySelector('a')?.getAttribute('href') || '';
+    const match = href.match(/\/app\/([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : '';
+  }
+
   function findRecentSectionHeader() {
-    // 1. Search for headers/labels inside sidebar elements
     const sidebars = document.querySelectorAll('side-nav, mat-sidenav, nav, aside, [class*="side-nav"], [class*="sidebar"], [data-test-id*="sidebar"]');
     
     for (const sb of sidebars) {
@@ -32,7 +37,6 @@
       }
     }
 
-    // 2. Search anywhere on the left side of the screen (sidebar area)
     const allLeftElements = Array.from(document.querySelectorAll('h2, h3, h4, span, div'));
     for (const el of allLeftElements) {
       const rect = el.getBoundingClientRect();
@@ -46,7 +50,6 @@
       }
     }
 
-    // 3. Fallback: parent of first conversation link
     const links = getConversationLinks();
     if (links.length > 0) {
       const listContainer = links[0].closest('mat-nav-list, mat-list, [role="list"], .conversation-list, [class*="list"]') || links[0].parentElement;
@@ -66,7 +69,6 @@
 
     if (recentHeader.querySelector('#gsp-bulk-delete-btn')) return;
 
-    // Style the recentHeader element itself as flex row without affecting parent list
     recentHeader.style.display = 'flex';
     recentHeader.style.alignItems = 'center';
     recentHeader.style.justifyContent = 'space-between';
@@ -80,7 +82,7 @@
     btn.title = 'Delete all recent conversations';
     btn.innerHTML = `
       <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+        <path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/>
       </svg>
       <span>Delete all</span>
     `;
@@ -94,21 +96,54 @@
     recentHeader.appendChild(btn);
   }
 
-  async function deleteSingleConversation(item) {
-    try {
-      // Scroll item into view in sidebar
-      item.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  function deleteViaRPC(conversationId) {
+    return new Promise((resolve) => {
+      const requestId = 'req_' + Math.random().toString(36).substring(2, 9);
 
-      // Trigger full pointer and mouse sequence to reveal hover actions
+      const handler = (e) => {
+        if (e.data && e.data.type === 'GSP_DELETE_RPC_RESULT' && e.data.requestId === requestId) {
+          window.removeEventListener('message', handler);
+          resolve(e.data.success);
+        }
+      };
+
+      window.addEventListener('message', handler);
+      window.postMessage({
+        type: 'GSP_EXECUTE_DELETE_RPC',
+        conversationId,
+        requestId
+      }, '*');
+
+      // Timeout after 600ms
+      setTimeout(() => {
+        window.removeEventListener('message', handler);
+        resolve(false);
+      }, 600);
+    });
+  }
+
+  async function deleteSingleConversationSilent(item) {
+    try {
+      const convId = extractConversationId(item);
+      if (convId) {
+        const rpcOk = await deleteViaRPC(convId);
+        if (rpcOk) {
+          // Remove from DOM immediately
+          const row = item.closest('[role="listitem"], mat-list-item, div, li') || item;
+          row.remove();
+          return true;
+        }
+      }
+
+      // Fallback: silent UI automation (cdk overlays kept completely hidden by CSS)
+      item.scrollIntoView({ block: 'nearest', inline: 'nearest' });
       item.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
       item.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
       item.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
-      item.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }));
 
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise(r => setTimeout(r, 60));
 
-      // Look for the 3-dots button inside item, its parent, or next siblings
-      let menuBtn = item.querySelector('button[aria-haspopup="menu"], button[aria-label*="more" i], button[aria-label*="más" i], button[aria-label*="opcion" i], button[aria-label*="option" i], button[data-test-id*="more"], button[data-test-id*="menu"]') ||
+      let menuBtn = item.querySelector('button[aria-haspopup="menu"], button[aria-label*="more" i], button[aria-label*="más" i], button[aria-label*="opcion" i], button[aria-label*="option" i], button[data-test-id*="more"]') ||
                     item.parentElement?.querySelector('button[aria-haspopup="menu"], button[aria-label*="more" i]') ||
                     item.closest('[role="listitem"], mat-list-item, [class*="item"]')?.querySelector('button[aria-haspopup="menu"], button[aria-label*="more" i]');
 
@@ -118,15 +153,11 @@
         menuBtn = btns.find(b => b.getAttribute('aria-haspopup') === 'menu' || b.querySelector('svg') || b.querySelector('mat-icon'));
       }
 
-      if (!menuBtn) {
-        return false;
-      }
+      if (!menuBtn) return false;
 
-      // Click 3-dots button to open menu overlay
       menuBtn.click();
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, 120));
 
-      // Find "Delete" option in overlay
       const overlayMenuItems = Array.from(document.querySelectorAll('.cdk-overlay-container [role="menuitem"], .cdk-overlay-pane button, [role="menu"] [role="menuitem"], [role="menu"] button, .mat-mdc-menu-item'));
       const deleteOption = overlayMenuItems.find(el => {
         const t = (el.textContent || '').toLowerCase().trim();
@@ -139,9 +170,8 @@
       }
 
       deleteOption.click();
-      await new Promise(r => setTimeout(r, 250));
+      await new Promise(r => setTimeout(r, 140));
 
-      // Find confirmation button in dialog
       const dialogConfirmBtn = Array.from(document.querySelectorAll('.cdk-overlay-container mat-dialog-actions button, .cdk-overlay-pane mat-dialog-container button, [role="dialog"] button, dialog button')).find(b => {
         const t = (b.textContent || '').toLowerCase().trim();
         const isConfirm = t.includes('delete') || t.includes('eliminar') || t.includes('borrar') || t.includes('confirm') || t.includes('yes') || t.includes('sí') || t.includes('si');
@@ -151,7 +181,7 @@
 
       if (dialogConfirmBtn) {
         dialogConfirmBtn.click();
-        await new Promise(r => setTimeout(r, 350));
+        await new Promise(r => setTimeout(r, 200));
         return true;
       }
 
@@ -173,11 +203,12 @@
       return;
     }
 
-    // Native browser confirmation dialog
     const confirmed = window.confirm(`Are you sure you want to delete all ${total} recent conversations?\n\nThis action cannot be undone.`);
     if (!confirmed) return;
 
     isDeleting = true;
+    document.body.classList.add('gsp-silent-deleting');
+
     const btn = document.getElementById('gsp-bulk-delete-btn');
     if (btn) {
       btn.disabled = true;
@@ -194,20 +225,22 @@
         btn.innerHTML = `<span>Deleting ${deletedCount + 1}/${total}...</span>`;
       }
 
-      const success = await deleteSingleConversation(item);
+      const success = await deleteSingleConversationSilent(item);
       if (success) {
         deletedCount++;
       }
-      await new Promise(r => setTimeout(r, 300));
+      await new Promise(r => setTimeout(r, 120));
     }
 
+    document.body.classList.remove('gsp-silent-deleting');
     isDeleting = false;
+
     if (btn) {
       btn.disabled = false;
       btn.style.opacity = '1';
       btn.innerHTML = `
         <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+          <path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/>
         </svg>
         <span>Delete all</span>
       `;

@@ -739,6 +739,20 @@
   border-color: rgba(217, 48, 37, 0.3);
 }
 
+/* Suppress all CDK overlay menus and dialogs during bulk delete */
+body.gsp-silent-deleting .cdk-overlay-container,
+body.gsp-silent-deleting .cdk-overlay-backdrop,
+body.gsp-silent-deleting .cdk-overlay-pane,
+body.gsp-silent-deleting mat-dialog-container,
+body.gsp-silent-deleting [role="dialog"],
+body.gsp-silent-deleting [role="menu"] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  transition: none !important;
+  animation: none !important;
+}
+
 .gsp-progress-bar-container {
   width: 100%;
   height: 6px;

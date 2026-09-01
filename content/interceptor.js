@@ -1,10 +1,28 @@
 /**
  * Network & DOM Interceptor for Gemini Superpowers
- * Extracts official Usage Limits (Current usage %, Weekly limit %, Resets at ...)
- * from Gemini's network responses, script tags, and DOM.
+ * Extracts official Usage Limits and handles direct RPC conversation management in MAIN world.
  */
 (function () {
   'use strict';
+
+  let lastBatchExecuteUrl = '';
+  let xsrfToken = '';
+
+  function getXsrfToken() {
+    if (xsrfToken) return xsrfToken;
+    try {
+      if (window.WIZ_global_data && window.WIZ_global_data.SNlM0e) {
+        xsrfToken = window.WIZ_global_data.SNlM0e;
+        return xsrfToken;
+      }
+      const match = document.documentElement.innerHTML.match(/"SNlM0e":"([^"]+)"/);
+      if (match) {
+        xsrfToken = match[1];
+        return xsrfToken;
+      }
+    } catch (e) {}
+    return '';
+  }
 
   function parseUsageFromText(text) {
     if (!text || typeof text !== 'string') return null;
@@ -14,8 +32,6 @@
     let resetsIn = null;
     let weeklyResetsIn = null;
 
-    // Pattern 1: Direct text matches like "Current usage ... 1% used" and "Resets at 4:47 PM"
-    // "Weekly limit ... 2% used" and "Resets Sep 3 at 5:47 PM"
     const currentUsageMatch = text.match(/Current usage[^\n\r]*?(\d+%\s*used)/i) ||
                               text.match(/"current[_\s]?usage"[^}]*?(\d+%\s*used)/i) ||
                               text.match(/(\d+)%\s*used/i);
@@ -46,7 +62,6 @@
       weeklyResetsIn = weeklyResetMatch[1];
     }
 
-    // Pattern 2: Numerical ratios (e.g. 0.01 -> 1%, 0.02 -> 2%)
     if (!fiveHourUsage) {
       const ratioMatch = text.match(/"current_usage_ratio"\s*:\s*([0-9.]+)/i) ||
                          text.match(/"usageRatio"\s*:\s*([0-9.]+)/i);
@@ -82,7 +97,6 @@
   // Scan all script tags and DOM
   function scanPage() {
     try {
-      // Check document scripts
       const scripts = document.querySelectorAll('script');
       for (const s of scripts) {
         const text = s.textContent || '';
@@ -95,7 +109,6 @@
         }
       }
 
-      // Check entire document body text if limits dialog was rendered
       const bodyText = document.body ? document.body.innerText : '';
       if (bodyText.includes('Current usage') && bodyText.includes('used')) {
         const quota = parseUsageFromText(bodyText);
@@ -110,6 +123,11 @@
   // Intercept window.fetch
   const originalFetch = window.fetch;
   window.fetch = async function (...args) {
+    const url = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
+    if (url.includes('batchexecute')) {
+      lastBatchExecuteUrl = url;
+    }
+
     const response = await originalFetch.apply(this, args);
     try {
       const clone = response.clone();
@@ -127,6 +145,9 @@
 
   XMLHttpRequest.prototype.open = function (...args) {
     this._gsp_url = args[1] || '';
+    if (typeof this._gsp_url === 'string' && this._gsp_url.includes('batchexecute')) {
+      lastBatchExecuteUrl = this._gsp_url;
+    }
     return originalXHROpen.apply(this, args);
   };
 
@@ -142,7 +163,40 @@
     return originalXHRSend.apply(this, args);
   };
 
-  // Scan on start and periodically
+  // Listen for RPC delete requests from isolated content script
+  window.addEventListener('message', async (e) => {
+    if (e.data && e.data.type === 'GSP_EXECUTE_DELETE_RPC') {
+      const { conversationId, requestId } = e.data;
+      const token = getXsrfToken();
+      const endpoint = lastBatchExecuteUrl || `https://gemini.google.com/_/BardChatUi/data/batchexecute?rpcids=GDMbFd&f.sid=${Date.now()}`;
+
+      if (!token || !conversationId) {
+        window.postMessage({ type: 'GSP_DELETE_RPC_RESULT', requestId, success: false }, '*');
+        return;
+      }
+
+      try {
+        const formattedId = conversationId.startsWith('c_') ? conversationId : `c_${conversationId}`;
+        const reqPayload = JSON.stringify([[[ "GDMbFd", JSON.stringify([formattedId, 0, null, 1]), null, "generic" ]]]);
+        const bodyParams = new URLSearchParams();
+        bodyParams.append('f.req', reqPayload);
+        bodyParams.append('at', token);
+
+        const resp = await originalFetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          },
+          body: bodyParams.toString()
+        });
+
+        window.postMessage({ type: 'GSP_DELETE_RPC_RESULT', requestId, success: resp.ok }, '*');
+      } catch (err) {
+        window.postMessage({ type: 'GSP_DELETE_RPC_RESULT', requestId, success: false }, '*');
+      }
+    }
+  });
+
   scanPage();
   setTimeout(scanPage, 1000);
   setTimeout(scanPage, 3000);
