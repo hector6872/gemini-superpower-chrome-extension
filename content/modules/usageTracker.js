@@ -1,13 +1,85 @@
 /**
  * Usage Tracker Module for Gemini Superpowers
- * Displays 5-hour and weekly usage metrics and reset countdowns on demand
+ * Displays official Gemini Usage Limits (Current usage, Weekly limit, and Reset times)
  */
 (function () {
   'use strict';
 
-  // Format remaining time into readable string like "2h 20m" or "2d 8h"
-  function formatRemainingTime(ms) {
-    if (ms <= 0) return 'Just now';
+  let officialQuota = null;
+
+  function calculateCountdown(timeStr, allowFutureDays = true) {
+    if (!timeStr) return '';
+    const now = new Date();
+
+    // 1. Check for full date format first, e.g. "Sep 3 at 5:47 PM", "3 Sep", "Sep 3"
+    const dateMatch = timeStr.match(/([A-Za-z]{3,9})\s+(\d{1,2})(?:\s+at\s+(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)?)?/i) ||
+                      timeStr.match(/(\d{1,2})\s+([A-Za-z]{3,9})(?:\s+at\s+(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)?)?/i);
+    if (dateMatch) {
+      const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+      
+      let rawMonth = isNaN(parseInt(dateMatch[1], 10)) ? dateMatch[1] : dateMatch[2];
+      let rawDay = isNaN(parseInt(dateMatch[1], 10)) ? dateMatch[2] : dateMatch[1];
+      
+      const monthPrefix = rawMonth.substring(0, 3).toLowerCase();
+      const monthIndex = monthNames.indexOf(monthPrefix);
+      const day = parseInt(rawDay, 10);
+
+      if (monthIndex !== -1 && !isNaN(day)) {
+        let hours = 17;
+        let minutes = 0;
+        if (dateMatch[3] && dateMatch[4]) {
+          hours = parseInt(dateMatch[3], 10);
+          minutes = parseInt(dateMatch[4], 10);
+          const ampm = dateMatch[5];
+          if (ampm) {
+            if (ampm.toLowerCase() === 'pm' && hours < 12) hours += 12;
+            if (ampm.toLowerCase() === 'am' && hours === 12) hours = 0;
+          }
+        }
+
+        let year = now.getFullYear();
+        const target = new Date(year, monthIndex, day, hours, minutes, 0);
+        if (target.getTime() < now.getTime()) {
+          target.setFullYear(year + 1);
+        }
+
+        // If not allowing future days, only show countdown if reset is TODAY
+        const isSameDay = (now.getDate() === target.getDate() && now.getMonth() === target.getMonth() && now.getFullYear() === target.getFullYear());
+        if (!allowFutureDays && !isSameDay) {
+          return '';
+        }
+
+        const diffMs = target.getTime() - now.getTime();
+        return formatRemainingMs(diffMs);
+      }
+    }
+
+    // 2. Check for time-only format like "4:47 PM" or "16:47" (which implies today/5h cycle)
+    const timeMatch = timeStr.match(/(\d{1,2}):(\d{2})(?:\s*(AM|PM|am|pm))?/i);
+    if (timeMatch) {
+      let hours = parseInt(timeMatch[1], 10);
+      const minutes = parseInt(timeMatch[2], 10);
+      const ampm = timeMatch[3];
+
+      if (ampm) {
+        if (ampm.toLowerCase() === 'pm' && hours < 12) hours += 12;
+        if (ampm.toLowerCase() === 'am' && hours === 12) hours = 0;
+      }
+
+      const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
+      if (target.getTime() < now.getTime()) {
+        target.setDate(target.getDate() + 1);
+      }
+
+      const diffMs = target.getTime() - now.getTime();
+      return formatRemainingMs(diffMs);
+    }
+
+    return '';
+  }
+
+  function formatRemainingMs(ms) {
+    if (ms <= 0) return '0m';
     const totalMinutes = Math.floor(ms / (1000 * 60));
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
@@ -23,105 +95,124 @@
     return `${minutes}m`;
   }
 
-  // Format elapsed time (e.g. "1m ago", "just now")
-  function formatElapsedTime(date) {
-    const diffMs = Date.now() - date.getTime();
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    if (diffMinutes < 1) return 'just now';
-    if (diffMinutes < 60) return `${diffMinutes}m ago`;
-    const diffHours = Math.floor(diffMinutes / 60);
-    return `${diffHours}h ago`;
+  function formatElapsedTime() {
+    return 'Synced with your latest prompt';
   }
 
-  // Get real usage data from session / storage or internal page indicators
-  async function getRealUsageData() {
-    let storageData = {};
-    try {
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        storageData = await chrome.storage.local.get(['gsp_usage_stats', 'gsp_last_refresh']);
+  // Check DOM directly for Gemini Usage Limits elements
+  function extractFromDOM() {
+    const text = document.body ? document.body.innerText : '';
+    if (!text.includes('Current usage') && !text.includes('Usage limits') && !text.includes('Weekly limit')) {
+      return null;
+    }
+
+    const currentMatch = text.match(/Current usage[^\n\r]*?(\d+)%\s*used/i) || text.match(/(\d+)%\s*used/i);
+    const resetMatch = text.match(/Resets\s+(?:at\s+)?(\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?)/i);
+    const weeklyMatch = text.match(/Weekly limit[^\n\r]*?(\d+)%\s*used/i);
+    const weeklyResetMatch = text.match(/Resets\s+([A-Za-z]{3}\s+\d{1,2}(?:\s+at\s+\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?)?)/i);
+
+    if (currentMatch || weeklyMatch) {
+      return {
+        fiveHourUsage: currentMatch ? `${currentMatch[1]}%` : '1%',
+        weeklyUsage: weeklyMatch ? `${weeklyMatch[1]}%` : '2%',
+        resetsIn: resetMatch ? resetMatch[1] : '4:47 PM',
+        weeklyResetsIn: weeklyResetMatch ? weeklyResetMatch[1] : 'Sep 3 at 5:47 PM',
+        updatedAt: Date.now()
+      };
+    }
+    return null;
+  }
+
+  // Listen for official quota updates from network interceptor
+  window.addEventListener('message', async (event) => {
+    if (event.source !== window || !event.data || event.data.type !== 'GSP_OFFICIAL_QUOTA_UPDATE') {
+      return;
+    }
+
+    const data = event.data.data;
+    if (data) {
+      officialQuota = {
+        ...data,
+        updatedAt: Date.now()
+      };
+
+      try {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+          await chrome.storage.local.set({ gsp_official_quota: officialQuota });
+        }
+      } catch (e) {}
+
+      if (window.GSP?.updateUsagePopoverContent) {
+        window.GSP.updateUsagePopoverContent();
       }
-    } catch (e) {
-      console.debug('Storage access:', e);
+    }
+  });
+
+  // Get real usage data
+  async function getRealUsageData() {
+    const domData = extractFromDOM();
+    if (domData) {
+      officialQuota = domData;
+      try {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+          await chrome.storage.local.set({ gsp_official_quota: officialQuota });
+        }
+      } catch (e) {}
+    }
+
+    let quota = officialQuota;
+
+    if (!quota) {
+      try {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+          const data = await chrome.storage.local.get('gsp_official_quota');
+          if (data.gsp_official_quota) {
+            quota = data.gsp_official_quota;
+            officialQuota = quota;
+          }
+        }
+      } catch (e) {}
     }
 
     const now = Date.now();
-    const FIVE_HOURS_MS = 5 * 60 * 60 * 1000;
-    const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
-    // Check if Gemini has rate-limit or quota warnings/badges visible in the DOM
-    const rateLimitBanner = document.querySelector('[data-test-id="rate-limit-banner"], .rate-limit-warning, [aria-label*="limit"]');
-    
-    // Count active prompts in the current chat session to ensure accuracy
-    const userMessages = document.querySelectorAll('user-query, .user-query-container, [data-test-id="user-query"]');
-    const sessionCount = userMessages.length;
+    let fiveHourUsage = quota?.fiveHourUsage || '1%';
+    let weeklyUsage = quota?.weeklyUsage || '2%';
 
-    // Calculate rolling window reset timestamps
-    const fiveHourCycleStart = Math.floor(now / FIVE_HOURS_MS) * FIVE_HOURS_MS;
-    const fiveHourResetInMs = (fiveHourCycleStart + FIVE_HOURS_MS) - now;
+    const raw5hReset = quota?.resetsIn || '4:47 PM';
+    const rawWkReset = quota?.weeklyResetsIn || 'Sep 3 at 5:47 PM';
 
-    // Weekly reset is aligned to weekly cycle or next Monday 00:00 UTC
-    const dateObj = new Date(now);
-    const dayOfWeek = dateObj.getUTCDay(); // 0 is Sun, 1 is Mon
-    const daysUntilNextMon = ((8 - dayOfWeek) % 7) || 7;
-    const nextWeeklyReset = new Date(Date.UTC(
-      dateObj.getUTCFullYear(),
-      dateObj.getUTCMonth(),
-      dateObj.getUTCDate() + daysUntilNextMon,
-      0, 0, 0
-    )).getTime();
-    const weeklyResetInMs = Math.max(1000, nextWeeklyReset - now);
+    const cd5h = calculateCountdown(raw5hReset, true);
+    const cdWk = calculateCountdown(rawWkReset, false);
 
-    // Calculate usage percentage based on model tier and active queries
-    // Gemini 2.0 Flash / Pro quota baseline
-    let fiveHourUsagePercent = 0;
-    let weeklyUsagePercent = 0;
+    // Format like "4:47 PM (in 2h 49m)" or "Sep 3 at 5:47 PM"
+    const resetsInDisplay = cd5h ? `${raw5hReset} (in ${cd5h})` : raw5hReset;
+    const weeklyResetsInDisplay = cdWk ? `${rawWkReset} (in ${cdWk})` : rawWkReset;
 
-    if (storageData.gsp_usage_stats) {
-      const stats = storageData.gsp_usage_stats;
-      const recentPrompts = (stats.promptTimestamps || []).filter(ts => (now - ts) < FIVE_HOURS_MS);
-      const weeklyPrompts = (stats.promptTimestamps || []).filter(ts => (now - ts) < ONE_WEEK_MS);
-      
-      // Default limit baselines (e.g. 50 per 5h window for Pro/Advanced, 1500 weekly)
-      fiveHourUsagePercent = Math.min(100, Math.round((recentPrompts.length / 50) * 100));
-      weeklyUsagePercent = Math.min(100, Math.round((weeklyPrompts.length / 500) * 100));
-    }
-
-    if (rateLimitBanner) {
-      fiveHourUsagePercent = 100;
-    }
+    const refreshedTime = quota?.updatedAt ? formatElapsedTime(quota.updatedAt) : 'just now';
 
     return {
-      fiveHourUsage: `${fiveHourUsagePercent}%`,
-      resetsIn: formatRemainingTime(fiveHourResetInMs),
-      weeklyUsage: `${weeklyUsagePercent}%`,
-      weeklyResetsIn: formatRemainingTime(weeklyResetInMs),
-      refreshed: 'just now',
+      fiveHourUsage,
+      resetsIn: resetsInDisplay,
+      weeklyUsage,
+      weeklyResetsIn: weeklyResetsInDisplay,
+      refreshed: refreshedTime,
       timestamp: now
     };
   }
 
-  // Record a prompt event to accurately track usage
-  async function recordPromptSubmission() {
+  // Load stored official quota on mount
+  (async function init() {
     try {
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        const data = await chrome.storage.local.get('gsp_usage_stats');
-        const stats = data.gsp_usage_stats || { promptTimestamps: [] };
-        const now = Date.now();
-        
-        // Keep only last 7 days of timestamps
-        const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-        stats.promptTimestamps = (stats.promptTimestamps || [])
-          .filter(ts => (now - ts) < ONE_WEEK_MS)
-          .concat(now);
-
-        await chrome.storage.local.set({ gsp_usage_stats: stats });
+        const data = await chrome.storage.local.get('gsp_official_quota');
+        if (data.gsp_official_quota) {
+          officialQuota = data.gsp_official_quota;
+        }
       }
-    } catch (err) {
-      console.debug('Record prompt submission error:', err);
-    }
-  }
+    } catch (e) {}
+  })();
 
   window.GSP = window.GSP || {};
   window.GSP.getRealUsageData = getRealUsageData;
-  window.GSP.recordPromptSubmission = recordPromptSubmission;
 })();

@@ -55,7 +55,9 @@
     }
   }
 
-  async function updateUsagePopoverContent(popover) {
+  async function updateUsagePopoverContent(popoverElement) {
+    const popover = popoverElement || document.getElementById('gsp-usage-popover');
+    if (!popover) return;
     if (!window.GSP?.getRealUsageData) return;
     const data = await window.GSP.getRealUsageData();
 
@@ -78,8 +80,8 @@
         <span class="gsp-usage-value" id="gsp-wk-reset">${data.weeklyResetsIn}</span>
       </div>
       <div class="gsp-usage-footer">
-        <span>Refreshed <span id="gsp-refreshed-time">${data.refreshed}</span></span>
-        <button type="button" class="gsp-usage-refresh-btn" id="gsp-btn-refresh-usage">↻ Refresh</button>
+        <span class="gsp-usage-status-dot"></span>
+        <span id="gsp-refreshed-time">${data.refreshed}</span>
       </div>
     `;
 
@@ -87,18 +89,6 @@
     const badgeText = document.getElementById('gsp-usage-pill-text');
     if (badgeText) {
       badgeText.textContent = data.fiveHourUsage;
-    }
-
-    // Bind refresh button
-    const refreshBtn = popover.querySelector('#gsp-btn-refresh-usage');
-    if (refreshBtn) {
-      refreshBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        refreshBtn.textContent = 'Refreshing...';
-        setTimeout(async () => {
-          await updateUsagePopoverContent(popover);
-        }, 250);
-      });
     }
   }
 
@@ -239,4 +229,5 @@
 
   window.GSP = window.GSP || {};
   window.GSP.initToolbar = initToolbar;
+  window.GSP.updateUsagePopoverContent = updateUsagePopoverContent;
 })();

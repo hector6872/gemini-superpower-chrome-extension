@@ -184,11 +184,13 @@
   bottom: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%) translateY(6px);
-  width: 250px;
+  width: max-content;
+  min-width: 250px;
+  max-width: 380px;
   background: var(--gsp-bg-card);
   border: 1px solid var(--gsp-border-card);
   border-radius: 16px;
-  padding: 16px;
+  padding: 16px 18px;
   box-shadow: var(--gsp-card-shadow);
   opacity: 0;
   visibility: hidden;
@@ -211,17 +213,21 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 20px;
   padding: 6px 0;
   font-size: 13.5px;
+  white-space: nowrap;
 }
 
 .gsp-usage-label {
   color: var(--gsp-text-secondary);
+  white-space: nowrap;
 }
 
 .gsp-usage-value {
   font-weight: 600;
   color: var(--gsp-text-primary);
+  white-space: nowrap;
 }
 
 .gsp-usage-divider {
@@ -233,28 +239,25 @@
 .gsp-usage-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 6px;
   margin-top: 8px;
   padding-top: 6px;
   border-top: 1px solid var(--gsp-border-card);
   font-size: 11.5px;
-  color: var(--gsp-text-muted);
+  color: var(--gsp-text-secondary);
+  white-space: nowrap;
 }
 
-.gsp-usage-refresh-btn {
-  background: none;
-  border: none;
-  color: var(--gsp-accent);
-  font-size: 11.5px;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 4px;
+.gsp-usage-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34a853;
+  display: inline-block;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(52, 168, 83, 0.4);
 }
 
-.gsp-usage-refresh-btn:hover {
-  text-decoration: underline;
-}
 
 /* --------------------------------------------------------------------------
    // Prompt Autocomplete Menu
