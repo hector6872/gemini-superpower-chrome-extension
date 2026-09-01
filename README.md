@@ -62,8 +62,7 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
 1. Open Google Chrome and navigate to `chrome://extensions/`.
 2. Enable **Developer mode** (toggle in the top right corner).
 3. Click **Load unpacked**.
-4. Select the project directory:
-   `/Users/hector.de.isidro/Developer/gemini-superpower-chrome-extension`
+4. Select the cloned `gemini-superpower-chrome-extension` project folder.
 5. Open or refresh [https://gemini.google.com/](https://gemini.google.com/) to start using your new superpowers!
 
 ---
