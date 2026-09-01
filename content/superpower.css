@@ -143,8 +143,23 @@
   border: none;
   color: var(--gsp-text-primary);
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.1s ease;
+  transition: background-color 0.15s ease, transform 0.1s ease, width 0.2s ease, opacity 0.2s ease;
   outline: none;
+}
+
+.gsp-btn-nav-top {
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.gsp-btn-nav-top.gsp-nav-top-visible {
+  width: 28px;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .gsp-nav-btn:hover {

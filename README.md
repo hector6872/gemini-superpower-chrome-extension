@@ -18,8 +18,9 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
      - **Weekly limit**: Weekly usage percentage and exact reset date/time (e.g. *2% used • Resets Sep 3 at 5:47 PM*).
      - **Live status**: `🟢 Synced with your latest prompt` (updated automatically in the background via network interceptor).
 
-3. **User Prompt Navigator (`^` and `v`)**:
+3. **User Prompt Navigator (`⤒`, `^` and `v`)**:
    - Jump smoothly and instantly between your previous and next user query prompts without tedious manual scrolling, skipping long model responses.
+   - **Direct Scroll to Top (`⤒`)**: Dynamic button that reveals itself whenever you scroll down to take you straight to the beginning of the conversation in one click.
 
 4. **Single-Word Quick Prompts (`//`) & In-Page Editor**:
    - Type `//` inside the chat box or click `// Prompts` to open the autocomplete command menu (`//fix`, `//test`, `//review`, `//explain`, `//optimize`, `//doc`, `//summary`, `//translate`).

@@ -122,6 +122,11 @@
 
         <div class="gsp-toolbar-right">
           <div class="gsp-nav-group" title="Navigate messages">
+            <button type="button" class="gsp-nav-btn gsp-btn-nav-top" id="gsp-btn-nav-top" title="Scroll to top of chat">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 4h16v2H4zm8 4l6 6-1.41 1.41L13 11.83V20h-2v-8.17l-3.59 3.58L6 14z"/>
+              </svg>
+            </button>
             <button type="button" class="gsp-nav-btn" id="gsp-btn-nav-up" title="Previous message (Scroll Up)">
               <svg viewBox="0 0 24 24">
                 <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
@@ -171,6 +176,13 @@
             isPopoverOpen = false;
             popover.classList.remove('gsp-visible');
           }
+        });
+      }
+
+      const navTopBtn = toolbar.querySelector('#gsp-btn-nav-top');
+      if (navTopBtn) {
+        navTopBtn.addEventListener('click', () => {
+          if (window.GSP?.scrollToTop) window.GSP.scrollToTop();
         });
       }
 

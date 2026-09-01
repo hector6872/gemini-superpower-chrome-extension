@@ -1,6 +1,6 @@
 /**
  * Message Navigator Module for Gemini Superpowers
- * Allows jumping up/down exclusively between user query messages with smooth scroll
+ * Allows jumping up/down between user query messages and scrolling directly to top
  */
 (function () {
   'use strict';
@@ -24,7 +24,6 @@
       }
     }
 
-    // Search for overflow scroll ancestor of any user query
     const sampleMsg = document.querySelector('user-query, [class*="user-query"], [data-test-id="user-query"]');
     if (sampleMsg) {
       let cur = sampleMsg.parentElement;
@@ -54,13 +53,10 @@
     ];
 
     const elements = Array.from(document.querySelectorAll(selectors.join(', ')));
-    
-    // Deduplicate top-level user message containers
     const unique = [];
     const seen = new Set();
 
     for (const el of elements) {
-      // Exclude model response containers
       if (el.closest('model-response, [data-test-id="model-response"], .model-response-container')) {
         continue;
       }
@@ -97,6 +93,20 @@
     flashHighlight(target);
   }
 
+  function scrollToTop() {
+    const scrollContainer = findScrollContainer();
+    if (scrollContainer && scrollContainer !== document.documentElement && scrollContainer !== document.body) {
+      scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    const messages = getUserMessages();
+    if (messages.length > 0) {
+      flashHighlight(messages[0]);
+    }
+  }
+
   function scrollUp() {
     const messages = getUserMessages();
     const scrollContainer = findScrollContainer();
@@ -107,7 +117,6 @@
       return;
     }
 
-    // Find the last message that is above the current view threshold
     const topThreshold = 70;
     let target = null;
 
@@ -122,10 +131,7 @@
     if (target) {
       scrollToMessage(target, scrollContainer);
     } else {
-      // If already at or above first message, scroll to very top
-      if (scrollContainer) scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
-      else window.scrollTo({ top: 0, behavior: 'smooth' });
-      if (messages[0]) flashHighlight(messages[0]);
+      scrollToTop();
     }
   }
 
@@ -139,7 +145,6 @@
       return;
     }
 
-    // Find the first message that is strictly below the current view threshold
     const topThreshold = 85;
     let target = null;
 
@@ -154,7 +159,6 @@
     if (target) {
       scrollToMessage(target, scrollContainer);
     } else {
-      // If at or past the last message, scroll to the bottom of the chat
       if (scrollContainer) {
         scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: 'smooth' });
       } else {
@@ -178,7 +182,40 @@
     }, 800);
   }
 
+  function updateScrollState() {
+    const topBtn = document.getElementById('gsp-btn-nav-top');
+    if (!topBtn) return;
+
+    const container = findScrollContainer();
+    const scrollTop = (container && container !== document.documentElement && container !== document.body)
+      ? container.scrollTop
+      : (window.scrollY || document.documentElement.scrollTop || 0);
+
+    if (scrollTop > 80) {
+      topBtn.classList.add('gsp-nav-top-visible');
+    } else {
+      topBtn.classList.remove('gsp-nav-top-visible');
+    }
+  }
+
+  function initNavigator() {
+    window.addEventListener('scroll', updateScrollState, { passive: true });
+    setInterval(() => {
+      const container = findScrollContainer();
+      if (container && container !== document.documentElement && container !== document.body && !container.__gsp_nav_scroll_bound) {
+        container.__gsp_nav_scroll_bound = true;
+        container.addEventListener('scroll', updateScrollState, { passive: true });
+      }
+      updateScrollState();
+    }, 1000);
+  }
+
+  initNavigator();
+
   window.GSP = window.GSP || {};
+  window.GSP.findScrollContainer = findScrollContainer;
+  window.GSP.scrollToTop = scrollToTop;
   window.GSP.scrollUp = scrollUp;
   window.GSP.scrollDown = scrollDown;
+  window.GSP.updateScrollState = updateScrollState;
 })();
