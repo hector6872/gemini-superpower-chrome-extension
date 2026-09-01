@@ -28,6 +28,7 @@
       "css": ["content/superpower.css"],
       "js": [
         "content/modules/autoFocus.js",
+        "content/modules/wideMode.js",
         "content/modules/usageTracker.js",
         "content/modules/navigator.js",
         "content/modules/promptCommands.js",

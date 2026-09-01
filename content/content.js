@@ -10,6 +10,7 @@
   function initAll() {
     if (window.GSP) {
       if (window.GSP.initAutoFocus) window.GSP.initAutoFocus();
+      if (window.GSP.initWideMode) window.GSP.initWideMode();
       if (window.GSP.initPromptCommands) window.GSP.initPromptCommands();
       if (window.GSP.initToolbar) window.GSP.initToolbar();
       if (window.GSP.initBulkDelete) window.GSP.initBulkDelete();

@@ -34,7 +34,11 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
    - Clean "Delete all" action integrated into the recent conversations sidebar header.
    - Confirmation dialog with a real-time progress bar and cancellation support.
 
-7. **Prompt Library Manager (Popup)**:
+7. **Wide Mode (Full Width) Switch**:
+   - Toggle button in the top-right header (next to the overflow menu) to switch between standard view and full-width layout.
+   - Automatically expands the chat history, conversation turns, and prompt input to take full advantage of wide screens.
+
+8. **Prompt Library Manager (Popup)**:
    - Create, edit, and delete custom prompt templates.
    - Import and export prompt libraries in JSON format.
 
