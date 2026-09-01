@@ -7,7 +7,7 @@
   --gsp-font-family: 'Google Sans', 'Google Sans Text', Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --gsp-bg-pill: rgba(255, 255, 255, 0.9);
   --gsp-bg-pill-hover: #f0f4f9;
-  --gsp-bg-pill-active: #e1ebf8;
+  --gsp-bg-pill-active: #d3e3fd;
   --gsp-border-pill: rgba(0, 0, 0, 0.12);
   --gsp-text-primary: #1f1f1f;
   --gsp-text-secondary: #444746;
@@ -16,11 +16,13 @@
   --gsp-bg-inner: #f8fafd;
   --gsp-border-card: rgba(0, 0, 0, 0.12);
   --gsp-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.08);
-  --gsp-accent: #1a73e8;
-  --gsp-accent-rgb: 26, 115, 232;
-  --gsp-sparkle-gradient: linear-gradient(135deg, #1a73e8 0%, #9334e9 100%);
+  --gsp-accent: #0b57d0;
+  --gsp-accent-rgb: 11, 87, 208;
+  --gsp-text-on-accent: #ffffff;
+  --gsp-sparkle-gradient: linear-gradient(70deg, #1ba1e3 0%, #5470df 50%, #a265d6 100%);
   --gsp-pill-height: 32px;
   --gsp-danger: #d93025;
+  --gsp-text-on-danger: #ffffff;
 }
 
 /* Dark theme overrides strictly matching Gemini native Dark Mode (#131314 / #1e1f20) */
@@ -28,7 +30,7 @@
   :root {
     --gsp-bg-pill: #1e1f20;
     --gsp-bg-pill-hover: #282a2c;
-    --gsp-bg-pill-active: #333538;
+    --gsp-bg-pill-active: #0842a0;
     --gsp-border-pill: rgba(255, 255, 255, 0.1);
     --gsp-text-primary: #e3e3e3;
     --gsp-text-secondary: #c4c7c5;
@@ -39,7 +41,9 @@
     --gsp-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.6), 0 1px 6px rgba(0, 0, 0, 0.4);
     --gsp-accent: #a8c7fa;
     --gsp-accent-rgb: 168, 199, 250;
+    --gsp-text-on-accent: #041e49;
     --gsp-danger: #f28b82;
+    --gsp-text-on-danger: #601410;
   }
 }
 
@@ -65,7 +69,9 @@ body[class*="dark"],
   --gsp-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.6), 0 1px 6px rgba(0, 0, 0, 0.4) !important;
   --gsp-accent: #a8c7fa !important;
   --gsp-accent-rgb: 168, 199, 250 !important;
+  --gsp-text-on-accent: #041e49 !important;
   --gsp-danger: #f28b82 !important;
+  --gsp-text-on-danger: #601410 !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -710,12 +716,12 @@ body[class*="dark"],
 
 .gsp-btn-primary {
   background: var(--gsp-accent);
-  color: #ffffff;
+  color: var(--gsp-text-on-accent);
   border: none;
   padding: 9px 18px;
   border-radius: 9999px;
   font-size: 13.5px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   outline: none;
   transition: opacity 0.15s ease;
@@ -727,12 +733,12 @@ body[class*="dark"],
 
 .gsp-btn-danger {
   background: var(--gsp-danger);
-  color: #ffffff;
+  color: var(--gsp-text-on-danger);
   border: none;
   padding: 9px 18px;
   border-radius: 9999px;
   font-size: 13.5px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   outline: none;
   transition: opacity 0.15s ease;
