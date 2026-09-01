@@ -168,18 +168,39 @@
     }
   }
 
-  function flashHighlight(element) {
-    const originalTransition = element.style.transition;
-    const originalOutline = element.style.outline;
+  function getMessageCard(element) {
+    if (!element) return null;
 
-    element.style.transition = 'outline 0.2s ease';
-    element.style.outline = '2px solid rgba(26, 115, 232, 0.4)';
-    element.style.borderRadius = '8px';
+    // Direct bubble / card selectors in Gemini
+    const bubble = element.querySelector('.query-content, .user-query-bubble, [class*="query-content"], [class*="user-query-bubble"], [data-test-id*="user-query-bubble"], [class*="speech-bubble"], .chat-bubble');
+    if (bubble) return bubble;
+
+    // Look for paragraph or inner text container
+    const textNode = element.querySelector('p, span[class*="text"], [class*="query-text"]');
+    if (textNode) {
+      const parent = textNode.parentElement;
+      if (parent && parent !== element && !parent.matches('user-query, .user-query-container, [data-test-id="user-query"]')) {
+        return parent;
+      }
+      return textNode;
+    }
+
+    return element;
+  }
+
+  function flashHighlight(element) {
+    if (!element) return;
+    const card = getMessageCard(element);
+    if (!card) return;
+
+    card.classList.remove('gsp-nav-flash');
+    // Force reflow to restart animation
+    void card.offsetWidth;
+    card.classList.add('gsp-nav-flash');
 
     setTimeout(() => {
-      element.style.outline = originalOutline;
-      element.style.transition = originalTransition;
-    }, 800);
+      card.classList.remove('gsp-nav-flash');
+    }, 1050);
   }
 
   function updateScrollState() {

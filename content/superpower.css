@@ -211,6 +211,25 @@ body[class*="dark"],
   fill: currentColor;
 }
 
+/* --------------------------------------------------------------------------
+   Message Navigation Flash / Ambient Focus Pulse (Theme Adaptive)
+   -------------------------------------------------------------------------- */
+@keyframes gsp-prompt-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--gsp-accent-rgb), 0);
+  }
+  25% {
+    box-shadow: 0 0 0 2.5px rgba(var(--gsp-accent-rgb), 0.5), 0 4px 18px rgba(var(--gsp-accent-rgb), 0.25);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--gsp-accent-rgb), 0);
+  }
+}
+
+.gsp-nav-flash {
+  animation: gsp-prompt-glow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+}
+
 /* Optimize Sparkle Button */
 .gsp-btn-optimize {
   background: var(--gsp-bg-pill);
