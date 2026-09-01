@@ -411,8 +411,13 @@ body[class*="dark"],
    Prompt Library Manager Modal
    -------------------------------------------------------------------------- */
 .gsp-prompt-manager-modal {
-  max-width: 680px !important;
+  max-width: 740px !important;
   width: 92% !important;
+  max-height: 88vh !important;
+  overflow-y: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
 }
 
 .gsp-modal-header {
@@ -649,6 +654,9 @@ body[class*="dark"],
 .gsp-modal {
   width: 90%;
   max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
   background: var(--gsp-bg-card);
   border: 1px solid var(--gsp-border-card);
   border-radius: 20px;
@@ -700,6 +708,13 @@ body[class*="dark"],
   box-sizing: border-box;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+textarea.gsp-input-field {
+  min-height: 85px;
+  max-height: 320px;
+  resize: vertical;
+  line-height: 1.45;
 }
 
 .gsp-input-field:focus {

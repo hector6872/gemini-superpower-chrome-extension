@@ -403,7 +403,7 @@
       `;
 
       // Event handlers
-      modal.querySelector('#gsp-btn-close-modal').addEventListener('click', () => backdrop.remove());
+      modal.querySelector('#gsp-btn-close-modal').addEventListener('click', closeModal);
 
       modal.querySelector('#gsp-btn-new-prompt').addEventListener('click', () => {
         renderModalContent(null);
@@ -467,6 +467,31 @@
       });
     }
 
+    function closeModal() {
+      window.removeEventListener('keydown', handleModalKeydown, true);
+      if (backdrop.parentNode) {
+        backdrop.parentNode.removeChild(backdrop);
+      }
+    }
+
+    function handleModalKeydown(e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        closeModal();
+      }
+    }
+
+    window.addEventListener('keydown', handleModalKeydown, true);
+
+    modal.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+    modal.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+    });
+
     if (editingPromptId) {
       const p = activePrompts.find(item => item.id === editingPromptId);
       renderModalContent(p || null);
@@ -477,8 +502,15 @@
     backdrop.appendChild(modal);
     document.body.appendChild(backdrop);
 
-    backdrop.addEventListener('click', (e) => {
-      if (e.target === backdrop) backdrop.remove();
+    let isMouseDownOnBackdrop = false;
+    backdrop.addEventListener('mousedown', (e) => {
+      isMouseDownOnBackdrop = (e.target === backdrop);
+    });
+    backdrop.addEventListener('mouseup', (e) => {
+      if (isMouseDownOnBackdrop && e.target === backdrop) {
+        closeModal();
+      }
+      isMouseDownOnBackdrop = false;
     });
   }
 
