@@ -68,6 +68,7 @@
     if (!recentHeader) return;
 
     if (recentHeader.querySelector('#gsp-bulk-delete-btn')) return;
+    const t = window.GSP?.t || ((k) => k);
 
     recentHeader.style.display = 'flex';
     recentHeader.style.alignItems = 'center';
@@ -79,12 +80,12 @@
     btn.id = 'gsp-bulk-delete-btn';
     btn.className = 'gsp-bulk-delete-btn';
     btn.type = 'button';
-    btn.title = 'Delete all recent conversations';
+    btn.title = t('delete_all_title');
     btn.innerHTML = `
       <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
         <path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/>
       </svg>
-      <span>Delete all</span>
+      <span>${t('delete_all_btn')}</span>
     `;
 
     btn.addEventListener('click', (e) => {
@@ -194,16 +195,17 @@
 
   async function startBulkDelete() {
     if (isDeleting) return;
+    const t = window.GSP?.t || ((k, p) => k);
 
     const items = getConversationLinks();
     const total = items.length;
 
     if (total === 0) {
-      window.alert('No recent conversations found to delete.');
+      window.alert(t('no_conversations'));
       return;
     }
 
-    const confirmed = window.confirm(`Are you sure you want to delete all ${total} recent conversations?\n\nThis action cannot be undone.`);
+    const confirmed = window.confirm(t('confirm_delete_all', { count: total }));
     if (!confirmed) return;
 
     isDeleting = true;
@@ -222,7 +224,7 @@
 
       const item = currentItems[0];
       if (btn) {
-        btn.innerHTML = `<span>Deleting ${deletedCount + 1}/${total}...</span>`;
+        btn.innerHTML = `<span>${t('deleting_progress', { current: deletedCount + 1, total })}</span>`;
       }
 
       const success = await deleteSingleConversationSilent(item);

@@ -397,17 +397,19 @@
       `;
     });
 
+    const t = window.GSP?.t || ((k) => k);
+
     menuElement.innerHTML = `
       <div class="gsp-prompt-header">
         <div class="gsp-prompt-header-left">
-          <span>✨ Quick Prompts (<code>//</code>)</span>
+          <span>${t('quick_prompts_header')}</span>
         </div>
         <div class="gsp-prompt-header-right">
-          <button type="button" class="gsp-prompt-edit-btn" id="gsp-btn-open-editor" title="Edit and manage prompts">
+          <button type="button" class="gsp-prompt-edit-btn" id="gsp-btn-open-editor" title="${t('edit_prompts_title')}">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
               <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
             </svg>
-            <span>Edit Prompts</span>
+            <span>${t('edit_prompts_btn')}</span>
           </button>
         </div>
       </div>
@@ -415,7 +417,7 @@
         ${itemsHtml}
       </ul>
       <div class="gsp-prompt-footer">
-        <span>↑↓ navigate • Enter / Tab / Space to insert</span>
+        <span>${t('menu_footer')}</span>
       </div>
     `;
 
@@ -495,6 +497,7 @@
   }
 
   function renderModalContent(formPrompt = null) {
+    const t = window.GSP?.t || ((k) => k);
     let promptRowsHtml = '';
     const sortedPrompts = [...activePrompts].sort((a, b) => a.title.localeCompare(b.title));
     sortedPrompts.forEach(p => {
@@ -507,8 +510,8 @@
             <span class="gsp-manager-desc">${escapeHtml(p.desc || '')}</span>
           </div>
           <div class="gsp-manager-actions">
-            <button type="button" class="gsp-btn-sm gsp-btn-edit-item" data-id="${escapeHtml(p.id)}" title="Edit prompt">Edit</button>
-            <button type="button" class="gsp-btn-sm gsp-btn-del-item" data-id="${escapeHtml(p.id)}" title="Delete prompt">Delete</button>
+            <button type="button" class="gsp-btn-sm gsp-btn-edit-item" data-id="${escapeHtml(p.id)}" title="${t('btn_edit')}">${t('btn_edit')}</button>
+            <button type="button" class="gsp-btn-sm gsp-btn-del-item" data-id="${escapeHtml(p.id)}" title="${t('btn_delete')}">${t('btn_delete')}</button>
           </div>
         </div>
       `;
@@ -519,15 +522,15 @@
 
     modal.innerHTML = `
       <div class="gsp-modal-header">
-        <h3 class="gsp-modal-title">✨ Prompt Library Manager</h3>
+        <h3 class="gsp-modal-title">${t('manager_title')}</h3>
         <button type="button" class="gsp-modal-close-btn" id="gsp-btn-close-modal">✕</button>
       </div>
 
       <div class="gsp-manager-container">
         <div class="gsp-manager-list-section">
           <div class="gsp-manager-section-header">
-            <span>Your Commands (<code>//</code>)</span>
-            <button type="button" class="gsp-btn-pill-action" id="gsp-btn-new-prompt">+ New Command</button>
+            <span>${t('your_commands')}</span>
+            <button type="button" class="gsp-btn-pill-action" id="gsp-btn-new-prompt">${t('new_command_btn')}</button>
           </div>
           <div class="gsp-manager-list">
             ${promptRowsHtml}
@@ -535,38 +538,38 @@
         </div>
 
         <div class="gsp-manager-form-section">
-          <h4 class="gsp-form-title">${isEditing ? `Edit /${escapeHtml(targetPrompt.title)}` : 'Add New Command'}</h4>
+          <h4 class="gsp-form-title">${isEditing ? `${t('edit_command_title')}${escapeHtml(targetPrompt.title)}` : t('add_command_title')}</h4>
           <form id="gsp-prompt-editor-form">
             <input type="hidden" id="gsp-form-id" value="${escapeHtml(targetPrompt.id)}">
             
             <div class="gsp-input-group">
-              <label class="gsp-input-label" for="gsp-form-title">Command Name (single word, e.g. fix, test)</label>
+              <label class="gsp-input-label" for="gsp-form-title">${t('field_cmd_name')}</label>
               <input type="text" id="gsp-form-title" class="gsp-input-field" required placeholder="e.g. fix" value="${escapeHtml(targetPrompt.title)}">
             </div>
 
             <div class="gsp-input-group">
-              <label class="gsp-input-label" for="gsp-form-desc">Short Description</label>
-              <input type="text" id="gsp-form-desc" class="gsp-input-field" placeholder="e.g. Fix bugs and logic issues" value="${escapeHtml(targetPrompt.desc)}">
+              <label class="gsp-input-label" for="gsp-form-desc">${t('field_short_desc')}</label>
+              <input type="text" id="gsp-form-desc" class="gsp-input-field" placeholder="${t('placeholder_desc')}" value="${escapeHtml(targetPrompt.desc)}">
             </div>
 
             <div class="gsp-input-group">
-              <label class="gsp-input-label" for="gsp-form-model">Automatic Model Switch</label>
+              <label class="gsp-input-label" for="gsp-form-model">${t('field_auto_model')}</label>
               <select id="gsp-form-model" class="gsp-input-field">
-                <option value="keep" ${targetPrompt.model === 'keep' ? 'selected' : ''}>No change (keep active model)</option>
-                <option value="flash-lite" ${(targetPrompt.model === 'flash-lite' || targetPrompt.model === 'flash_lite') ? 'selected' : ''}>Gemini Flash Lite</option>
-                <option value="flash" ${targetPrompt.model === 'flash' ? 'selected' : ''}>Gemini Flash</option>
-                <option value="pro" ${targetPrompt.model === 'pro' ? 'selected' : ''}>Gemini Pro</option>
+                <option value="keep" ${targetPrompt.model === 'keep' ? 'selected' : ''}>${t('opt_model_keep')}</option>
+                <option value="flash-lite" ${(targetPrompt.model === 'flash-lite' || targetPrompt.model === 'flash_lite') ? 'selected' : ''}>${t('opt_model_flash_lite')}</option>
+                <option value="flash" ${targetPrompt.model === 'flash' ? 'selected' : ''}>${t('opt_model_flash')}</option>
+                <option value="pro" ${targetPrompt.model === 'pro' ? 'selected' : ''}>${t('opt_model_pro')}</option>
               </select>
             </div>
 
             <div class="gsp-input-group">
-              <label class="gsp-input-label" for="gsp-form-template">Prompt Text (Injected at beginning)</label>
-              <textarea id="gsp-form-template" class="gsp-input-field" rows="4" required placeholder="Please analyze and fix the following code:">${escapeHtml(targetPrompt.template)}</textarea>
+              <label class="gsp-input-label" for="gsp-form-template">${t('field_prompt_text')}</label>
+              <textarea id="gsp-form-template" class="gsp-input-field" rows="4" required placeholder="${t('placeholder_template')}">${escapeHtml(targetPrompt.template)}</textarea>
             </div>
 
             <div class="gsp-modal-actions">
-              <button type="button" class="gsp-btn-secondary" id="gsp-btn-reset-defaults">Restore Defaults</button>
-              <button type="submit" class="gsp-btn-primary">Save Command</button>
+              <button type="button" class="gsp-btn-secondary" id="gsp-btn-reset-defaults">${t('btn_restore_defaults')}</button>
+              <button type="submit" class="gsp-btn-primary">${t('btn_save_command')}</button>
             </div>
           </form>
         </div>
@@ -581,7 +584,7 @@
       });
 
       modal.querySelector('#gsp-btn-reset-defaults').addEventListener('click', async () => {
-        if (confirm('Reset all prompt templates back to default commands?')) {
+        if (confirm(t('confirm_reset_defaults'))) {
           activePrompts = [...DEFAULT_PROMPTS];
           await savePrompts();
           renderModalContent(null);
@@ -599,7 +602,7 @@
       modal.querySelectorAll('.gsp-btn-del-item').forEach(btn => {
         btn.addEventListener('click', async () => {
           const id = btn.getAttribute('data-id');
-          if (confirm('Delete this prompt template?')) {
+          if (confirm(t('confirm_delete_prompt'))) {
             activePrompts = activePrompts.filter(item => item.id !== id);
             await savePrompts();
             renderModalContent(null);

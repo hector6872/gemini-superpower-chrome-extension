@@ -55,23 +55,24 @@
     if (!popover) return;
     if (!window.GSP?.getRealUsageData) return;
     const data = await window.GSP.getRealUsageData();
+    const t = window.GSP?.t || ((k) => k);
 
     popover.innerHTML = `
       <div class="gsp-usage-row">
-        <span class="gsp-usage-label">5-hour usage</span>
+        <span class="gsp-usage-label">${t('usage_5h_label')}</span>
         <span class="gsp-usage-value" id="gsp-5h-val">${data.fiveHourUsage}</span>
       </div>
       <div class="gsp-usage-row">
-        <span class="gsp-usage-label">Resets in</span>
+        <span class="gsp-usage-label">${t('usage_resets_label')}</span>
         <span class="gsp-usage-value" id="gsp-5h-reset">${data.resetsIn}</span>
       </div>
       <div class="gsp-usage-divider"></div>
       <div class="gsp-usage-row">
-        <span class="gsp-usage-label">Weekly usage</span>
+        <span class="gsp-usage-label">${t('usage_weekly_label')}</span>
         <span class="gsp-usage-value" id="gsp-wk-val">${data.weeklyUsage}</span>
       </div>
       <div class="gsp-usage-row">
-        <span class="gsp-usage-label">Weekly resets in</span>
+        <span class="gsp-usage-label">${t('usage_resets_label')}</span>
         <span class="gsp-usage-value" id="gsp-wk-reset">${data.weeklyResetsIn}</span>
       </div>
       <div class="gsp-usage-footer">
@@ -97,18 +98,19 @@
       toolbar = document.createElement('div');
       toolbar.id = 'gsp-toolbar-root';
       toolbar.className = 'gsp-toolbar-container';
+      const t = window.GSP?.t || ((k) => k);
 
       toolbar.innerHTML = `
         <div class="gsp-toolbar-left">
-          <button type="button" class="gsp-pill-btn gsp-btn-prompts" id="gsp-btn-prompts" title="Quick Prompts (//) list and editor">
+          <button type="button" class="gsp-pill-btn gsp-btn-prompts" id="gsp-btn-prompts" title="${t('prompts_btn_title')}">
             <svg viewBox="0 0 24 24">
               <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
             </svg>
-            <span>// Prompts</span>
+            <span>${t('prompts_btn')}</span>
           </button>
 
           <div class="gsp-usage-wrapper">
-            <button type="button" class="gsp-pill-btn" id="gsp-btn-usage" title="View 5-hour and weekly usage and reset timers">
+            <button type="button" class="gsp-pill-btn" id="gsp-btn-usage" title="${t('usage_card_info')}">
               <svg viewBox="0 0 24 24">
                 <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
               </svg>
@@ -121,18 +123,18 @@
         </div>
 
         <div class="gsp-toolbar-right">
-          <div class="gsp-nav-group" title="Navigate messages">
-            <button type="button" class="gsp-nav-btn gsp-btn-nav-top" id="gsp-btn-nav-top" title="Scroll to top of chat">
+          <div class="gsp-nav-group">
+            <button type="button" class="gsp-nav-btn gsp-btn-nav-top" id="gsp-btn-nav-top" title="${t('nav_top_title')}">
               <svg viewBox="0 0 24 24">
                 <path d="M4 4h16v2H4zm8 4l6 6-1.41 1.41L13 11.83V20h-2v-8.17l-3.59 3.58L6 14z"/>
               </svg>
             </button>
-            <button type="button" class="gsp-nav-btn" id="gsp-btn-nav-up" title="Previous message (Scroll Up)">
+            <button type="button" class="gsp-nav-btn" id="gsp-btn-nav-up" title="${t('nav_prev_title')}">
               <svg viewBox="0 0 24 24">
                 <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
               </svg>
             </button>
-            <button type="button" class="gsp-nav-btn" id="gsp-btn-nav-down" title="Next message (Scroll Down)">
+            <button type="button" class="gsp-nav-btn" id="gsp-btn-nav-down" title="${t('nav_next_title')}">
               <svg viewBox="0 0 24 24">
                 <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
               </svg>

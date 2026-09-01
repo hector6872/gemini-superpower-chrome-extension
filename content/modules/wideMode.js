@@ -29,10 +29,12 @@
       document.documentElement.classList.remove('gsp-wide-mode');
     }
 
+    const t = window.GSP?.t || ((k) => k);
+
     const btn = document.getElementById('gsp-btn-wide-mode');
     if (btn) {
       btn.innerHTML = isWideMode ? COLLAPSE_ICON : EXPAND_ICON;
-      btn.title = isWideMode ? 'Exit Wide Mode (Full Width)' : 'Enter Wide Mode (Full Width)';
+      btn.title = t('wide_mode_title');
       btn.setAttribute('aria-pressed', isWideMode ? 'true' : 'false');
       btn.classList.toggle('gsp-header-btn-active', isWideMode);
     }

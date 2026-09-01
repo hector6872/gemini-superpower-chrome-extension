@@ -45,6 +45,10 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
    - Clean "Delete all" action integrated into the recent conversations sidebar header using the native Material delete icon.
    - Native confirmation dialog with silent, background batch deletion.
 
+8. **Internationalization & Multi-Language Support (i18n)**:
+   - Full native localization for English, Spanish, German, French, and Italian.
+   - Automatically adapts all toolbar controls, prompt menus, library managers, usage cards, and dialogs to match your browser's language setting.
+
 ---
 
 ## 🛠️ Installation in Google Chrome (Mac)

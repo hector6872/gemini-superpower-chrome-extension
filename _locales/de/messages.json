@@ -1,0 +1,10 @@
+{
+  "extensionName": {
+    "message": "Gemini Superpowers",
+    "description": "Name der Chrome-Erweiterung"
+  },
+  "extensionDescription": {
+    "message": "Erweitere Google Gemini mit //-Prompt-Vorlagen, Modellwechsel, Nachrichtennavigation, Nutzungstracking und Massenlöschung.",
+    "description": "Beschreibung der Chrome-Erweiterung"
+  }
+}
