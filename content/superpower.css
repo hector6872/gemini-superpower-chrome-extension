@@ -317,6 +317,16 @@
   background: var(--gsp-bg-pill-hover);
 }
 
+.gsp-prompt-item.gsp-selected {
+  background: rgba(var(--gsp-accent-rgb), 0.12) !important;
+  border-left: 3px solid var(--gsp-accent);
+  padding-left: 11px;
+}
+
+.gsp-prompt-item.gsp-selected .gsp-prompt-title {
+  color: var(--gsp-accent) !important;
+}
+
 .gsp-prompt-item-left {
   display: flex;
   flex-direction: column;
