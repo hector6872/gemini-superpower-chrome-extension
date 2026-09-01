@@ -1,4 +1,4 @@
-# ⚡ Gemini Superpowers (Chrome Extension)
+# ⚡ gemini-superpower-chrome-extension
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-4285F4.svg)](manifest.json)
