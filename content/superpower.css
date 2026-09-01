@@ -5,16 +5,17 @@
 
 :root {
   --gsp-font-family: 'Google Sans', 'Google Sans Text', Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --gsp-bg-pill: rgba(255, 255, 255, 0.85);
-  --gsp-bg-pill-hover: rgba(240, 244, 249, 0.95);
-  --gsp-bg-pill-active: rgba(225, 235, 248, 1);
+  --gsp-bg-pill: rgba(255, 255, 255, 0.9);
+  --gsp-bg-pill-hover: #f0f4f9;
+  --gsp-bg-pill-active: #e1ebf8;
   --gsp-border-pill: rgba(0, 0, 0, 0.12);
   --gsp-text-primary: #1f1f1f;
   --gsp-text-secondary: #444746;
   --gsp-text-muted: #727775;
   --gsp-bg-card: #ffffff;
+  --gsp-bg-inner: #f8fafd;
   --gsp-border-card: rgba(0, 0, 0, 0.12);
-  --gsp-card-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.08);
+  --gsp-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.08);
   --gsp-accent: #1a73e8;
   --gsp-accent-rgb: 26, 115, 232;
   --gsp-sparkle-gradient: linear-gradient(135deg, #1a73e8 0%, #9334e9 100%);
@@ -22,23 +23,49 @@
   --gsp-danger: #d93025;
 }
 
-/* Dark theme overrides matching Gemini Dark Mode */
-@media (prefers-color-scheme: dark), [data-theme="dark"], body.theme-dark, .theme-dark, [data-theme="system"][data-color-mode="dark"] {
+/* Dark theme overrides strictly matching Gemini native Dark Mode (#131314 / #1e1f20) */
+@media (prefers-color-scheme: dark) {
   :root {
-    --gsp-bg-pill: rgba(30, 31, 32, 0.85);
-    --gsp-bg-pill-hover: rgba(45, 47, 49, 0.95);
-    --gsp-bg-pill-active: rgba(60, 64, 67, 1);
-    --gsp-border-pill: rgba(255, 255, 255, 0.14);
+    --gsp-bg-pill: #1e1f20;
+    --gsp-bg-pill-hover: #282a2c;
+    --gsp-bg-pill-active: #333538;
+    --gsp-border-pill: rgba(255, 255, 255, 0.1);
     --gsp-text-primary: #e3e3e3;
     --gsp-text-secondary: #c4c7c5;
     --gsp-text-muted: #8e918f;
     --gsp-bg-card: #1e1f20;
-    --gsp-border-card: rgba(255, 255, 255, 0.12);
-    --gsp-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 1px 6px rgba(0, 0, 0, 0.3);
-    --gsp-accent: #8ab4f8;
-    --gsp-accent-rgb: 138, 180, 248;
+    --gsp-bg-inner: #131314;
+    --gsp-border-card: rgba(255, 255, 255, 0.1);
+    --gsp-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.6), 0 1px 6px rgba(0, 0, 0, 0.4);
+    --gsp-accent: #a8c7fa;
+    --gsp-accent-rgb: 168, 199, 250;
     --gsp-danger: #f28b82;
   }
+}
+
+html.dark-theme,
+body.dark-theme,
+html.theme-dark,
+body.theme-dark,
+[data-theme="dark"],
+[data-color-mode="dark"],
+html[class*="dark"],
+body[class*="dark"],
+[class*="dark-theme"] {
+  --gsp-bg-pill: #1e1f20 !important;
+  --gsp-bg-pill-hover: #282a2c !important;
+  --gsp-bg-pill-active: #333538 !important;
+  --gsp-border-pill: rgba(255, 255, 255, 0.1) !important;
+  --gsp-text-primary: #e3e3e3 !important;
+  --gsp-text-secondary: #c4c7c5 !important;
+  --gsp-text-muted: #8e918f !important;
+  --gsp-bg-card: #1e1f20 !important;
+  --gsp-bg-inner: #131314 !important;
+  --gsp-border-card: rgba(255, 255, 255, 0.1) !important;
+  --gsp-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.6), 0 1px 6px rgba(0, 0, 0, 0.4) !important;
+  --gsp-accent: #a8c7fa !important;
+  --gsp-accent-rgb: 168, 199, 250 !important;
+  --gsp-danger: #f28b82 !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -429,6 +456,7 @@
 .gsp-manager-list {
   max-height: 280px;
   overflow-y: auto;
+  background: var(--gsp-bg-inner);
   border: 1px solid var(--gsp-border-card);
   border-radius: 12px;
   padding: 4px;
@@ -638,7 +666,7 @@
 .gsp-input-field {
   width: 100%;
   padding: 10px 14px;
-  background: var(--gsp-bg-pill);
+  background: var(--gsp-bg-inner);
   border: 1px solid var(--gsp-border-pill);
   border-radius: 10px;
   font-family: var(--gsp-font-family);
