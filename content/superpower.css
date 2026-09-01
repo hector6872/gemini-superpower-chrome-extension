@@ -162,12 +162,20 @@
   pointer-events: auto;
 }
 
-.gsp-nav-btn:hover {
+.gsp-nav-btn:hover:not(:disabled) {
   background: var(--gsp-bg-pill-hover);
 }
 
-.gsp-nav-btn:active {
+.gsp-nav-btn:active:not(:disabled) {
   transform: scale(0.92);
+}
+
+.gsp-nav-btn:disabled,
+.gsp-nav-btn.gsp-nav-disabled {
+  opacity: 0.28 !important;
+  cursor: default !important;
+  pointer-events: none !important;
+  transform: none !important;
 }
 
 .gsp-nav-btn svg {

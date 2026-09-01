@@ -184,17 +184,67 @@
 
   function updateScrollState() {
     const topBtn = document.getElementById('gsp-btn-nav-top');
-    if (!topBtn) return;
+    const upBtn = document.getElementById('gsp-btn-nav-up');
+    const downBtn = document.getElementById('gsp-btn-nav-down');
+    
+    if (!upBtn && !downBtn && !topBtn) return;
 
+    const messages = getUserMessages();
     const container = findScrollContainer();
-    const scrollTop = (container && container !== document.documentElement && container !== document.body)
-      ? container.scrollTop
-      : (window.scrollY || document.documentElement.scrollTop || 0);
+    
+    const isWindow = !container || container === document.documentElement || container === document.body;
+    const scrollTop = isWindow
+      ? (window.scrollY || document.documentElement.scrollTop || 0)
+      : container.scrollTop;
+    const scrollHeight = isWindow
+      ? document.documentElement.scrollHeight
+      : container.scrollHeight;
+    const clientHeight = isWindow
+      ? window.innerHeight
+      : container.clientHeight;
 
-    if (scrollTop > 80) {
-      topBtn.classList.add('gsp-nav-top-visible');
-    } else {
-      topBtn.classList.remove('gsp-nav-top-visible');
+    const isAtTop = scrollTop <= 30;
+    const isAtBottom = (scrollTop + clientHeight) >= (scrollHeight - 40);
+
+    // Can we scroll up?
+    const topThreshold = 70;
+    let hasMessageAbove = false;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const rect = messages[i].getBoundingClientRect();
+      if (rect.top < topThreshold - 10) {
+        hasMessageAbove = true;
+        break;
+      }
+    }
+    const canScrollUp = messages.length > 0 && (hasMessageAbove || !isAtTop);
+
+    // Can we scroll down?
+    const bottomThreshold = 85;
+    let hasMessageBelow = false;
+    for (let i = 0; i < messages.length; i++) {
+      const rect = messages[i].getBoundingClientRect();
+      if (rect.top > bottomThreshold + 15) {
+        hasMessageBelow = true;
+        break;
+      }
+    }
+    const canScrollDown = messages.length > 0 && (hasMessageBelow || !isAtBottom);
+
+    if (upBtn) {
+      upBtn.disabled = !canScrollUp;
+      upBtn.classList.toggle('gsp-nav-disabled', !canScrollUp);
+    }
+    if (downBtn) {
+      downBtn.disabled = !canScrollDown;
+      downBtn.classList.toggle('gsp-nav-disabled', !canScrollDown);
+    }
+    if (topBtn) {
+      topBtn.disabled = isAtTop;
+      if (!isAtTop && scrollTop > 80) {
+        topBtn.classList.add('gsp-nav-top-visible');
+      } else {
+        topBtn.classList.remove('gsp-nav-top-visible');
+      }
     }
   }
 
