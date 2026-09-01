@@ -21,59 +21,59 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const DEFAULT_PROMPTS = [
     {
-      id: 'fix',
-      title: 'fix',
-      desc: 'Fix bugs, errors, and logic issues in the code or text',
-      template: 'Please analyze and fix the following code or text. Explain what caused the issue, provide the corrected version, and ensure best practices and edge cases are handled:',
-      model: 'pro'
-    },
-    {
-      id: 'test',
-      title: 'test',
-      desc: 'Generate comprehensive unit tests and mock cases',
-      template: 'Please write comprehensive unit tests for the following code, including happy paths, edge cases, error handling, and mock assertions:',
-      model: 'pro'
-    },
-    {
-      id: 'review',
-      title: 'review',
-      desc: 'Review code for security, architecture, and performance',
-      template: 'Please review the following code for potential bugs, security vulnerabilities, performance optimization, and best practices. Provide a refactored proposal with explanations:',
-      model: 'pro'
+      id: 'doc',
+      title: 'doc',
+      desc: 'Generate clear documentation and usage guides',
+      template: 'Please write clear, comprehensive documentation for the following, including an overview, parameter details, expected outputs, and usage examples:',
+      model: 'keep'
     },
     {
       id: 'explain',
       title: 'explain',
-      desc: 'Explain concepts or code step-by-step in clear terms',
-      template: 'Please explain the following code or concept in clear, structured, and easy-to-understand terms with step-by-step examples:',
+      desc: 'Explain step-by-step in clear, simple terms',
+      template: 'Please explain the following step-by-step in clear, structured, and easy-to-understand terms with practical examples:',
       model: 'flash'
+    },
+    {
+      id: 'fix',
+      title: 'fix',
+      desc: 'Fix bugs, errors, and issues in the content',
+      template: 'Please analyze and fix the following. Explain what caused the issue, provide the corrected version, and ensure edge cases and best practices are handled:',
+      model: 'pro'
     },
     {
       id: 'optimize',
       title: 'optimize',
-      desc: 'Optimize performance, algorithms, and complexity',
-      template: 'Please analyze and optimize the performance and time/space complexity of the following code. Provide the improved version and benchmark rationale:',
+      desc: 'Optimize performance, efficiency, and clarity',
+      template: 'Please analyze and optimize the following for maximum efficiency, speed, and clarity. Explain the key improvements made:',
       model: 'thinking'
     },
     {
-      id: 'doc',
-      title: 'doc',
-      desc: 'Generate clear technical documentation and JSDoc/docstrings',
-      template: 'Please write clear, comprehensive documentation for the following code, including overview, parameter types, return values, and usage examples:',
-      model: 'keep'
+      id: 'review',
+      title: 'review',
+      desc: 'Review for quality, security, and improvements',
+      template: 'Please review the following for potential issues, security, performance, and best practices. Provide an improved version with explanations:',
+      model: 'pro'
     },
     {
       id: 'summary',
       title: 'summary',
-      desc: 'Condense into 3-5 core takeaways and key conclusions',
-      template: 'Please provide an executive summary of the following content, highlighting 3-5 key takeaways, actionable conclusions, and recommended next steps:',
+      desc: 'Condense into key takeaways and conclusions',
+      template: 'Please provide a concise summary of the following content, highlighting core takeaways, key conclusions, and recommended next steps:',
       model: 'flash'
+    },
+    {
+      id: 'test',
+      title: 'test',
+      desc: 'Generate comprehensive tests and validation cases',
+      template: 'Please write comprehensive tests and validation scenarios for the following, including expected behavior, edge cases, and error handling:',
+      model: 'pro'
     },
     {
       id: 'translate',
       title: 'translate',
-      desc: 'Translate with high precision, natural tone, and domain nuance',
-      template: 'Translate the following text accurately, preserving its natural tone, technical terminology, and contextual nuance:',
+      desc: 'Translate accurately preserving tone and nuance',
+      template: 'Translate the following text accurately, preserving its natural tone, terminology, and contextual nuance:',
       model: 'keep'
     }
   ];
@@ -88,10 +88,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       prompts = [...DEFAULT_PROMPTS];
       await savePrompts();
     }
+    prompts.sort((a, b) => a.title.localeCompare(b.title));
     renderList();
   }
 
   async function savePrompts() {
+    prompts.sort((a, b) => a.title.localeCompare(b.title));
     await chrome.storage.local.set({ gsp_custom_prompts: prompts });
   }
 

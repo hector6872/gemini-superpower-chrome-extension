@@ -284,7 +284,7 @@
 }
 
 .gsp-prompt-header {
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--gsp-border-card);
   display: flex;
   align-items: center;
@@ -292,6 +292,192 @@
   font-size: 12px;
   color: var(--gsp-text-muted);
   background: rgba(0, 0, 0, 0.02);
+}
+
+.gsp-prompt-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  color: var(--gsp-text-primary);
+}
+
+.gsp-prompt-edit-btn {
+  background: var(--gsp-bg-pill);
+  border: 1px solid var(--gsp-border-pill);
+  color: var(--gsp-accent);
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.gsp-prompt-edit-btn:hover {
+  background: var(--gsp-bg-pill-hover);
+  border-color: var(--gsp-accent);
+}
+
+.gsp-prompt-footer {
+  padding: 6px 12px;
+  border-top: 1px solid var(--gsp-border-card);
+  font-size: 11px;
+  color: var(--gsp-text-muted);
+  background: rgba(0, 0, 0, 0.015);
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Prompt Library Manager Modal
+   -------------------------------------------------------------------------- */
+.gsp-prompt-manager-modal {
+  max-width: 680px !important;
+  width: 92% !important;
+}
+
+.gsp-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--gsp-border-card);
+}
+
+.gsp-modal-close-btn {
+  background: none;
+  border: none;
+  color: var(--gsp-text-muted);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.gsp-modal-close-btn:hover {
+  background: var(--gsp-bg-pill-hover);
+  color: var(--gsp-text-primary);
+}
+
+.gsp-manager-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 600px) {
+  .gsp-manager-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gsp-manager-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--gsp-text-primary);
+}
+
+.gsp-btn-pill-action {
+  background: var(--gsp-bg-pill);
+  border: 1px solid var(--gsp-border-pill);
+  color: var(--gsp-accent);
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.gsp-btn-pill-action:hover {
+  background: var(--gsp-bg-pill-hover);
+}
+
+.gsp-manager-list {
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid var(--gsp-border-card);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.gsp-manager-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 8px;
+  gap: 8px;
+  transition: background 0.12s ease;
+}
+
+.gsp-manager-row:hover {
+  background: var(--gsp-bg-pill-hover);
+}
+
+.gsp-manager-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.gsp-manager-cmd {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--gsp-text-primary);
+}
+
+.gsp-manager-desc {
+  font-size: 11px;
+  color: var(--gsp-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gsp-manager-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.gsp-btn-sm {
+  background: var(--gsp-bg-pill);
+  border: 1px solid var(--gsp-border-pill);
+  color: var(--gsp-text-secondary);
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.gsp-btn-sm:hover {
+  color: var(--gsp-text-primary);
+  background: var(--gsp-bg-pill-hover);
+}
+
+.gsp-btn-del-item:hover {
+  color: #ea4335 !important;
+  border-color: #ea4335 !important;
+}
+
+.gsp-form-title {
+  margin: 0 0 12px 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--gsp-text-primary);
 }
 
 .gsp-prompt-list {

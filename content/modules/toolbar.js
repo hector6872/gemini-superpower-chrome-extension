@@ -9,9 +9,6 @@
   let isPopoverOpen = false;
   let resizeObserver = null;
 
-  /**
-   * Finds the outermost input card/capsule (the container that holds the +, text input, mic, send buttons)
-   */
   function findOutermostInputCard() {
     const inputEl = document.querySelector('rich-textarea') ||
                     document.querySelector('div[contenteditable="true"]') ||
@@ -19,7 +16,6 @@
                     document.querySelector('textarea');
     if (!inputEl) return null;
 
-    // Look for form or outermost input area card
     const form = inputEl.closest('form');
     if (form && form.parentElement) {
       return form;
@@ -30,7 +26,6 @@
       return inputArea;
     }
 
-    // Traverse upwards to find the element that contains both the input and action buttons
     let current = inputEl;
     while (current && current.parentElement) {
       const parent = current.parentElement;
@@ -105,11 +100,11 @@
 
       toolbar.innerHTML = `
         <div class="gsp-toolbar-left">
-          <button type="button" class="gsp-pill-btn gsp-btn-optimize" id="gsp-btn-optimize" title="Optimize prompt structure, role and constraints">
+          <button type="button" class="gsp-pill-btn gsp-btn-prompts" id="gsp-btn-prompts" title="Quick Prompts (//) list and editor">
             <svg viewBox="0 0 24 24">
-              <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
+              <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
             </svg>
-            <span>Optimize</span>
+            <span>// Prompts</span>
           </button>
 
           <div class="gsp-usage-wrapper">
@@ -145,11 +140,12 @@
       inputCard.parentNode.insertBefore(toolbar, inputCard);
 
       // Event Listeners
-      const optimizeBtn = toolbar.querySelector('#gsp-btn-optimize');
-      if (optimizeBtn) {
-        optimizeBtn.addEventListener('click', () => {
-          if (window.GSP?.optimizeCurrentPrompt) {
-            window.GSP.optimizeCurrentPrompt();
+      const promptsBtn = toolbar.querySelector('#gsp-btn-prompts');
+      if (promptsBtn) {
+        promptsBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (window.GSP?.togglePromptMenu) {
+            window.GSP.togglePromptMenu();
           }
         });
       }
@@ -196,14 +192,11 @@
         updateUsagePopoverContent(popover);
       }
     } else if (toolbar.nextElementSibling !== inputCard) {
-      // Ensure toolbar stays directly before inputCard outside of it
       inputCard.parentNode.insertBefore(toolbar, inputCard);
     }
 
-    // Sync exact width and horizontal position
     syncToolbarWidth(toolbar, inputCard);
 
-    // Keep size synced with ResizeObserver
     if (window.ResizeObserver && !resizeObserver) {
       resizeObserver = new ResizeObserver(() => {
         const currentToolbar = document.getElementById('gsp-toolbar-root');
@@ -229,5 +222,6 @@
 
   window.GSP = window.GSP || {};
   window.GSP.initToolbar = initToolbar;
+  window.GSP.syncToolbarWidth = syncToolbarWidth;
   window.GSP.updateUsagePopoverContent = updateUsagePopoverContent;
 })();

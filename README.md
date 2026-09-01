@@ -8,7 +8,7 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
 
 1. **Floating Superpowers Toolbar (Gemini Native Look & Feel)**:
    - Injected directly above the chat prompt input card, perfectly matched to its width.
-   - **✨ Optimize** button to restructure and enrich your typed prompt with professional roles, constraints, and format.
+   - **`// Prompts` button**: Instant one-click access to the Quick Prompts menu and in-page Prompt Editor.
    - Seamless design supporting both Light and Dark themes automatically.
 
 2. **Official Usage Limits & Reset Timers (5-Hour & Weekly)**:
@@ -21,10 +21,11 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
 3. **User Prompt Navigator (`^` and `v`)**:
    - Jump smoothly and instantly between your previous and next user query prompts without tedious manual scrolling, skipping long model responses.
 
-4. **Quick Prompt Launcher (`//`) with Placeholders & Auto-Model Switching**:
-   - Type `//` inside the chat box to trigger a quick-search autocomplete menu.
-   - Support for dynamic placeholders (`{{placeholder}}`) with an intuitive input modal.
-   - Auto-model switcher: assign specific models (*Gemini Flash*, *Gemini Pro*, *Flash Thinking*, or *No change* to keep the currently active model).
+4. **Single-Word Quick Prompts (`//`) & In-Page Editor**:
+   - Type `//` inside the chat box or click `// Prompts` to open the autocomplete command menu (`//fix`, `//test`, `//review`, `//explain`, `//optimize`, `//doc`, `//summary`, `//translate`).
+   - Type `//fix` + `Space`, `Tab`, or `Enter` to instantly prepend the prompt template at the beginning of your text with the cursor positioned at the end.
+   - **Integrated Editor**: Click `✏️ Edit Prompts` in the menu to add, edit, or delete single-word commands right within Gemini.
+   - **Auto-Model Switcher**: Assign specific models (*Gemini Flash*, *Gemini Pro*, *Flash Thinking*, or *No change*) to any command.
 
 5. **Smart Auto-Focus**:
    - The chat prompt input automatically gets focused whenever you open the page or switch back to the Gemini tab/window.
@@ -32,16 +33,15 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
 
 6. **Wide Mode (Full Width) Toggle**:
    - Toggle button in the top-right header (placed directly next to the overflow menu) to switch between standard view and full-width layout.
-   - Expands the chat history, conversation turns, model response markdown, input card, and toolbar across the screen.
+   - Expands the chat history, conversation turns, model response markdown, input card, and toolbar across the screen without affecting the left sidebar.
    - Remembers your wide mode preference in local storage.
 
 7. **Bulk Delete Recent Conversations**:
    - Clean "Delete all" action integrated into the recent conversations sidebar header.
    - Confirmation dialog with a real-time progress bar and cancellation support.
 
-8. **Prompt Library Manager (Popup)**:
-   - Create, edit, and delete custom prompt templates.
-   - Import and export prompt libraries in JSON format.
+8. **In-Page Prompt Library Manager**:
+   - Create, edit, and delete custom single-word prompt templates directly inside Gemini via the `✏️ Edit Prompts` action.
 
 ---
 
