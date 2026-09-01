@@ -54,9 +54,6 @@
 
   function toggleWideMode() {
     setWideMode(!isWideMode);
-    if (window.GSP?.showToast) {
-      window.GSP.showToast(isWideMode ? 'Wide mode enabled' : 'Standard view restored');
-    }
   }
 
   function findOverflowButton() {

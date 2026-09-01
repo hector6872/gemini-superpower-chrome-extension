@@ -346,6 +346,7 @@
     });
   }
 
+  let toastTimeout = null;
   function showToast(msg) {
     let toast = document.querySelector('.gsp-toast');
     if (!toast) {
@@ -355,7 +356,8 @@
     }
     toast.textContent = msg;
     toast.classList.add('gsp-toast-show');
-    setTimeout(() => {
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
       toast.classList.remove('gsp-toast-show');
     }, 2400);
   }
