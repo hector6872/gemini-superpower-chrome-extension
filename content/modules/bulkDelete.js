@@ -1,222 +1,232 @@
 /**
  * Bulk Delete Module for Gemini Superpowers
- * Allows deleting all recent conversations in bulk with safety confirmation
+ * Injects a "Delete all" button in the recent conversations sidebar
+ * using native browser confirmation dialog.
  */
 (function () {
   'use strict';
 
   let isDeleting = false;
-  let shouldCancel = false;
 
-  function findSidebarRecentContainer() {
-    const selectors = [
-      'nav .recent-conversations',
-      'nav .conversations-list',
-      'mat-nav-list',
-      '.conversation-list',
-      '[data-test-id="recent-conversations-list"]',
-      'side-nav',
-      'nav'
-    ];
-
-    for (const sel of selectors) {
-      const el = document.querySelector(sel);
-      if (el) return el;
-    }
-    return null;
+  function getConversationLinks() {
+    const candidateLinks = Array.from(document.querySelectorAll('side-nav a, mat-sidenav a, nav a, aside a, [class*="side-nav"] a, [class*="sidebar"] a, a[href*="/app/"]'));
+    return candidateLinks.filter(a => {
+      const href = a.getAttribute('href') || '';
+      return href.includes('/app/') && a.offsetHeight > 0 && a.offsetParent !== null;
+    });
   }
 
-  function getConversationItems() {
-    const itemSelectors = [
-      'nav mat-list-item',
-      'nav a[role="listitem"]',
-      'nav .conversation-item',
-      'nav [data-test-id="conversation-item"]',
-      'nav .conversation-row'
-    ];
+  function findRecentSectionHeader() {
+    // 1. Search for headers/labels inside sidebar elements
+    const sidebars = document.querySelectorAll('side-nav, mat-sidenav, nav, aside, [class*="side-nav"], [class*="sidebar"], [data-test-id*="sidebar"]');
+    
+    for (const sb of sidebars) {
+      const candidates = sb.querySelectorAll('h2, h3, h4, span, div, p, [class*="title"], [class*="header"]');
+      for (const el of candidates) {
+        const text = (el.textContent || '').trim().toLowerCase();
+        if (text === 'recent' || text === 'recents' || text === 'recientes' || text === 'chats recientes' || text === 'recent chats' || text === 'conversaciones recientes') {
+          if (el.offsetHeight > 0 && el.children.length <= 2) {
+            return el;
+          }
+        }
+      }
+    }
 
-    const list = Array.from(document.querySelectorAll(itemSelectors.join(', ')));
-    // Filter out items that are not conversations (like "Help", "Settings", etc.)
-    return list.filter(item => {
-      const text = item.textContent?.trim() || '';
-      const href = item.getAttribute('href') || item.querySelector('a')?.getAttribute('href') || '';
-      return href.includes('/app/') || item.querySelector('button[aria-haspopup="menu"]');
-    });
+    // 2. Search anywhere on the left side of the screen (sidebar area)
+    const allLeftElements = Array.from(document.querySelectorAll('h2, h3, h4, span, div'));
+    for (const el of allLeftElements) {
+      const rect = el.getBoundingClientRect();
+      if (rect.left < 360 && rect.top < 400 && rect.width > 0 && rect.height > 0) {
+        const text = (el.textContent || '').trim().toLowerCase();
+        if (text === 'recent' || text === 'recents' || text === 'recientes' || text === 'chats recientes' || text === 'recent chats') {
+          if (el.children.length <= 2) {
+            return el;
+          }
+        }
+      }
+    }
+
+    // 3. Fallback: parent of first conversation link
+    const links = getConversationLinks();
+    if (links.length > 0) {
+      const listContainer = links[0].closest('mat-nav-list, mat-list, [role="list"], .conversation-list, [class*="list"]') || links[0].parentElement;
+      if (listContainer && listContainer.previousElementSibling) {
+        return listContainer.previousElementSibling;
+      }
+    }
+
+    return null;
   }
 
   function injectBulkDeleteButton() {
     if (document.getElementById('gsp-bulk-delete-btn')) return;
 
-    // Look for recent header or sidebar top
-    const headers = Array.from(document.querySelectorAll('nav h2, nav .section-title, nav span, nav div'));
-    const recentHeader = headers.find(h => {
-      const t = (h.textContent || '').toLowerCase().trim();
-      return t === 'recents' || t === 'recientes' || t === 'recent' || t === 'recent chats' || t === 'chats recientes';
-    });
+    const recentHeader = findRecentSectionHeader();
+    if (!recentHeader) return;
 
-    if (recentHeader && recentHeader.parentElement) {
-      const container = recentHeader.parentElement;
-      container.style.display = 'flex';
-      container.style.alignItems = 'center';
-      container.style.justifyContent = 'space-between';
+    if (recentHeader.querySelector('#gsp-bulk-delete-btn')) return;
 
-      const btn = document.createElement('button');
-      btn.id = 'gsp-bulk-delete-btn';
-      btn.className = 'gsp-bulk-delete-btn';
-      btn.title = 'Delete all recent conversations';
-      btn.innerHTML = `
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-        </svg>
-        <span>Delete all</span>
-      `;
+    // Style the recentHeader element itself as flex row without affecting parent list
+    recentHeader.style.display = 'flex';
+    recentHeader.style.alignItems = 'center';
+    recentHeader.style.justifyContent = 'space-between';
+    recentHeader.style.boxSizing = 'border-box';
+    recentHeader.style.paddingRight = '12px';
 
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        openBulkDeleteModal();
-      });
-
-      container.appendChild(btn);
-    }
-  }
-
-  function openBulkDeleteModal() {
-    const items = getConversationItems();
-    const count = items.length;
-
-    const backdrop = document.createElement('div');
-    backdrop.className = 'gsp-modal-backdrop';
-
-    const modal = document.createElement('div');
-    modal.className = 'gsp-modal';
-
-    modal.innerHTML = `
-      <h3 class="gsp-modal-title">🗑️ Delete All Conversations</h3>
-      <p class="gsp-modal-desc" id="gsp-bulk-status">
-        Are you sure you want to delete all visible recent conversations (${count})?
-        This action cannot be undone.
-      </p>
-      <div class="gsp-progress-bar-container" style="display: none;" id="gsp-bulk-prog-box">
-        <div class="gsp-progress-bar-fill" id="gsp-bulk-prog-fill"></div>
-      </div>
-      <div class="modal-actions gsp-modal-actions">
-        <button type="button" class="gsp-btn-secondary" id="gsp-bulk-cancel">Cancel</button>
-        <button type="button" class="gsp-btn-danger" id="gsp-bulk-confirm">Delete ${count} chats</button>
-      </div>
+    const btn = document.createElement('button');
+    btn.id = 'gsp-bulk-delete-btn';
+    btn.className = 'gsp-bulk-delete-btn';
+    btn.type = 'button';
+    btn.title = 'Delete all recent conversations';
+    btn.innerHTML = `
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+      </svg>
+      <span>Delete all</span>
     `;
 
-    backdrop.appendChild(modal);
-    document.body.appendChild(backdrop);
-
-    const cancelBtn = modal.querySelector('#gsp-bulk-cancel');
-    const confirmBtn = modal.querySelector('#gsp-bulk-confirm');
-    const statusText = modal.querySelector('#gsp-bulk-status');
-    const progBox = modal.querySelector('#gsp-bulk-prog-box');
-    const progFill = modal.querySelector('#gsp-bulk-prog-fill');
-
-    function cleanup() {
-      shouldCancel = true;
-      if (backdrop.parentNode) {
-        backdrop.parentNode.removeChild(backdrop);
-      }
-    }
-
-    cancelBtn.addEventListener('click', () => {
-      if (isDeleting) {
-        shouldCancel = true;
-        cancelBtn.textContent = 'Cancelling...';
-        cancelBtn.disabled = true;
-      } else {
-        cleanup();
-      }
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      startBulkDelete();
     });
 
-    confirmBtn.addEventListener('click', async () => {
-      isDeleting = true;
-      shouldCancel = false;
-      confirmBtn.style.display = 'none';
-      progBox.style.display = 'block';
-
-      const allItems = getConversationItems();
-      const total = allItems.length;
-
-      if (total === 0) {
-        statusText.textContent = 'No recent conversations to delete.';
-        setTimeout(cleanup, 1200);
-        return;
-      }
-
-      for (let i = 0; i < total; i++) {
-        if (shouldCancel) {
-          statusText.textContent = 'Operation cancelled.';
-          break;
-        }
-
-        const currentItems = getConversationItems();
-        if (currentItems.length === 0) break;
-
-        const item = currentItems[0];
-        statusText.textContent = `Deleting conversation ${i + 1} of ${total}...`;
-        progFill.style.width = `${Math.round(((i + 1) / total) * 100)}%`;
-
-        await deleteSingleConversation(item);
-        await new Promise(r => setTimeout(r, 450)); // Safety delay for DOM updates
-      }
-
-      isDeleting = false;
-      statusText.textContent = shouldCancel ? 'Process cancelled.' : 'All conversations have been deleted!';
-      setTimeout(() => {
-        cleanup();
-        if (window.GSP?.showToast) {
-          window.GSP.showToast('Conversations deleted successfully');
-        }
-      }, 1000);
-    });
+    recentHeader.appendChild(btn);
   }
 
   async function deleteSingleConversation(item) {
     try {
-      // Trigger hover over item to reveal the 3 dots menu
+      // Scroll item into view in sidebar
+      item.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+
+      // Trigger full pointer and mouse sequence to reveal hover actions
+      item.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
       item.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
       item.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+      item.dispatchEvent(new MouseEvent('mousemove', { bubbles: true }));
 
-      // Find the three dots menu button inside item
-      const menuBtn = item.querySelector('button[aria-haspopup="menu"], button[aria-label*="more" i], button[aria-label*="opciones" i], button[aria-label*="options" i], button.more-actions');
-      if (menuBtn) {
-        menuBtn.click();
-        await new Promise(r => setTimeout(r, 120));
+      await new Promise(r => setTimeout(r, 100));
 
-        // Find "Delete" option in menu
-        const menuItems = Array.from(document.querySelectorAll('[role="menuitem"], .mat-mdc-menu-item, button'));
-        const deleteOption = menuItems.find(el => {
-          const t = (el.textContent || '').toLowerCase();
-          return t.includes('delete') || t.includes('eliminar') || t.includes('borrar');
-        });
+      // Look for the 3-dots button inside item, its parent, or next siblings
+      let menuBtn = item.querySelector('button[aria-haspopup="menu"], button[aria-label*="more" i], button[aria-label*="más" i], button[aria-label*="opcion" i], button[aria-label*="option" i], button[data-test-id*="more"], button[data-test-id*="menu"]') ||
+                    item.parentElement?.querySelector('button[aria-haspopup="menu"], button[aria-label*="more" i]') ||
+                    item.closest('[role="listitem"], mat-list-item, [class*="item"]')?.querySelector('button[aria-haspopup="menu"], button[aria-label*="more" i]');
 
-        if (deleteOption) {
-          deleteOption.click();
-          await new Promise(r => setTimeout(r, 150));
-
-          // Confirm in dialog if one pops up
-          const dialogConfirmBtn = Array.from(document.querySelectorAll('mat-dialog-actions button, dialog button, .dialog-buttons button')).find(b => {
-            const t = (b.textContent || '').toLowerCase();
-            return t.includes('delete') || t.includes('eliminar') || t.includes('confirm');
-          });
-
-          if (dialogConfirmBtn) {
-            dialogConfirmBtn.click();
-            await new Promise(r => setTimeout(r, 200));
-          }
-        }
+      if (!menuBtn) {
+        const containerRow = item.closest('[role="listitem"], mat-list-item, div, li') || item;
+        const btns = Array.from(containerRow.querySelectorAll('button'));
+        menuBtn = btns.find(b => b.getAttribute('aria-haspopup') === 'menu' || b.querySelector('svg') || b.querySelector('mat-icon'));
       }
+
+      if (!menuBtn) {
+        return false;
+      }
+
+      // Click 3-dots button to open menu overlay
+      menuBtn.click();
+      await new Promise(r => setTimeout(r, 200));
+
+      // Find "Delete" option in overlay
+      const overlayMenuItems = Array.from(document.querySelectorAll('.cdk-overlay-container [role="menuitem"], .cdk-overlay-pane button, [role="menu"] [role="menuitem"], [role="menu"] button, .mat-mdc-menu-item'));
+      const deleteOption = overlayMenuItems.find(el => {
+        const t = (el.textContent || '').toLowerCase().trim();
+        return t.includes('delete') || t.includes('eliminar') || t.includes('borrar') || t.includes('supprimer') || t.includes('löschen');
+      });
+
+      if (!deleteOption) {
+        document.body.click();
+        return false;
+      }
+
+      deleteOption.click();
+      await new Promise(r => setTimeout(r, 250));
+
+      // Find confirmation button in dialog
+      const dialogConfirmBtn = Array.from(document.querySelectorAll('.cdk-overlay-container mat-dialog-actions button, .cdk-overlay-pane mat-dialog-container button, [role="dialog"] button, dialog button')).find(b => {
+        const t = (b.textContent || '').toLowerCase().trim();
+        const isConfirm = t.includes('delete') || t.includes('eliminar') || t.includes('borrar') || t.includes('confirm') || t.includes('yes') || t.includes('sí') || t.includes('si');
+        const isCancel = t.includes('cancel') || t.includes('cancelar') || t.includes('no');
+        return isConfirm && !isCancel;
+      });
+
+      if (dialogConfirmBtn) {
+        dialogConfirmBtn.click();
+        await new Promise(r => setTimeout(r, 350));
+        return true;
+      }
+
+      return false;
     } catch (err) {
-      console.debug('Error deleting conversation item:', err);
+      console.debug('Error deleting conversation:', err);
+      return false;
+    }
+  }
+
+  async function startBulkDelete() {
+    if (isDeleting) return;
+
+    const items = getConversationLinks();
+    const total = items.length;
+
+    if (total === 0) {
+      window.alert('No recent conversations found to delete.');
+      return;
+    }
+
+    // Native browser confirmation dialog
+    const confirmed = window.confirm(`Are you sure you want to delete all ${total} recent conversations?\n\nThis action cannot be undone.`);
+    if (!confirmed) return;
+
+    isDeleting = true;
+    const btn = document.getElementById('gsp-bulk-delete-btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+    }
+
+    let deletedCount = 0;
+    for (let i = 0; i < total; i++) {
+      const currentItems = getConversationLinks();
+      if (currentItems.length === 0) break;
+
+      const item = currentItems[0];
+      if (btn) {
+        btn.innerHTML = `<span>Deleting ${deletedCount + 1}/${total}...</span>`;
+      }
+
+      const success = await deleteSingleConversation(item);
+      if (success) {
+        deletedCount++;
+      }
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    isDeleting = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.innerHTML = `
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+        </svg>
+        <span>Delete all</span>
+      `;
     }
   }
 
   function initBulkDelete() {
-    setInterval(injectBulkDeleteButton, 1500);
+    setInterval(injectBulkDeleteButton, 1000);
+
+    const observer = new MutationObserver(() => {
+      injectBulkDeleteButton();
+    });
+
+    const sidebar = document.querySelector('side-nav, mat-sidenav, nav, aside, [class*="side-nav"], [class*="sidebar"]');
+    if (sidebar) {
+      observer.observe(sidebar, { childList: true, subtree: true });
+    } else {
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
   }
 
   window.GSP = window.GSP || {};

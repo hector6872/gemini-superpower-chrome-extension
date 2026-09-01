@@ -719,22 +719,24 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 4px 8px;
+  background: var(--gsp-bg-pill);
+  border: 1px solid var(--gsp-border-pill);
+  border-radius: 6px;
+  padding: 2px 7px;
   font-family: var(--gsp-font-family);
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--gsp-text-muted);
   cursor: pointer;
   transition: all 0.15s ease;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 .gsp-bulk-delete-btn:hover {
-  background: rgba(217, 48, 37, 0.1);
+  background: rgba(217, 48, 37, 0.12);
   color: var(--gsp-danger);
-  border-color: rgba(217, 48, 37, 0.2);
+  border-color: rgba(217, 48, 37, 0.3);
 }
 
 .gsp-progress-bar-container {
