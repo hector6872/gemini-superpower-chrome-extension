@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Gemini Superpowers",
+  "version": "1.0.0",
+  "description": "Supercharge your Google Gemini experience with // prompt templates, model switching, message navigation, usage tracking, and bulk chat management.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://gemini.google.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://gemini.google.com/*"],
+      "css": ["content/superpower.css"],
+      "js": [
+        "content/modules/autoFocus.js",
+        "content/modules/usageTracker.js",
+        "content/modules/navigator.js",
+        "content/modules/promptCommands.js",
+        "content/modules/bulkDelete.js",
+        "content/modules/toolbar.js",
+        "content/content.js"
+      ],
+      "run_at": "document_end"
+    }
+  ]
+}

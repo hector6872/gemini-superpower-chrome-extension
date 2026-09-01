@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini Superpowers</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-title">
+      <svg class="header-logo" viewBox="0 0 24 24" width="22" height="22">
+        <path fill="#1a73e8" d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
+      </svg>
+      <h1>Gemini Superpowers</h1>
+    </div>
+    <div class="header-actions">
+      <button id="btn-add-prompt" class="btn btn-primary" title="Add new prompt template">+ New Prompt</button>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="section-header">
+      <h2>Prompt Templates (<code>//</code>)</h2>
+      <div class="io-actions">
+        <button id="btn-export" class="btn-text" title="Export prompts to JSON">Export</button>
+        <label for="import-file" class="btn-text" title="Import prompts from JSON">Import</label>
+        <input type="file" id="import-file" accept=".json" style="display: none;">
+      </div>
+    </div>
+
+    <div id="prompts-list" class="prompts-list">
+      <!-- Dynamic list of prompts -->
+    </div>
+  </main>
+
+  <!-- Prompt Editor Modal / Form -->
+  <div id="prompt-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <h3 id="modal-title">Edit Prompt</h3>
+      <form id="prompt-form">
+        <input type="hidden" id="edit-prompt-id">
+        
+        <div class="form-group">
+          <label for="prompt-title">Prompt Title</label>
+          <input type="text" id="prompt-title" required placeholder="e.g. Code Review & Refactor">
+        </div>
+
+        <div class="form-group">
+          <label for="prompt-desc">Short Description</label>
+          <input type="text" id="prompt-desc" placeholder="e.g. In-depth security and clean code analysis">
+        </div>
+
+        <div class="form-group">
+          <label for="prompt-model">Automatic Model Switch</label>
+          <select id="prompt-model">
+            <option value="keep">No change (keep currently selected)</option>
+            <option value="flash">Gemini Flash</option>
+            <option value="pro">Gemini Pro</option>
+            <option value="thinking">Flash Thinking</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="prompt-template">Prompt Content (use <code>{{variable}}</code> for placeholders)</label>
+          <textarea id="prompt-template" rows="5" required placeholder="Please review this {{language}} code:\n\n{{code}}"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="btn-modal-cancel" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <button id="btn-reset-defaults" class="btn-link">Restore default prompt templates</button>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>

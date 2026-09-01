@@ -1,0 +1,556 @@
+/* ==========================================================================
+   Gemini Superpowers - Stylesheet
+   Designed to seamlessly match Google Gemini's Material You Design System
+   ========================================================================== */
+
+:root {
+  --gsp-font-family: 'Google Sans', 'Google Sans Text', Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --gsp-bg-pill: rgba(255, 255, 255, 0.85);
+  --gsp-bg-pill-hover: rgba(240, 244, 249, 0.95);
+  --gsp-bg-pill-active: rgba(225, 235, 248, 1);
+  --gsp-border-pill: rgba(0, 0, 0, 0.12);
+  --gsp-text-primary: #1f1f1f;
+  --gsp-text-secondary: #444746;
+  --gsp-text-muted: #727775;
+  --gsp-bg-card: #ffffff;
+  --gsp-border-card: rgba(0, 0, 0, 0.12);
+  --gsp-card-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.08);
+  --gsp-accent: #1a73e8;
+  --gsp-accent-rgb: 26, 115, 232;
+  --gsp-sparkle-gradient: linear-gradient(135deg, #1a73e8 0%, #9334e9 100%);
+  --gsp-pill-height: 32px;
+  --gsp-danger: #d93025;
+}
+
+/* Dark theme overrides matching Gemini Dark Mode */
+@media (prefers-color-scheme: dark), [data-theme="dark"], body.theme-dark, .theme-dark, [data-theme="system"][data-color-mode="dark"] {
+  :root {
+    --gsp-bg-pill: rgba(30, 31, 32, 0.85);
+    --gsp-bg-pill-hover: rgba(45, 47, 49, 0.95);
+    --gsp-bg-pill-active: rgba(60, 64, 67, 1);
+    --gsp-border-pill: rgba(255, 255, 255, 0.14);
+    --gsp-text-primary: #e3e3e3;
+    --gsp-text-secondary: #c4c7c5;
+    --gsp-text-muted: #8e918f;
+    --gsp-bg-card: #1e1f20;
+    --gsp-border-card: rgba(255, 255, 255, 0.12);
+    --gsp-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 1px 6px rgba(0, 0, 0, 0.3);
+    --gsp-accent: #8ab4f8;
+    --gsp-accent-rgb: 138, 180, 248;
+    --gsp-danger: #f28b82;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Toolbar container above Gemini input
+   -------------------------------------------------------------------------- */
+.gsp-toolbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 0 4px;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--gsp-font-family);
+  font-size: 13px;
+  user-select: none;
+  z-index: 50;
+  position: relative;
+}
+
+.gsp-toolbar-left,
+.gsp-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   Pill Buttons
+   -------------------------------------------------------------------------- */
+.gsp-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--gsp-pill-height);
+  padding: 0 14px;
+  background: var(--gsp-bg-pill);
+  border: 1px solid var(--gsp-border-pill);
+  border-radius: 9999px;
+  color: var(--gsp-text-primary);
+  font-family: var(--gsp-font-family);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.gsp-pill-btn:hover {
+  background: var(--gsp-bg-pill-hover);
+  border-color: rgba(var(--gsp-accent-rgb), 0.35);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.gsp-pill-btn:active {
+  background: var(--gsp-bg-pill-active);
+  transform: scale(0.97);
+}
+
+.gsp-pill-btn svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+/* Icon-only pill */
+.gsp-pill-icon {
+  padding: 0 10px;
+}
+
+.gsp-nav-group {
+  display: inline-flex;
+  align-items: center;
+  background: var(--gsp-bg-pill);
+  border: 1px solid var(--gsp-border-pill);
+  border-radius: 9999px;
+  height: var(--gsp-pill-height);
+  padding: 2px 4px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.gsp-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 26px;
+  border-radius: 9999px;
+  background: transparent;
+  border: none;
+  color: var(--gsp-text-primary);
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  outline: none;
+}
+
+.gsp-nav-btn:hover {
+  background: var(--gsp-bg-pill-hover);
+}
+
+.gsp-nav-btn:active {
+  transform: scale(0.92);
+}
+
+.gsp-nav-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* Optimize Sparkle Button */
+.gsp-btn-optimize {
+  background: var(--gsp-bg-pill);
+  position: relative;
+}
+
+.gsp-btn-optimize svg {
+  fill: #8ab4f8;
+}
+
+/* --------------------------------------------------------------------------
+   Usage Popover Card
+   -------------------------------------------------------------------------- */
+.gsp-usage-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.gsp-usage-popover {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  width: 250px;
+  background: var(--gsp-bg-card);
+  border: 1px solid var(--gsp-border-card);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--gsp-card-shadow);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+  z-index: 1000;
+  color: var(--gsp-text-primary);
+  font-family: var(--gsp-font-family);
+  backdrop-filter: blur(16px);
+}
+
+.gsp-usage-popover.gsp-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.gsp-usage-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13.5px;
+}
+
+.gsp-usage-label {
+  color: var(--gsp-text-secondary);
+}
+
+.gsp-usage-value {
+  font-weight: 600;
+  color: var(--gsp-text-primary);
+}
+
+.gsp-usage-divider {
+  height: 1px;
+  background: var(--gsp-border-card);
+  margin: 6px 0;
+}
+
+.gsp-usage-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--gsp-border-card);
+  font-size: 11.5px;
+  color: var(--gsp-text-muted);
+}
+
+.gsp-usage-refresh-btn {
+  background: none;
+  border: none;
+  color: var(--gsp-accent);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.gsp-usage-refresh-btn:hover {
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   // Prompt Autocomplete Menu
+   -------------------------------------------------------------------------- */
+.gsp-prompt-menu {
+  position: absolute;
+  width: 380px;
+  max-height: 320px;
+  background: var(--gsp-bg-card);
+  border: 1px solid var(--gsp-border-card);
+  border-radius: 16px;
+  box-shadow: var(--gsp-card-shadow);
+  z-index: 10000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--gsp-font-family);
+  animation: gsp-fade-in 0.15s ease-out;
+}
+
+@keyframes gsp-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.gsp-prompt-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--gsp-border-card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--gsp-text-muted);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.gsp-prompt-list {
+  overflow-y: auto;
+  max-height: 260px;
+  padding: 6px 0;
+  margin: 0;
+  list-style: none;
+}
+
+.gsp-prompt-item {
+  padding: 9px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  gap: 12px;
+}
+
+.gsp-prompt-item:hover,
+.gsp-prompt-item.gsp-selected {
+  background: var(--gsp-bg-pill-hover);
+}
+
+.gsp-prompt-item-left {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 2px;
+}
+
+.gsp-prompt-title {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--gsp-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gsp-prompt-desc {
+  font-size: 11.5px;
+  color: var(--gsp-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gsp-model-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(var(--gsp-accent-rgb), 0.12);
+  color: var(--gsp-accent);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Placeholder Filling Modal
+   -------------------------------------------------------------------------- */
+.gsp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  font-family: var(--gsp-font-family);
+  animation: gsp-backdrop-fade 0.15s ease-out;
+}
+
+@keyframes gsp-backdrop-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.gsp-modal {
+  width: 90%;
+  max-width: 480px;
+  background: var(--gsp-bg-card);
+  border: 1px solid var(--gsp-border-card);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--gsp-card-shadow);
+  color: var(--gsp-text-primary);
+  animation: gsp-modal-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes gsp-modal-pop {
+  from { transform: scale(0.94); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.gsp-modal-title {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.gsp-modal-desc {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  color: var(--gsp-text-secondary);
+}
+
+.gsp-input-group {
+  margin-bottom: 14px;
+}
+
+.gsp-input-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--gsp-text-secondary);
+  text-transform: capitalize;
+}
+
+.gsp-input-field {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--gsp-bg-pill);
+  border: 1px solid var(--gsp-border-pill);
+  border-radius: 10px;
+  font-family: var(--gsp-font-family);
+  font-size: 13.5px;
+  color: var(--gsp-text-primary);
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.gsp-input-field:focus {
+  border-color: var(--gsp-accent);
+  box-shadow: 0 0 0 2px rgba(var(--gsp-accent-rgb), 0.2);
+}
+
+.gsp-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.gsp-btn-primary {
+  background: var(--gsp-accent);
+  color: #ffffff;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 9999px;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.15s ease;
+}
+
+.gsp-btn-primary:hover {
+  opacity: 0.9;
+}
+
+.gsp-btn-danger {
+  background: var(--gsp-danger);
+  color: #ffffff;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 9999px;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.15s ease;
+}
+
+.gsp-btn-danger:hover {
+  opacity: 0.9;
+}
+
+.gsp-btn-secondary {
+  background: transparent;
+  color: var(--gsp-text-primary);
+  border: 1px solid var(--gsp-border-pill);
+  padding: 9px 18px;
+  border-radius: 9999px;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: background 0.15s ease;
+}
+
+.gsp-btn-secondary:hover {
+  background: var(--gsp-bg-pill-hover);
+}
+
+/* --------------------------------------------------------------------------
+   Bulk Delete Button in Sidebar
+   -------------------------------------------------------------------------- */
+.gsp-bulk-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-family: var(--gsp-font-family);
+  font-size: 12px;
+  color: var(--gsp-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: auto;
+}
+
+.gsp-bulk-delete-btn:hover {
+  background: rgba(217, 48, 37, 0.1);
+  color: var(--gsp-danger);
+  border-color: rgba(217, 48, 37, 0.2);
+}
+
+.gsp-progress-bar-container {
+  width: 100%;
+  height: 6px;
+  background: var(--gsp-bg-pill-hover);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 14px 0;
+}
+
+.gsp-progress-bar-fill {
+  height: 100%;
+  background: var(--gsp-danger);
+  width: 0%;
+  transition: width 0.2s ease;
+}
+
+/* --------------------------------------------------------------------------
+   Toasts / Notifications
+   -------------------------------------------------------------------------- */
+.gsp-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--gsp-bg-card);
+  color: var(--gsp-text-primary);
+  border: 1px solid var(--gsp-border-card);
+  box-shadow: var(--gsp-card-shadow);
+  padding: 10px 20px;
+  border-radius: 9999px;
+  font-family: var(--gsp-font-family);
+  font-size: 13.5px;
+  font-weight: 500;
+  z-index: 100000;
+  opacity: 0;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.gsp-toast.gsp-toast-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
