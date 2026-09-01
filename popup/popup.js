@@ -107,6 +107,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   function renderList() {
     promptsListEl.innerHTML = '';
 
@@ -120,7 +130,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       card.className = 'prompt-card';
       card.innerHTML = `
         <div class="prompt-card-header">
-          <span class="prompt-card-title">${p.title}</span>
+          <span class="prompt-card-title">${escapeHtml(p.title)}</span>
           <div class="prompt-card-actions">
             <button class="btn-icon btn-edit" title="Edit" data-idx="${idx}">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
@@ -134,9 +144,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             </button>
           </div>
         </div>
-        ${p.desc ? `<span class="prompt-card-desc">${p.desc}</span>` : ''}
+        ${p.desc ? `<span class="prompt-card-desc">${escapeHtml(p.desc)}</span>` : ''}
         <div class="prompt-card-meta">
-          <span class="prompt-badge">Model: ${getModelLabel(p.model)}</span>
+          <span class="prompt-badge">Model: ${escapeHtml(getModelLabel(p.model))}</span>
         </div>
       `;
 

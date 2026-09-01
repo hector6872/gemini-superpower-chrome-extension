@@ -101,7 +101,7 @@
       const requestId = 'req_' + Math.random().toString(36).substring(2, 9);
 
       const handler = (e) => {
-        if (e.data && e.data.type === 'GSP_DELETE_RPC_RESULT' && e.data.requestId === requestId) {
+        if (e.source === window && e.data && e.data.type === 'GSP_DELETE_RPC_RESULT' && e.data.requestId === requestId) {
           window.removeEventListener('message', handler);
           resolve(e.data.success);
         }

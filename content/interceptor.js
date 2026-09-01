@@ -165,6 +165,7 @@
 
   // Listen for RPC delete requests from isolated content script
   window.addEventListener('message', async (e) => {
+    if (e.source !== window) return;
     if (e.data && e.data.type === 'GSP_EXECUTE_DELETE_RPC') {
       const { conversationId, requestId } = e.data;
       const token = getXsrfToken();
