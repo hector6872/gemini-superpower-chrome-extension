@@ -348,8 +348,17 @@
     });
   }
 
+  let previousQuery = null;
+
   function renderPromptMenu(query, inputElement) {
-    currentQuery = (query || '').toLowerCase().trim();
+    const trimmedQuery = (query || '').toLowerCase().trim();
+    const queryChanged = (trimmedQuery !== previousQuery);
+    previousQuery = trimmedQuery;
+    currentQuery = trimmedQuery;
+
+    if (queryChanged) {
+      selectedIndex = 0;
+    }
 
     filteredPrompts = activePrompts.filter(p => {
       if (!currentQuery) return true;
@@ -358,7 +367,15 @@
              (p.desc && p.desc.toLowerCase().includes(currentQuery));
     });
 
-    filteredPrompts.sort((a, b) => a.title.localeCompare(b.title));
+    filteredPrompts.sort((a, b) => {
+      if (currentQuery) {
+        const aStarts = a.title.toLowerCase().startsWith(currentQuery);
+        const bStarts = b.title.toLowerCase().startsWith(currentQuery);
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+      }
+      return a.title.localeCompare(b.title);
+    });
 
     if (filteredPrompts.length === 0) {
       closePromptMenu();
@@ -421,6 +438,9 @@
       </div>
     `;
 
+    // Ensure selected item is in view
+    updateSelectedMenuItem();
+
     // Bind Edit Prompts button
     const editBtn = menuElement.querySelector('#gsp-btn-open-editor');
     if (editBtn) {
@@ -456,6 +476,8 @@
       menuElement.parentNode.removeChild(menuElement);
       menuElement = null;
     }
+    previousQuery = null;
+    selectedIndex = 0;
   }
 
   function togglePromptMenu() {
