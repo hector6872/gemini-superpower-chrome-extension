@@ -46,10 +46,12 @@
       console.debug('Error saving wide mode preference:', e);
     }
 
-    // Trigger window resize event so toolbar & layout immediately recalculate width
-    window.dispatchEvent(new Event('resize'));
-    setTimeout(() => window.dispatchEvent(new Event('resize')), 80);
-    setTimeout(() => window.dispatchEvent(new Event('resize')), 250);
+    // Sync toolbar width directly without firing global window resize events
+    const toolbar = document.getElementById('gsp-toolbar-root');
+    const inputCard = document.querySelector('rich-textarea, div[contenteditable="true"], textarea')?.closest('form, .input-area-container, [class*="input-box"]');
+    if (toolbar && inputCard && window.GSP?.syncToolbarWidth) {
+      window.GSP.syncToolbarWidth(toolbar, inputCard);
+    }
   }
 
   function toggleWideMode() {

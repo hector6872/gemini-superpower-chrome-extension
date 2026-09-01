@@ -635,25 +635,47 @@
 /* --------------------------------------------------------------------------
    Wide Mode (Full Width) Layout Overrides
    -------------------------------------------------------------------------- */
-body.gsp-wide-mode .conversation-container,
-body.gsp-wide-mode .chat-window,
-body.gsp-wide-mode .bottom-container,
-body.gsp-wide-mode .input-area-container,
-body.gsp-wide-mode form.input-area,
-body.gsp-wide-mode .input-box,
-body.gsp-wide-mode [class*="chat-input-container"],
-body.gsp-wide-mode [class*="conversation-turn"],
-body.gsp-wide-mode [class*="response-container"],
-body.gsp-wide-mode [class*="query-container"],
-body.gsp-wide-mode user-query,
-body.gsp-wide-mode model-response,
-body.gsp-wide-mode .user-query-container,
-body.gsp-wide-mode .model-response-container,
-body.gsp-wide-mode .response-container-content,
-body.gsp-wide-mode .message-content,
-body.gsp-wide-mode .presented-content,
-body.gsp-wide-mode .main-content,
-body.gsp-wide-mode main {
+/* Explicitly isolate sidebar and all its children from any wide mode effects */
+body.gsp-wide-mode mat-sidenav,
+body.gsp-wide-mode side-nav,
+body.gsp-wide-mode .side-nav,
+body.gsp-wide-mode .sidebar,
+body.gsp-wide-mode [class*="side-nav"],
+body.gsp-wide-mode [class*="sidebar"],
+body.gsp-wide-mode nav,
+body.gsp-wide-mode aside,
+body.gsp-wide-mode .navigation,
+body.gsp-wide-mode mat-sidenav *,
+body.gsp-wide-mode side-nav *,
+body.gsp-wide-mode .side-nav *,
+body.gsp-wide-mode .sidebar *,
+body.gsp-wide-mode [class*="side-nav"] *,
+body.gsp-wide-mode [class*="sidebar"] *,
+body.gsp-wide-mode nav *,
+body.gsp-wide-mode aside * {
+  max-width: initial;
+  margin-left: initial;
+  margin-right: initial;
+}
+
+/* Expand only inner chat content and prompt cards inside main chat container */
+body.gsp-wide-mode main .conversation-container,
+body.gsp-wide-mode main .chat-window,
+body.gsp-wide-mode main .bottom-container,
+body.gsp-wide-mode main .input-area-container,
+body.gsp-wide-mode main form.input-area,
+body.gsp-wide-mode main .input-box,
+body.gsp-wide-mode main [class*="chat-input-container"],
+body.gsp-wide-mode main [class*="conversation-turn"],
+body.gsp-wide-mode main [class*="response-container"],
+body.gsp-wide-mode main [class*="query-container"],
+body.gsp-wide-mode main user-query,
+body.gsp-wide-mode main model-response,
+body.gsp-wide-mode main .user-query-container,
+body.gsp-wide-mode main .model-response-container,
+body.gsp-wide-mode main .response-container-content,
+body.gsp-wide-mode main .message-content,
+body.gsp-wide-mode main .presented-content {
   max-width: 96% !important;
   width: 100% !important;
   margin-left: auto !important;
@@ -661,14 +683,14 @@ body.gsp-wide-mode main {
 }
 
 /* Ensure inner markdown, code blocks, paragraphs in model responses expand fully */
-body.gsp-wide-mode model-response .markdown,
-body.gsp-wide-mode model-response .message-content,
-body.gsp-wide-mode model-response .presented-content,
-body.gsp-wide-mode model-response structured-content,
-body.gsp-wide-mode model-response [class*="content"],
-body.gsp-wide-mode .model-response-container .markdown,
-body.gsp-wide-mode .model-response-container [class*="content"],
-body.gsp-wide-mode .response-container [class*="content"] {
+body.gsp-wide-mode main model-response .markdown,
+body.gsp-wide-mode main model-response .message-content,
+body.gsp-wide-mode main model-response .presented-content,
+body.gsp-wide-mode main model-response structured-content,
+body.gsp-wide-mode main model-response [class*="content"],
+body.gsp-wide-mode main .model-response-container .markdown,
+body.gsp-wide-mode main .model-response-container [class*="content"],
+body.gsp-wide-mode main .response-container [class*="content"] {
   max-width: 100% !important;
   width: 100% !important;
 }
