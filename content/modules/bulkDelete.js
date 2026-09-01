@@ -23,38 +23,23 @@
   }
 
   function findRecentSectionHeader() {
-    const sidebars = document.querySelectorAll('side-nav, mat-sidenav, nav, aside, [class*="side-nav"], [class*="sidebar"], [data-test-id*="sidebar"]');
-    
-    for (const sb of sidebars) {
-      const candidates = sb.querySelectorAll('h2, h3, h4, span, div, p, [class*="title"], [class*="header"]');
-      for (const el of candidates) {
-        const text = (el.textContent || '').trim().toLowerCase();
-        if (text === 'recent' || text === 'recents' || text === 'recientes' || text === 'chats recientes' || text === 'recent chats' || text === 'conversaciones recientes') {
-          if (el.offsetHeight > 0 && el.children.length <= 2) {
-            return el;
-          }
-        }
-      }
-    }
-
-    const allLeftElements = Array.from(document.querySelectorAll('h2, h3, h4, span, div'));
-    for (const el of allLeftElements) {
-      const rect = el.getBoundingClientRect();
-      if (rect.left < 360 && rect.top < 400 && rect.width > 0 && rect.height > 0) {
-        const text = (el.textContent || '').trim().toLowerCase();
-        if (text === 'recent' || text === 'recents' || text === 'recientes' || text === 'chats recientes' || text === 'recent chats') {
-          if (el.children.length <= 2) {
-            return el;
-          }
-        }
-      }
-    }
-
+    // 1. Structural match: header immediately preceding conversation list
     const links = getConversationLinks();
     if (links.length > 0) {
       const listContainer = links[0].closest('mat-nav-list, mat-list, [role="list"], .conversation-list, [class*="list"]') || links[0].parentElement;
       if (listContainer && listContainer.previousElementSibling) {
         return listContainer.previousElementSibling;
+      }
+    }
+
+    // 2. Sidebar header container
+    const sidebars = document.querySelectorAll('side-nav, mat-sidenav, nav, aside, [class*="side-nav"], [class*="sidebar"], [data-test-id*="sidebar"]');
+    for (const sb of sidebars) {
+      const candidates = sb.querySelectorAll('h2, h3, h4, [class*="title"], [class*="header"]');
+      for (const el of candidates) {
+        if (el.offsetHeight > 0 && el.children.length <= 2) {
+          return el;
+        }
       }
     }
 
@@ -161,9 +146,13 @@
 
       const overlayMenuItems = Array.from(document.querySelectorAll('.cdk-overlay-container [role="menuitem"], .cdk-overlay-pane button, [role="menu"] [role="menuitem"], [role="menu"] button, .mat-mdc-menu-item'));
       const deleteOption = overlayMenuItems.find(el => {
+        // 1. Vector SVG path or mat-icon for trashcan (language-agnostic)
+        const hasDeleteIcon = el.querySelector('svg path[d*="M16 9"], svg path[d*="M6 19"], svg path[d*="M15 4"]') ||
+                              (el.querySelector('mat-icon') && (el.querySelector('mat-icon').textContent || '').includes('delete'));
+        if (hasDeleteIcon) return true;
         const t = (el.textContent || '').toLowerCase().trim();
         return t.includes('delete') || t.includes('eliminar') || t.includes('borrar') || t.includes('supprimer') || t.includes('löschen');
-      });
+      }) || overlayMenuItems[overlayMenuItems.length - 1];
 
       if (!deleteOption) {
         document.body.click();
@@ -173,12 +162,14 @@
       deleteOption.click();
       await new Promise(r => setTimeout(r, 140));
 
-      const dialogConfirmBtn = Array.from(document.querySelectorAll('.cdk-overlay-container mat-dialog-actions button, .cdk-overlay-pane mat-dialog-container button, [role="dialog"] button, dialog button')).find(b => {
+      const dialogButtons = Array.from(document.querySelectorAll('.cdk-overlay-container mat-dialog-actions button, .cdk-overlay-pane mat-dialog-container button, [role="dialog"] button, dialog button'));
+      const dialogConfirmBtn = dialogButtons.find(b => {
+        if (b.classList.contains('mat-warn') || b.classList.contains('mat-primary') || b.getAttribute('color') === 'warn') return true;
         const t = (b.textContent || '').toLowerCase().trim();
         const isConfirm = t.includes('delete') || t.includes('eliminar') || t.includes('borrar') || t.includes('confirm') || t.includes('yes') || t.includes('sí') || t.includes('si');
         const isCancel = t.includes('cancel') || t.includes('cancelar') || t.includes('no');
         return isConfirm && !isCancel;
-      });
+      }) || dialogButtons[dialogButtons.length - 1];
 
       if (dialogConfirmBtn) {
         dialogConfirmBtn.click();
