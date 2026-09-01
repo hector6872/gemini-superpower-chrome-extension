@@ -52,3 +52,15 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
 4. Select the project directory:
    `/Users/hector.de.isidro/Developer/gemini-superpower-chrome-extension`
 5. Open or refresh [https://gemini.google.com/](https://gemini.google.com/) to start using your new superpowers!
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome! Please check out the [Contributing Guidelines](CONTRIBUTING.md) before submitting a pull request.
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
