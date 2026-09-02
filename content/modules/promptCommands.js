@@ -529,8 +529,91 @@
       .replace(/'/g, '&#039;');
   }
 
+  function validateAndSanitizePromptsJSON(jsonStringOrObject) {
+    let parsed;
+    if (typeof jsonStringOrObject === 'string') {
+      if (jsonStringOrObject.length > 1024 * 1024) {
+        throw new Error('File size exceeds the 1MB limit.');
+      }
+      try {
+        parsed = JSON.parse(jsonStringOrObject);
+      } catch (e) {
+        throw new Error('Invalid JSON syntax.');
+      }
+    } else if (typeof jsonStringOrObject === 'object' && jsonStringOrObject !== null) {
+      parsed = jsonStringOrObject;
+    } else {
+      throw new Error('Invalid data type.');
+    }
+
+    let rawList = [];
+    if (Array.isArray(parsed)) {
+      rawList = parsed;
+    } else if (parsed && Array.isArray(parsed.prompts)) {
+      rawList = parsed.prompts;
+    } else {
+      throw new Error('JSON must contain an array of prompts.');
+    }
+
+    if (rawList.length === 0) {
+      throw new Error('No prompts found in the imported file.');
+    }
+
+    if (rawList.length > 200) {
+      throw new Error('Too many prompts in file (maximum 200 allowed).');
+    }
+
+    const sanitizedPrompts = [];
+    const allowedModels = new Set(['keep', 'flash-lite', 'flash', 'pro']);
+
+    for (let i = 0; i < rawList.length; i++) {
+      const item = rawList[i];
+      if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
+
+      let rawTitle = String(item.title || '').trim();
+      rawTitle = rawTitle.replace(/^\/+/, '');
+      const cleanTitle = rawTitle.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40);
+
+      if (!cleanTitle) continue;
+
+      let cleanDesc = '';
+      if (item.desc !== undefined && item.desc !== null) {
+        cleanDesc = String(item.desc).trim().slice(0, 200);
+      }
+
+      let rawModel = String(item.model || 'keep').toLowerCase().trim();
+      if (rawModel === 'flash_lite') rawModel = 'flash-lite';
+      const cleanModel = allowedModels.has(rawModel) ? rawModel : 'keep';
+
+      let rawTemplate = '';
+      if (item.template !== undefined && item.template !== null) {
+        rawTemplate = String(item.template).trim().slice(0, 20000);
+      }
+
+      if (!rawTemplate) continue;
+
+      const cleanId = typeof item.id === 'string' && /^[a-zA-Z0-9_-]{1,60}$/.test(item.id)
+        ? item.id
+        : `cmd_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+      sanitizedPrompts.push({
+        id: cleanId,
+        title: cleanTitle,
+        desc: cleanDesc,
+        model: cleanModel,
+        template: rawTemplate
+      });
+    }
+
+    if (sanitizedPrompts.length === 0) {
+      throw new Error('No valid prompt commands found to import.');
+    }
+
+    return sanitizedPrompts;
+  }
+
   function renderModalContent(formPrompt = null) {
-    const t = window.GSP?.t || ((k) => k);
+    const t = window.GSP?.t || ((k, p) => k);
     let promptRowsHtml = '';
     const sortedPrompts = [...activePrompts].sort((a, b) => a.title.localeCompare(b.title));
     sortedPrompts.forEach(p => {
@@ -555,13 +638,30 @@
 
     modal.innerHTML = `
       <div class="gsp-modal-header">
-        <h3 class="gsp-modal-title">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-            <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
-          </svg>
-          <span>// ${t('manager_title')}</span>
-        </h3>
-        <button type="button" class="gsp-modal-close-btn" id="gsp-btn-close-modal">✕</button>
+        <div class="gsp-modal-header-left">
+          <h3 class="gsp-modal-title">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+            </svg>
+            <span>// ${t('manager_title')}</span>
+          </h3>
+        </div>
+        <div class="gsp-modal-header-actions">
+          <button type="button" class="gsp-btn-header-action" id="gsp-btn-export-json" title="${t('export_prompts_title')}">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+            </svg>
+            <span>${t('btn_export')}</span>
+          </button>
+          <button type="button" class="gsp-btn-header-action" id="gsp-btn-import-json" title="${t('import_prompts_title')}">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+              <path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/>
+            </svg>
+            <span>${t('btn_import')}</span>
+          </button>
+          <input type="file" id="gsp-import-file-input" accept=".json,application/json" style="display: none;" />
+          <button type="button" class="gsp-modal-close-btn" id="gsp-btn-close-modal">✕</button>
+        </div>
       </div>
 
       <div class="gsp-manager-container">
@@ -619,6 +719,95 @@
 
       modal.querySelector('#gsp-btn-new-prompt').addEventListener('click', () => {
         renderModalContent(null);
+      });
+
+      // Export JSON handler
+      modal.querySelector('#gsp-btn-export-json').addEventListener('click', () => {
+        const exportData = {
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          prompts: activePrompts
+        };
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `gemini-prompts-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // Import JSON handler
+      const importInput = modal.querySelector('#gsp-import-file-input');
+      modal.querySelector('#gsp-btn-import-json').addEventListener('click', () => {
+        importInput.value = '';
+        importInput.click();
+      });
+
+      importInput.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 1024 * 1024) {
+          alert(t('import_error_msg', { error: 'File size exceeds 1MB limit.' }));
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+          try {
+            const sanitized = validateAndSanitizePromptsJSON(evt.target.result);
+
+            if (!confirm(t('confirm_import_prompts', { count: sanitized.length }))) {
+              return;
+            }
+
+            const existingMap = new Map(activePrompts.map(p => [p.title.toLowerCase(), p]));
+            let updatedCount = 0;
+            let identicalCount = 0;
+            const addedPrompts = [];
+
+            sanitized.forEach(p => {
+              const key = p.title.toLowerCase();
+              const existing = existingMap.get(key);
+              if (existing) {
+                const isIdentical = (existing.desc || '') === (p.desc || '') &&
+                                    (existing.model || 'keep') === (p.model || 'keep') &&
+                                    (existing.template || '') === (p.template || '');
+                if (isIdentical) {
+                  identicalCount++;
+                } else {
+                  updatedCount++;
+                  existingMap.set(key, { ...p, id: existing.id || p.id });
+                }
+              } else {
+                addedPrompts.push('//' + p.title);
+                existingMap.set(key, p);
+              }
+            });
+
+            activePrompts = Array.from(existingMap.values());
+            await savePrompts();
+            renderModalContent(null);
+
+            if (addedPrompts.length > 0) {
+              alert(t('import_result_summary', {
+                added: addedPrompts.length,
+                addedList: addedPrompts.join(', '),
+                updated: updatedCount,
+                identical: identicalCount
+              }));
+            } else {
+              alert(t('import_result_no_new', {
+                updated: updatedCount,
+                identical: identicalCount
+              }));
+            }
+          } catch (err) {
+            alert(t('import_error_msg', { error: err.message || 'Invalid format' }));
+          }
+        };
+        reader.readAsText(file);
       });
 
       modal.querySelector('#gsp-btn-reset-defaults').addEventListener('click', async () => {

@@ -443,6 +443,45 @@ body[class*="dark"],
   border-bottom: 1px solid var(--gsp-border-card);
 }
 
+.gsp-modal-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.gsp-modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gsp-btn-header-action {
+  background: var(--gsp-bg-pill);
+  border: 1px solid var(--gsp-border-pill);
+  color: var(--gsp-text-secondary);
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.gsp-btn-header-action:hover {
+  color: var(--gsp-text-primary);
+  background: var(--gsp-bg-pill-hover);
+  border-color: rgba(var(--gsp-accent-rgb), 0.4);
+}
+
+.gsp-btn-header-action svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+}
+
 .gsp-modal-close-btn {
   background: none;
   border: none;

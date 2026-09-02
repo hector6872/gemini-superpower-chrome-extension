@@ -225,9 +225,97 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  function validateAndSanitizePromptsJSON(jsonStringOrObject) {
+    let parsed;
+    if (typeof jsonStringOrObject === 'string') {
+      if (jsonStringOrObject.length > 1024 * 1024) {
+        throw new Error('File size exceeds the 1MB limit.');
+      }
+      try {
+        parsed = JSON.parse(jsonStringOrObject);
+      } catch (e) {
+        throw new Error('Invalid JSON syntax.');
+      }
+    } else if (typeof jsonStringOrObject === 'object' && jsonStringOrObject !== null) {
+      parsed = jsonStringOrObject;
+    } else {
+      throw new Error('Invalid data type.');
+    }
+
+    let rawList = [];
+    if (Array.isArray(parsed)) {
+      rawList = parsed;
+    } else if (parsed && Array.isArray(parsed.prompts)) {
+      rawList = parsed.prompts;
+    } else {
+      throw new Error('JSON must contain an array of prompts.');
+    }
+
+    if (rawList.length === 0) {
+      throw new Error('No prompts found in the imported file.');
+    }
+
+    if (rawList.length > 200) {
+      throw new Error('Too many prompts in file (maximum 200 allowed).');
+    }
+
+    const sanitizedPrompts = [];
+    const allowedModels = new Set(['keep', 'flash-lite', 'flash', 'pro']);
+
+    for (let i = 0; i < rawList.length; i++) {
+      const item = rawList[i];
+      if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
+
+      let rawTitle = String(item.title || '').trim();
+      rawTitle = rawTitle.replace(/^\/+/, '');
+      const cleanTitle = rawTitle.toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40);
+
+      if (!cleanTitle) continue;
+
+      let cleanDesc = '';
+      if (item.desc !== undefined && item.desc !== null) {
+        cleanDesc = String(item.desc).trim().slice(0, 200);
+      }
+
+      let rawModel = String(item.model || 'keep').toLowerCase().trim();
+      if (rawModel === 'flash_lite') rawModel = 'flash-lite';
+      const cleanModel = allowedModels.has(rawModel) ? rawModel : 'keep';
+
+      let rawTemplate = '';
+      if (item.template !== undefined && item.template !== null) {
+        rawTemplate = String(item.template).trim().slice(0, 20000);
+      }
+
+      if (!rawTemplate) continue;
+
+      const cleanId = typeof item.id === 'string' && /^[a-zA-Z0-9_-]{1,60}$/.test(item.id)
+        ? item.id
+        : `cmd_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+      sanitizedPrompts.push({
+        id: cleanId,
+        title: cleanTitle,
+        desc: cleanDesc,
+        model: cleanModel,
+        template: rawTemplate
+      });
+    }
+
+    if (sanitizedPrompts.length === 0) {
+      throw new Error('No valid prompt commands found to import.');
+    }
+
+    return sanitizedPrompts;
+  }
+
   // Export prompts to JSON
   btnExport.addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(prompts, null, 2)], { type: 'application/json' });
+    const exportData = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      prompts: prompts
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -240,20 +328,56 @@ document.addEventListener('DOMContentLoaded', async () => {
   importFile.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > 1024 * 1024) {
+      alert('File size exceeds the 1MB limit.');
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = async (event) => {
       try {
-        const imported = JSON.parse(event.target.result);
-        if (Array.isArray(imported)) {
-          prompts = imported;
-          await savePrompts();
-          renderList();
-          alert('Prompt templates imported successfully!');
+        const sanitized = validateAndSanitizePromptsJSON(event.target.result);
+
+        if (!confirm(`Import ${sanitized.length} prompt command(s) from this file?\n\nExisting commands with matching names will be updated and new ones will be added.`)) {
+          return;
+        }
+
+        const existingMap = new Map(prompts.map(p => [p.title.toLowerCase(), p]));
+        let updatedCount = 0;
+        let identicalCount = 0;
+        const addedPrompts = [];
+
+        sanitized.forEach(p => {
+          const key = p.title.toLowerCase();
+          const existing = existingMap.get(key);
+          if (existing) {
+            const isIdentical = (existing.desc || '') === (p.desc || '') &&
+                                (existing.model || 'keep') === (p.model || 'keep') &&
+                                (existing.template || '') === (p.template || '');
+            if (isIdentical) {
+              identicalCount++;
+            } else {
+              updatedCount++;
+              existingMap.set(key, { ...p, id: existing.id || p.id });
+            }
+          } else {
+            addedPrompts.push('//' + p.title);
+            existingMap.set(key, p);
+          }
+        });
+
+        prompts = Array.from(existingMap.values());
+        await savePrompts();
+        renderList();
+
+        if (addedPrompts.length > 0) {
+          alert(`Import completed successfully!\n\n• ${addedPrompts.length} command(s) added: ${addedPrompts.join(', ')}\n• ${updatedCount} command(s) updated\n• ${identicalCount} command(s) unchanged (identical)`);
         } else {
-          alert('Invalid file format.');
+          alert(`Import completed successfully!\n\n• 0 new commands added\n• ${updatedCount} command(s) updated\n• ${identicalCount} command(s) unchanged (identical)`);
         }
       } catch (err) {
-        alert('Error reading JSON file: ' + err.message);
+        alert('Failed to import prompts: ' + (err.message || 'Invalid format'));
       }
     };
     reader.readAsText(file);
