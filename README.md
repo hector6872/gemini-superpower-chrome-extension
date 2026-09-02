@@ -36,7 +36,8 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
    - Type `//` inside the chat box or click `// Prompts` to open the autocomplete command menu (`//doc`, `//explain`, `//fix`, `//optimize`, `//review`, `//summary`, `//test`, `//translate`).
    - Type `//fix` + `Space`, `Tab`, or `Enter` to instantly prepend the prompt template at the beginning of your text with the cursor positioned at the end.
    - **Integrated Editor**: Click `✏️ Edit Prompts` in the menu header to add, customize, or delete single-word commands right within Gemini.
-   - **Auto-Model Switcher**: Assign specific models (*Gemini Flash Lite*, *Gemini Flash*, *Gemini Pro*, or *No change*) to any command.
+   - **Auto-Model Switcher**: Assign specific models (*`⚡ Flash Lite`*, *`Flash`*, *`💎 Pro`*, or *No change*) to any command.
+   - **Secure JSON Import & Export**: Easily backup or share your prompt library as a JSON file. Includes strict input sanitization against XSS/injections, pre-import confirmation, and a granular summary reporting newly added, updated, and identical commands.
 
 5. **Smart Auto-Focus**:
    - The chat prompt input automatically gets focused whenever you open the page or switch back to the Gemini tab/window.
