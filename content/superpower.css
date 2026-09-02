@@ -181,18 +181,23 @@ body[class*="dark"],
 }
 
 .gsp-btn-nav-top {
-  width: 0;
-  opacity: 0;
-  pointer-events: none;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  transition: width 0.2s ease, opacity 0.2s ease;
 }
 
 .gsp-btn-nav-top.gsp-nav-top-visible {
-  width: 28px;
-  opacity: 1;
-  pointer-events: auto;
+  width: 28px !important;
+  min-width: 28px !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 .gsp-nav-btn:hover:not(:disabled) {
@@ -1156,8 +1161,13 @@ body.gsp-silent-deleting [role="menu"] {
   }
 
   .gsp-nav-btn {
-    width: 26px !important;
+    width: 26px;
     height: 26px !important;
+  }
+
+  .gsp-btn-nav-top.gsp-nav-top-visible {
+    width: 26px !important;
+    min-width: 26px !important;
   }
 
   .gsp-nav-btn svg {

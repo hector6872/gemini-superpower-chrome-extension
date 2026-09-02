@@ -23,53 +23,42 @@
   }
 
   function findRecentSectionHeader() {
-    const links = getConversationLinks();
-    if (links.length === 0) return null;
-
-    const firstLink = links[0];
-    const firstLinkRect = firstLink.getBoundingClientRect();
-    const sidebar = firstLink.closest('side-nav, mat-sidenav, nav, aside, [class*="side-nav"], [class*="sidebar"]') || document.body;
-
-    // 1. Check for specific recent section headers near the first conversation
-    const candidates = Array.from(sidebar.querySelectorAll(
-      '[data-test-id*="recent" i], [class*="recent" i], [aria-label*="recent" i], [aria-label*="reciente" i], h2, h3, h4, [class*="section-header"], [class*="header"], [class*="title"], [class*="label"], [class*="heading"]'
+    // Look in all sidebars or drawers in DOM
+    const sidebars = Array.from(document.querySelectorAll(
+      'side-nav, mat-sidenav, nav, aside, [class*="side-nav"], [class*="sidebar"], [class*="drawer"], [data-test-id*="sidebar"]'
     ));
 
-    const validCandidates = candidates.filter(el => {
-      if (el.offsetHeight === 0 || el.offsetParent === null) return false;
-      // Exclude top-level navigation, logos, buttons, and conversation items themselves
+    // Find the currently visible sidebar (or fallback to any found sidebar or document.body)
+    const activeSidebar = sidebars.find(sb => sb.offsetHeight > 0 && sb.offsetWidth > 0) || sidebars[0] || document.body;
+
+    // 1. Direct text/attribute match for "Recent" header inside sidebar
+    const allHeaders = Array.from(activeSidebar.querySelectorAll(
+      '[data-test-id*="recent" i], [class*="recent" i], [aria-label*="recent" i], [aria-label*="reciente" i], [aria-label*="récent" i], h2, h3, h4, [class*="section-header" i], [class*="header" i], [class*="title" i], [class*="label" i], [class*="heading" i], [role="heading"]'
+    ));
+
+    const explicitRecent = allHeaders.find(el => {
+      if (el.offsetHeight === 0 && el.offsetParent === null) return false;
       if (el.closest('[class*="brand" i], [class*="logo" i], [class*="new-chat" i], button, a, [role="listitem"]')) return false;
-      
-      const rect = el.getBoundingClientRect();
-      // Must be above the first conversation link, but close to it (within 140px)
-      return rect.bottom <= firstLinkRect.top + 20 && rect.top >= firstLinkRect.top - 140;
+      const text = (el.textContent || '').toLowerCase().trim();
+      const attr = (el.className + ' ' + (el.getAttribute('data-test-id') || '') + ' ' + (el.getAttribute('aria-label') || '')).toLowerCase();
+      return text === 'recent' || text === 'recientes' || text === 'récents' || text === 'letzte' || text === 'recenti' ||
+             text.includes('recent') || text.includes('reciente') || text.includes('récent') || attr.includes('recent');
     });
 
-    if (validCandidates.length > 0) {
-      // Prioritize elements with 'recent' in text, class, or attribute
-      const recentNamed = validCandidates.find(el => {
-        const text = (el.textContent || '').toLowerCase().trim();
-        const attr = (el.className + ' ' + (el.getAttribute('data-test-id') || '')).toLowerCase();
-        return text.includes('recent') || text.includes('reciente') || text.includes('récent') || text.includes('letzte') || attr.includes('recent');
-      });
-      if (recentNamed) return recentNamed;
-
-      // Otherwise pick the candidate closest to the first link
-      validCandidates.sort((a, b) => {
-        const distA = Math.abs(firstLinkRect.top - a.getBoundingClientRect().bottom);
-        const distB = Math.abs(firstLinkRect.top - b.getBoundingClientRect().bottom);
-        return distA - distB;
-      });
-      return validCandidates[0];
+    if (explicitRecent) {
+      return explicitRecent;
     }
 
-    // 2. Structural previousElementSibling of list container
-    const listContainer = firstLink.closest('mat-nav-list, mat-list, [role="list"], .conversation-list, [class*="list"]');
-    if (listContainer && listContainer.previousElementSibling) {
-      const prev = listContainer.previousElementSibling;
-      const rect = prev.getBoundingClientRect();
-      if (rect.bottom <= firstLinkRect.top + 20 && rect.top >= firstLinkRect.top - 140) {
-        return prev;
+    // 2. Proximity match to the first conversation link
+    const links = getConversationLinks();
+    if (links.length > 0) {
+      const firstLink = links[0];
+      const listContainer = firstLink.closest('mat-nav-list, mat-list, [role="list"], .conversation-list, [class*="list"]') || firstLink.parentElement;
+      if (listContainer && listContainer.previousElementSibling) {
+        const prev = listContainer.previousElementSibling;
+        if (!prev.closest('[class*="brand" i], [class*="logo" i], [class*="new-chat" i], button, a')) {
+          return prev;
+        }
       }
     }
 
@@ -77,10 +66,17 @@
   }
 
   function injectBulkDeleteButton() {
-    if (document.getElementById('gsp-bulk-delete-btn')) return;
+    const existingBtn = document.getElementById('gsp-bulk-delete-btn');
+    if (existingBtn && existingBtn.isConnected && existingBtn.offsetParent !== null) {
+      return;
+    }
 
     const recentHeader = findRecentSectionHeader();
     if (!recentHeader) return;
+
+    if (existingBtn) {
+      existingBtn.remove();
+    }
 
     if (recentHeader.querySelector('#gsp-bulk-delete-btn')) return;
     const t = window.GSP?.t || ((k) => k);
