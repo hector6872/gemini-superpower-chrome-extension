@@ -19,9 +19,13 @@
     </svg>
   `;
 
+  function isDesktop() {
+    return window.innerWidth > 768;
+  }
+
   function setWideMode(enable) {
     isWideMode = enable;
-    if (isWideMode) {
+    if (isWideMode && isDesktop()) {
       document.body.classList.add('gsp-wide-mode');
       document.documentElement.classList.add('gsp-wide-mode');
     } else {
@@ -73,6 +77,12 @@
   }
 
   function updateButtonPosition(btn) {
+    if (!isDesktop()) {
+      btn.style.display = 'none';
+      return;
+    }
+    btn.style.display = 'inline-flex';
+
     const overflowBtn = findOverflowButton();
     if (overflowBtn && overflowBtn.offsetParent !== null) {
       const rect = overflowBtn.getBoundingClientRect();
@@ -127,6 +137,7 @@
 
     setInterval(injectWideModeButton, 1000);
     window.addEventListener('resize', () => {
+      setWideMode(isWideMode);
       const btn = document.getElementById('gsp-btn-wide-mode');
       if (btn) updateButtonPosition(btn);
     });

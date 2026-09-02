@@ -41,6 +41,14 @@
 
   function syncToolbarWidth(toolbar, inputCard) {
     if (!toolbar || !inputCard) return;
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      toolbar.style.width = '100%';
+      toolbar.style.maxWidth = '100%';
+      toolbar.style.marginLeft = '0';
+      toolbar.style.marginRight = '0';
+      return;
+    }
     const rect = inputCard.getBoundingClientRect();
     if (rect.width > 0) {
       toolbar.style.width = `${rect.width}px`;

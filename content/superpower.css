@@ -1051,73 +1051,124 @@ body.gsp-silent-deleting [role="menu"] {
 }
 
 /* --------------------------------------------------------------------------
-   Wide Mode (Full Width) Layout Overrides
+   Wide Mode (Full Width) Layout Overrides (Desktop Only)
    -------------------------------------------------------------------------- */
-/* Explicitly isolate sidebar and all its children from any wide mode effects */
-body.gsp-wide-mode mat-sidenav,
-body.gsp-wide-mode side-nav,
-body.gsp-wide-mode .side-nav,
-body.gsp-wide-mode .sidebar,
-body.gsp-wide-mode [class*="side-nav"],
-body.gsp-wide-mode [class*="sidebar"],
-body.gsp-wide-mode nav,
-body.gsp-wide-mode aside,
-body.gsp-wide-mode .navigation,
-body.gsp-wide-mode mat-sidenav *,
-body.gsp-wide-mode side-nav *,
-body.gsp-wide-mode .side-nav *,
-body.gsp-wide-mode .sidebar *,
-body.gsp-wide-mode [class*="side-nav"] *,
-body.gsp-wide-mode [class*="sidebar"] *,
-body.gsp-wide-mode nav *,
-body.gsp-wide-mode aside * {
-  max-width: initial;
-  margin-left: initial;
-  margin-right: initial;
+@media (min-width: 769px) {
+  /* Explicitly isolate sidebar and all its children from any wide mode effects */
+  body.gsp-wide-mode mat-sidenav,
+  body.gsp-wide-mode side-nav,
+  body.gsp-wide-mode .side-nav,
+  body.gsp-wide-mode .sidebar,
+  body.gsp-wide-mode [class*="side-nav"],
+  body.gsp-wide-mode [class*="sidebar"],
+  body.gsp-wide-mode nav,
+  body.gsp-wide-mode aside,
+  body.gsp-wide-mode .navigation,
+  body.gsp-wide-mode mat-sidenav *,
+  body.gsp-wide-mode side-nav *,
+  body.gsp-wide-mode .side-nav *,
+  body.gsp-wide-mode .sidebar *,
+  body.gsp-wide-mode [class*="side-nav"] *,
+  body.gsp-wide-mode [class*="sidebar"] *,
+  body.gsp-wide-mode nav *,
+  body.gsp-wide-mode aside * {
+    max-width: initial;
+    margin-left: initial;
+    margin-right: initial;
+  }
+
+  /* Expand only inner chat content and prompt cards inside main chat container */
+  body.gsp-wide-mode main .conversation-container,
+  body.gsp-wide-mode main .chat-window,
+  body.gsp-wide-mode main .bottom-container,
+  body.gsp-wide-mode main .input-area-container,
+  body.gsp-wide-mode main form.input-area,
+  body.gsp-wide-mode main .input-box,
+  body.gsp-wide-mode main [class*="chat-input-container"],
+  body.gsp-wide-mode main [class*="conversation-turn"],
+  body.gsp-wide-mode main [class*="response-container"],
+  body.gsp-wide-mode main [class*="query-container"],
+  body.gsp-wide-mode main user-query,
+  body.gsp-wide-mode main model-response,
+  body.gsp-wide-mode main .user-query-container,
+  body.gsp-wide-mode main .model-response-container,
+  body.gsp-wide-mode main .response-container-content,
+  body.gsp-wide-mode main .message-content,
+  body.gsp-wide-mode main .presented-content {
+    max-width: 96% !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  /* Ensure inner markdown, code blocks, paragraphs in model responses expand fully */
+  body.gsp-wide-mode main model-response .markdown,
+  body.gsp-wide-mode main model-response .message-content,
+  body.gsp-wide-mode main model-response .presented-content,
+  body.gsp-wide-mode main model-response structured-content,
+  body.gsp-wide-mode main model-response [class*="content"],
+  body.gsp-wide-mode main .model-response-container .markdown,
+  body.gsp-wide-mode main .model-response-container [class*="content"],
+  body.gsp-wide-mode main .response-container [class*="content"] {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  body.gsp-wide-mode .gsp-toolbar-container {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 auto 8px auto !important;
+  }
 }
 
-/* Expand only inner chat content and prompt cards inside main chat container */
-body.gsp-wide-mode main .conversation-container,
-body.gsp-wide-mode main .chat-window,
-body.gsp-wide-mode main .bottom-container,
-body.gsp-wide-mode main .input-area-container,
-body.gsp-wide-mode main form.input-area,
-body.gsp-wide-mode main .input-box,
-body.gsp-wide-mode main [class*="chat-input-container"],
-body.gsp-wide-mode main [class*="conversation-turn"],
-body.gsp-wide-mode main [class*="response-container"],
-body.gsp-wide-mode main [class*="query-container"],
-body.gsp-wide-mode main user-query,
-body.gsp-wide-mode main model-response,
-body.gsp-wide-mode main .user-query-container,
-body.gsp-wide-mode main .model-response-container,
-body.gsp-wide-mode main .response-container-content,
-body.gsp-wide-mode main .message-content,
-body.gsp-wide-mode main .presented-content {
-  max-width: 96% !important;
-  width: 100% !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-}
+/* --------------------------------------------------------------------------
+   Mobile Viewport Responsive Adjustments (<= 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* Hide desktop-only header buttons */
+  .gsp-header-btn {
+    display: none !important;
+  }
 
-/* Ensure inner markdown, code blocks, paragraphs in model responses expand fully */
-body.gsp-wide-mode main model-response .markdown,
-body.gsp-wide-mode main model-response .message-content,
-body.gsp-wide-mode main model-response .presented-content,
-body.gsp-wide-mode main model-response structured-content,
-body.gsp-wide-mode main model-response [class*="content"],
-body.gsp-wide-mode main .model-response-container .markdown,
-body.gsp-wide-mode main .model-response-container [class*="content"],
-body.gsp-wide-mode main .response-container [class*="content"] {
-  max-width: 100% !important;
-  width: 100% !important;
-}
+  /* Align floating toolbar with Gemini mobile input horizontal padding */
+  .gsp-toolbar-container {
+    padding: 0 16px !important;
+    gap: 6px !important;
+    margin: 0 auto 6px auto !important;
+  }
 
-body.gsp-wide-mode .gsp-toolbar-container {
-  max-width: 100% !important;
-  width: 100% !important;
-  padding: 0 !important;
-  margin: 0 auto 8px auto !important;
+  .gsp-pill-btn {
+    height: 32px !important;
+    padding: 0 11px !important;
+    font-size: 12.5px !important;
+    gap: 5px !important;
+  }
+
+  .gsp-pill-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .gsp-nav-group {
+    height: 32px !important;
+    padding: 2px 3px !important;
+  }
+
+  .gsp-nav-btn {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .gsp-nav-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .gsp-bulk-delete-btn {
+    font-size: 11px !important;
+    padding: 2px 6px !important;
+  }
 }
 
 

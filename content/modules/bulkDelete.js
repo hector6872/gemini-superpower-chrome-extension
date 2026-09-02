@@ -23,23 +23,53 @@
   }
 
   function findRecentSectionHeader() {
-    // 1. Structural match: header immediately preceding conversation list
     const links = getConversationLinks();
-    if (links.length > 0) {
-      const listContainer = links[0].closest('mat-nav-list, mat-list, [role="list"], .conversation-list, [class*="list"]') || links[0].parentElement;
-      if (listContainer && listContainer.previousElementSibling) {
-        return listContainer.previousElementSibling;
-      }
+    if (links.length === 0) return null;
+
+    const firstLink = links[0];
+    const firstLinkRect = firstLink.getBoundingClientRect();
+    const sidebar = firstLink.closest('side-nav, mat-sidenav, nav, aside, [class*="side-nav"], [class*="sidebar"]') || document.body;
+
+    // 1. Check for specific recent section headers near the first conversation
+    const candidates = Array.from(sidebar.querySelectorAll(
+      '[data-test-id*="recent" i], [class*="recent" i], [aria-label*="recent" i], [aria-label*="reciente" i], h2, h3, h4, [class*="section-header"], [class*="header"], [class*="title"], [class*="label"], [class*="heading"]'
+    ));
+
+    const validCandidates = candidates.filter(el => {
+      if (el.offsetHeight === 0 || el.offsetParent === null) return false;
+      // Exclude top-level navigation, logos, buttons, and conversation items themselves
+      if (el.closest('[class*="brand" i], [class*="logo" i], [class*="new-chat" i], button, a, [role="listitem"]')) return false;
+      
+      const rect = el.getBoundingClientRect();
+      // Must be above the first conversation link, but close to it (within 140px)
+      return rect.bottom <= firstLinkRect.top + 20 && rect.top >= firstLinkRect.top - 140;
+    });
+
+    if (validCandidates.length > 0) {
+      // Prioritize elements with 'recent' in text, class, or attribute
+      const recentNamed = validCandidates.find(el => {
+        const text = (el.textContent || '').toLowerCase().trim();
+        const attr = (el.className + ' ' + (el.getAttribute('data-test-id') || '')).toLowerCase();
+        return text.includes('recent') || text.includes('reciente') || text.includes('récent') || text.includes('letzte') || attr.includes('recent');
+      });
+      if (recentNamed) return recentNamed;
+
+      // Otherwise pick the candidate closest to the first link
+      validCandidates.sort((a, b) => {
+        const distA = Math.abs(firstLinkRect.top - a.getBoundingClientRect().bottom);
+        const distB = Math.abs(firstLinkRect.top - b.getBoundingClientRect().bottom);
+        return distA - distB;
+      });
+      return validCandidates[0];
     }
 
-    // 2. Sidebar header container
-    const sidebars = document.querySelectorAll('side-nav, mat-sidenav, nav, aside, [class*="side-nav"], [class*="sidebar"], [data-test-id*="sidebar"]');
-    for (const sb of sidebars) {
-      const candidates = sb.querySelectorAll('h2, h3, h4, [class*="title"], [class*="header"]');
-      for (const el of candidates) {
-        if (el.offsetHeight > 0 && el.children.length <= 2) {
-          return el;
-        }
+    // 2. Structural previousElementSibling of list container
+    const listContainer = firstLink.closest('mat-nav-list, mat-list, [role="list"], .conversation-list, [class*="list"]');
+    if (listContainer && listContainer.previousElementSibling) {
+      const prev = listContainer.previousElementSibling;
+      const rect = prev.getBoundingClientRect();
+      if (rect.bottom <= firstLinkRect.top + 20 && rect.top >= firstLinkRect.top - 140) {
+        return prev;
       }
     }
 
