@@ -1,0 +1,10 @@
+{
+  "extensionName": {
+    "message": "Gemini Superpowers",
+    "description": "Nombre de la extensión de Chrome"
+  },
+  "extensionDescription": {
+    "message": "Potencia tu experiencia en Google Gemini con plantillas de comandos //, cambio de modelo, navegación de mensajes, control de límites y borrado masivo.",
+    "description": "Descripción de la extensión de Chrome"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "extensionName": {
+    "message": "Gemini Superpowers",
+    "description": "Name of the Chrome extension"
+  },
+  "extensionDescription": {
+    "message": "Turbine sua experiência no Google Gemini com modelos de prompt //, troca de modelos, navegação de mensagens, rastreamento de uso e exclusão em lote.",
+    "description": "Description of the Chrome extension"
+  }
+}

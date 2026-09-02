@@ -1,0 +1,10 @@
+{
+  "extensionName": {
+    "message": "Gemini Superpowers",
+    "description": "Name of the Chrome extension"
+  },
+  "extensionDescription": {
+    "message": "Supercharge your Google Gemini experience with // prompt templates, model switching, message navigation, usage tracking, and bulk chat management.",
+    "description": "Description of the Chrome extension"
+  }
+}
