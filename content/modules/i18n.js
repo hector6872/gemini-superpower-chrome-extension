@@ -252,6 +252,192 @@
       confirm_delete_all: 'Voulez-vous vraiment supprimer toutes les {count} conversations récentes ?\n\nCette action est irréversible.',
       no_conversations: 'Aucune conversation récente trouvée à supprimer.',
       deleting_progress: 'Suppression de {current}/{total}...'
+    },
+
+    it: {
+      // Toolbar
+      prompts_btn: '// Prompts',
+      prompts_btn_title: 'Prompt rapidi e modelli (//)',
+      nav_top_title: 'Torna all\'inizio della chat',
+      nav_prev_title: 'Prompt precedente',
+      nav_next_title: 'Prompt successivo',
+      wide_mode_title: 'Modalità ampia (Schermo intero)',
+      delete_all_btn: 'Elimina tutto',
+      delete_all_title: 'Elimina tutte le conversazioni recenti',
+
+      // Prompts Menu
+      quick_prompts_header: '✨ Prompt Rapidi (//)',
+      edit_prompts_btn: 'Modifica prompt',
+      edit_prompts_title: 'Gestisci e personalizza i prompt',
+      menu_footer: '↑↓ per navigare • Invio / Tab / Spazio per inserire',
+
+      // Prompt Manager Modal
+      manager_title: 'Gestore della libreria di prompt',
+      your_commands: 'I tuoi comandi (//)',
+      new_command_btn: '+ Nuovo comando',
+      edit_command_title: 'Modifica //',
+      add_command_title: 'Aggiungi comando',
+      field_cmd_name: 'Nome del comando (singola parola, es. fix, test)',
+      field_short_desc: 'Breve descrizione',
+      field_auto_model: 'Cambio automatico del modello',
+      field_prompt_text: 'Testo del prompt (inserito all\'inizio)',
+      placeholder_desc: 'es. Correggi bug ed errori',
+      placeholder_template: 'Per favore analizza e correggi il codice o testo seguente:',
+      opt_model_keep: 'Nessun cambio (mantieni modello attivo)',
+      opt_model_flash_lite: 'Gemini Flash Lite',
+      opt_model_flash: 'Gemini Flash',
+      opt_model_pro: 'Gemini Pro',
+      btn_restore_defaults: 'Ripristina predefiniti',
+      btn_save_command: 'Salva comando',
+      btn_edit: 'Modifica',
+      btn_delete: 'Elimina',
+      btn_export: 'Esporta JSON',
+      btn_import: 'Importa JSON',
+      export_prompts_title: 'Esporta la libreria di prompt in un file JSON',
+      import_prompts_title: 'Importa prompt da un file JSON',
+      confirm_import_prompts: 'Importare {count} comando/i di prompt da questo file?\n\nI comandi esistenti con lo stesso nome verranno aggiornati e quelli nuovi aggiunti.',
+      import_result_summary: 'Importazione completata con successo!\n\n• {added} comando/i aggiunto/i: {addedList}\n• {updated} comando/i aggiornato/i\n• {identical} comando/i invariato/i (identico)',
+      import_result_no_new: 'Importazione completata con successo!\n\n• 0 nuovi comandi aggiunti\n• {updated} comando/i aggiornato/i\n• {identical} comando/i invariato/i (identico)',
+      import_error_msg: 'Impossibile importare i prompt: {error}',
+      confirm_reset_defaults: 'Ripristinare tutti i modelli di prompt ai comandi predefiniti?',
+      confirm_delete_prompt: 'Eliminare questo modello di prompt?',
+
+      // Usage Limits Card
+      usage_card_title: 'Limiti di utilizzo',
+      usage_card_info: 'Quote ufficiali sincronizzate con la tua attività',
+      usage_5h_label: 'Utilizzo 5 ore',
+      usage_weekly_label: 'Limite settimanale',
+      usage_resets_label: 'Ripristino',
+      usage_synced_status: 'Sincronizzato con il tuo ultimo prompt',
+
+      // Bulk Delete
+      confirm_delete_all: 'Sei sicuro di voler eliminare tutte le {count} conversazioni recenti?\n\nQuesta azione non può essere annullata.',
+      no_conversations: 'Nessuna conversazione recente trovata da eliminare.',
+      deleting_progress: 'Eliminazione {current}/{total}...'
+    },
+
+    pt: {
+      // Toolbar
+      prompts_btn: '// Prompts',
+      prompts_btn_title: 'Prompts rápidos e modelos (//)',
+      nav_top_title: 'Rolar até o topo do chat',
+      nav_prev_title: 'Prompt anterior',
+      nav_next_title: 'Próximo prompt',
+      wide_mode_title: 'Modo amplo (Tela cheia)',
+      delete_all_btn: 'Excluir tudo',
+      delete_all_title: 'Excluir todas as conversas recentes',
+
+      // Prompts Menu
+      quick_prompts_header: '✨ Prompts Rápidos (//)',
+      edit_prompts_btn: 'Editar prompts',
+      edit_prompts_title: 'Gerenciar e personalizar prompts',
+      menu_footer: '↑↓ para navegar • Enter / Tab / Espaço para inserir',
+
+      // Prompt Manager Modal
+      manager_title: 'Gerenciador da biblioteca de prompts',
+      your_commands: 'Seus Comandos (//)',
+      new_command_btn: '+ Novo Comando',
+      edit_command_title: 'Editar //',
+      add_command_title: 'Adicionar comando',
+      field_cmd_name: 'Nome do comando (uma palavra, ex: fix, test)',
+      field_short_desc: 'Descrição curta',
+      field_auto_model: 'Troca automática de modelo',
+      field_prompt_text: 'Texto do prompt (inserido no início)',
+      placeholder_desc: 'ex: Corrigir erros e problemas',
+      placeholder_template: 'Por favor, analise e corrija o seguinte:',
+      opt_model_keep: 'Sem alteração (manter modelo ativo)',
+      opt_model_flash_lite: 'Gemini Flash Lite',
+      opt_model_flash: 'Gemini Flash',
+      opt_model_pro: 'Gemini Pro',
+      btn_restore_defaults: 'Restaurar padrões',
+      btn_save_command: 'Salvar comando',
+      btn_edit: 'Editar',
+      btn_delete: 'Excluir',
+      btn_export: 'Exportar JSON',
+      btn_import: 'Importar JSON',
+      export_prompts_title: 'Exportar sua biblioteca de prompts como arquivo JSON',
+      import_prompts_title: 'Importar prompts de um arquivo JSON',
+      confirm_import_prompts: 'Importar {count} comando(s) de prompt deste arquivo?\n\nComandos existentes com o mesmo nome serão atualizados e novos serão adicionados.',
+      import_result_summary: 'Importação concluída com sucesso!\n\n• {added} comando(s) adicionado(s): {addedList}\n• {updated} comando(s) atualizado(s)\n• {identical} comando(s) inalterado(s) (idênticos)',
+      import_result_no_new: 'Importação concluída com sucesso!\n\n• 0 novos comandos adicionados\n• {updated} comando(s) atualizado(s)\n• {identical} comando(s) inalterado(s) (idênticos)',
+      import_error_msg: 'Falha ao importar prompts: {error}',
+      confirm_reset_defaults: 'Redefinir todos os modelos para os comandos padrão?',
+      confirm_delete_prompt: 'Excluir este modelo de prompt?',
+
+      // Usage Limits Card
+      usage_card_title: 'Limites de uso',
+      usage_card_info: 'Cotas oficiais sincronizadas com sua atividade',
+      usage_5h_label: 'Uso em 5 horas',
+      usage_weekly_label: 'Limite semanal',
+      usage_resets_label: 'Redefinição',
+      usage_synced_status: 'Sincronizado com seu último prompt',
+
+      // Bulk Delete
+      confirm_delete_all: 'Tem certeza de que deseja excluir todas as {count} conversas recentes?\n\nEsta ação não pode ser desfeita.',
+      no_conversations: 'Nenhuma conversa recente encontrada para excluir.',
+      deleting_progress: 'Excluindo {current}/{total}...'
+    },
+
+    ja: {
+      // Toolbar
+      prompts_btn: '// Prompts',
+      prompts_btn_title: 'クイックプロンプトとテンプレート (//)',
+      nav_top_title: 'チャットの先頭へスクロール',
+      nav_prev_title: '前のプロンプト',
+      nav_next_title: '次のプロンプト',
+      wide_mode_title: 'ワイドモード（全幅表示）',
+      delete_all_btn: 'すべて削除',
+      delete_all_title: '最近の会話をすべて削除',
+
+      // Prompts Menu
+      quick_prompts_header: '✨ クイックプロンプト (//)',
+      edit_prompts_btn: 'プロンプトを編集',
+      edit_prompts_title: 'プロンプトの管理とカスタマイズ',
+      menu_footer: '↑↓ で選択 • Enter / Tab / Space で挿入',
+
+      // Prompt Manager Modal
+      manager_title: 'プロンプトライブラリマネージャー',
+      your_commands: '登録済みコマンド (//)',
+      new_command_btn: '+ 新しいコマンド',
+      edit_command_title: '編集 //',
+      add_command_title: 'コマンドを追加',
+      field_cmd_name: 'コマンド名（単一単語、例: fix, test）',
+      field_short_desc: '簡単な説明',
+      field_auto_model: 'モデルの自動切り替え',
+      field_prompt_text: 'プロンプト本文（先頭に挿入）',
+      placeholder_desc: '例: バグやロジックの問題を修正',
+      placeholder_template: '以下の内容を分析して修正してください：',
+      opt_model_keep: '変更なし（現在のモデルを維持）',
+      opt_model_flash_lite: 'Gemini Flash Lite',
+      opt_model_flash: 'Gemini Flash',
+      opt_model_pro: 'Gemini Pro',
+      btn_restore_defaults: '初期設定に戻す',
+      btn_save_command: 'コマンドを保存',
+      btn_edit: '編集',
+      btn_delete: '削除',
+      btn_export: 'JSON エクスポート',
+      btn_import: 'JSON インポート',
+      export_prompts_title: 'プロンプトライブラリを JSON ファイルとして書き出し',
+      import_prompts_title: 'JSON ファイルからプロンプトを読み込み',
+      confirm_import_prompts: 'このファイルから {count} 件のプロンプトコマンドをインポートしますか？\n\n同名の既存コマンドは更新され、新しいコマンドが追加されます。',
+      import_result_summary: 'インポートが正常に完了しました！\n\n• {added} 件追加: {addedList}\n• {updated} 件更新\n• {identical} 件変更なし（同一）',
+      import_result_no_new: 'インポートが正常に完了しました！\n\n• 0 件の新規追加\n• {updated} 件更新\n• {identical} 件変更なし（同一）',
+      import_error_msg: 'プロンプトのインポートに失敗しました: {error}',
+      confirm_reset_defaults: 'すべてのプロンプトを初期設定のコマンドにリセットしますか？',
+      confirm_delete_prompt: 'このプロンプトテンプレートを削除しますか？',
+
+      // Usage Limits Card
+      usage_card_title: '利用制限',
+      usage_card_info: '利用状況に合わせて更新される公式クォータ',
+      usage_5h_label: '5時間の利用枠',
+      usage_weekly_label: '週間制限',
+      usage_resets_label: 'リセット',
+      usage_synced_status: '最新のプロンプトと同期中',
+
+      // Bulk Delete
+      confirm_delete_all: '最近の会話 {count} 件をすべて削除してもよろしいですか？\n\nこの操作は取り消せません。',
+      no_conversations: '削除可能な最近の会話は見つかりませんでした。',
+      deleting_progress: '{current}/{total} 件目を削除中...'
     }
   };
 

@@ -1,0 +1,10 @@
+{
+  "extensionName": {
+    "message": "Gemini Superpowers",
+    "description": "Name of the Chrome extension"
+  },
+  "extensionDescription": {
+    "message": "Potenzia la tua esperienza con Google Gemini con modelli di prompt //, cambio modello, navigazione messaggi, limiti di utilizzo e gestione chat di gruppo.",
+    "description": "Description of the Chrome extension"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "extensionName": {
+    "message": "Gemini Superpowers",
+    "description": "Name of the Chrome extension"
+  },
+  "extensionDescription": {
+    "message": "Google Geminiを大幅に強化。// プロンプトテンプレート、自動モデル切り替え、メッセージナビゲーション、利用制限追跡、チャットの一括削除機能を追加します。",
+    "description": "Description of the Chrome extension"
+  }
+}

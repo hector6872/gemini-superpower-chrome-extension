@@ -53,7 +53,7 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
    - Native confirmation dialog with silent, background batch deletion.
 
 8. **Internationalization & Multi-Language Support (i18n)**:
-   - Full native localization for English, Spanish, German, French, and Italian.
+   - Full native localization for English, Spanish, German, French, Italian, Portuguese, and Japanese.
    - Automatically adapts all toolbar controls, prompt menus, library managers, usage cards, and dialogs to match your browser's language setting.
 
 ---
