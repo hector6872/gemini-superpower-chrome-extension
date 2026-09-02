@@ -99,10 +99,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function getModelLabel(model) {
     switch (model) {
-      case 'pro': return 'Gemini Pro';
+      case 'pro': return '💎 Gemini Pro';
       case 'flash-lite':
-      case 'flash_lite': return 'Flash Lite';
+      case 'flash_lite': return '⚡ Flash Lite';
       case 'flash': return 'Flash';
+      case 'keep':
       default: return 'No change';
     }
   }
@@ -130,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       card.className = 'prompt-card';
       card.innerHTML = `
         <div class="prompt-card-header">
-          <span class="prompt-card-title">${escapeHtml(p.title)}</span>
+          <span class="prompt-card-title">//${escapeHtml(p.title)}</span>
           <div class="prompt-card-actions">
             <button class="btn-icon btn-edit" title="Edit" data-idx="${idx}">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">

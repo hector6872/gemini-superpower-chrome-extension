@@ -736,9 +736,21 @@ body[class*="dark"],
 }
 
 .gsp-modal-title {
-  margin: 0 0 8px 0;
-  font-size: 18px;
+  margin: 0;
+  font-size: 16.5px;
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--gsp-text-primary);
+}
+
+.gsp-modal-title svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 .gsp-modal-desc {

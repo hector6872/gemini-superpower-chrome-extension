@@ -104,8 +104,8 @@
     switch (modelKey) {
       case 'flash-lite':
       case 'flash_lite': return '⚡ Flash Lite';
-      case 'flash': return '⚡ Flash';
-      case 'pro': return '🌟 Pro';
+      case 'flash': return 'Flash';
+      case 'pro': return '💎 Pro';
       default: return '';
     }
   }
@@ -406,7 +406,7 @@
       itemsHtml += `
         <div class="gsp-prompt-item ${isSelected ? 'gsp-selected' : ''}" data-idx="${idx}" aria-selected="${isSelected ? 'true' : 'false'}">
           <div class="gsp-prompt-item-left">
-            <span class="gsp-prompt-title">/${p.title}</span>
+            <span class="gsp-prompt-title">//${p.title}</span>
             ${p.desc ? `<span class="gsp-prompt-desc">${p.desc}</span>` : ''}
           </div>
           ${modelBadge}
@@ -419,7 +419,10 @@
     menuElement.innerHTML = `
       <div class="gsp-prompt-header">
         <div class="gsp-prompt-header-left">
-          <span>${t('quick_prompts_header')}</span>
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+            <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+          </svg>
+          <span>// Prompts</span>
         </div>
         <div class="gsp-prompt-header-right">
           <button type="button" class="gsp-prompt-edit-btn" id="gsp-btn-open-editor" title="${t('edit_prompts_title')}">
@@ -535,7 +538,7 @@
       promptRowsHtml += `
         <div class="gsp-manager-row">
           <div class="gsp-manager-info">
-            <span class="gsp-manager-cmd">/${escapeHtml(p.title)}</span>
+            <span class="gsp-manager-cmd">//${escapeHtml(p.title)}</span>
             ${badge}
             <span class="gsp-manager-desc">${escapeHtml(p.desc || '')}</span>
           </div>
@@ -552,7 +555,12 @@
 
     modal.innerHTML = `
       <div class="gsp-modal-header">
-        <h3 class="gsp-modal-title">${t('manager_title')}</h3>
+        <h3 class="gsp-modal-title">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+          </svg>
+          <span>// ${t('manager_title')}</span>
+        </h3>
         <button type="button" class="gsp-modal-close-btn" id="gsp-btn-close-modal">✕</button>
       </div>
 

@@ -24,10 +24,10 @@
       menu_footer: '↑↓ navigate • Enter / Tab / Space to insert',
 
       // Prompt Manager Modal
-      manager_title: '✨ Prompt Library Manager',
+      manager_title: 'Prompt Library Manager',
       your_commands: 'Your Commands (//)',
       new_command_btn: '+ New Command',
-      edit_command_title: 'Edit /',
+      edit_command_title: 'Edit //',
       add_command_title: 'Add New Command',
       field_cmd_name: 'Command Name (single word, e.g. fix, test)',
       field_short_desc: 'Short Description',
@@ -78,10 +78,10 @@
       menu_footer: '↑↓ navegar • Enter / Tab / Espacio para insertar',
 
       // Prompt Manager Modal
-      manager_title: '✨ Gestor de Biblioteca de Prompts',
+      manager_title: 'Gestor de Biblioteca de Prompts',
       your_commands: 'Tus Comandos (//)',
       new_command_btn: '+ Nuevo Comando',
-      edit_command_title: 'Editar /',
+      edit_command_title: 'Editar //',
       add_command_title: 'Añadir Nuevo Comando',
       field_cmd_name: 'Nombre del comando (palabra única, ej. fix, test)',
       field_short_desc: 'Descripción corta',
@@ -132,10 +132,10 @@
       menu_footer: '↑↓ navigieren • Eingabe / Tab / Leertaste zum Einfügen',
 
       // Prompt Manager Modal
-      manager_title: '✨ Prompt-Bibliothek-Manager',
+      manager_title: 'Prompt-Bibliothek-Manager',
       your_commands: 'Deine Befehle (//)',
       new_command_btn: '+ Neuer Befehl',
-      edit_command_title: 'Bearbeiten /',
+      edit_command_title: 'Bearbeiten //',
       add_command_title: 'Neuen Befehl hinzufügen',
       field_cmd_name: 'Befehlsname (einzelnes Wort, z. B. fix, test)',
       field_short_desc: 'Kurze Beschreibung',
@@ -186,10 +186,10 @@
       menu_footer: '↑↓ naviguer • Entrée / Tab / Espace pour insérer',
 
       // Prompt Manager Modal
-      manager_title: '✨ Gestionnaire de bibliothèque de prompts',
+      manager_title: 'Gestionnaire de bibliothèque de prompts',
       your_commands: 'Vos Commandes (//)',
       new_command_btn: '+ Nouvelle Commande',
-      edit_command_title: 'Modifier /',
+      edit_command_title: 'Modifier //',
       add_command_title: 'Ajouter une commande',
       field_cmd_name: 'Nom de commande (un mot, ex. fix, test)',
       field_short_desc: 'Description courte',
