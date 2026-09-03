@@ -428,7 +428,7 @@
         <div class="gsp-prompt-header-right">
           <button type="button" class="gsp-prompt-edit-btn" id="gsp-btn-open-editor" title="${t('edit_prompts_title')}">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
             </svg>
             <span>${t('edit_prompts_btn')}</span>
           </button>
@@ -953,7 +953,7 @@
     const targetPrompt = formPrompt || { id: '', title: '', desc: '', model: 'keep', template: '' };
 
     modal.innerHTML = `
-      <div class="gsp-modal-header">
+      <div class="gsp-modal-header gsp-editor-header">
         <div class="gsp-modal-header-left">
           <button type="button" class="gsp-btn-header-back" id="gsp-btn-back-to-library" title="${t('back_to_library')}">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
@@ -963,9 +963,8 @@
           </button>
         </div>
         <div class="gsp-editor-header-title">
-          <span class="gsp-editor-badge">${isEditing ? t('btn_edit') : t('new_command_btn')}</span>
           <h3 class="gsp-modal-title">
-            <span>${isEditing ? `//${escapeHtml(targetPrompt.title)}` : t('add_command_title')}</span>
+            <span>${isEditing ? `${t('edit_command_title')}${escapeHtml(targetPrompt.title)}` : t('add_command_title')}</span>
           </h3>
         </div>
         <div class="gsp-modal-header-actions">
@@ -979,7 +978,7 @@
 
           <div class="gsp-editor-fields-row">
             <div class="gsp-input-group gsp-group-cmd-name">
-              <label class="gsp-input-label" for="gsp-form-title">${t('field_cmd_name')}</label>
+              <label class="gsp-input-label" for="gsp-form-title">${t('field_cmd_name')} <span class="gsp-required-star">*</span></label>
               <div class="gsp-cmd-input-container">
                 <span class="gsp-cmd-prefix">//</span>
                 <input type="text" id="gsp-form-title" class="gsp-input-field gsp-cmd-input" required placeholder="fix" value="${escapeHtml(targetPrompt.title)}" autocomplete="off" spellcheck="false" autofocus>
@@ -1016,13 +1015,13 @@
           </div>
 
           <div class="gsp-input-group">
-            <label class="gsp-input-label" for="gsp-form-template">${t('field_prompt_text')}</label>
+            <label class="gsp-input-label" for="gsp-form-template">${t('field_prompt_text')} <span class="gsp-required-star">*</span></label>
             <textarea id="gsp-form-template" class="gsp-input-field gsp-textarea-template" rows="7" required placeholder="${t('placeholder_template')}">${escapeHtml(targetPrompt.template)}</textarea>
           </div>
 
           <div class="gsp-editor-actions-bar">
             <button type="button" class="gsp-btn-secondary" id="gsp-btn-cancel-edit">${t('btn_cancel')}</button>
-            <button type="submit" class="gsp-btn-primary">${t('btn_save_command')}</button>
+            <button type="submit" class="gsp-btn-primary">${isEditing ? t('btn_update_command') : t('btn_save_command')}</button>
           </div>
         </form>
       </div>

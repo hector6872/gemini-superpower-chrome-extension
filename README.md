@@ -32,12 +32,14 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
    - **Direct Scroll to Top (`⤒`)**: Dynamic button that reveals itself whenever you scroll down to take you straight to the beginning of the conversation in one click.
    - **Smart Disabled States**: Navigation buttons automatically disable when reaching the top, bottom, or in an empty conversation.
 
-4. **Single-Word Quick Prompts (`//`) & In-Page Editor**:
-   - Type `//` inside the chat box or click `// Prompts` to open the autocomplete command menu (`//doc`, `//explain`, `//fix`, `//optimize`, `//review`, `//summary`, `//test`, `//translate`).
+4. **Single-Word Quick Prompts (`//`) & Prompt Library Manager**:
+   - Type `//` inside the chat box or click `// Prompts` to open the autocomplete menu (`//doc`, `//explain`, `//fix`, `//optimize`, `//review`, `//summary`, `//test`, `//translate`).
    - Type `//fix` + `Space`, `Tab`, or `Enter` to instantly prepend the prompt template at the beginning of your text with the cursor positioned at the end.
-   - **Integrated Editor**: Click `✏️ Edit Prompts` in the menu header to add, customize, or delete single-word commands right within Gemini.
-   - **Auto-Model Switcher**: Assign specific models (*`⚡ Flash Lite`*, *`Flash`*, *`💎 Pro`*, or *No change*) to any command.
-   - **Secure JSON Import & Export**: Easily backup or share your prompt library as a JSON file. Includes strict input sanitization against XSS/injections, pre-import confirmation, and a granular summary reporting newly added, updated, and identical commands.
+   - **Prompt Library Manager**: Click `📚 Library` in the popover header to manage your prompts right within Gemini:
+     - **Library View**: Instant search & filter, rich prompt preview cards, model badges, and quick actions to edit, delete, or restore defaults.
+     - **Editor View**: Focused creation & editing screen with duplicate shortcut validation, required field indicators, and interactive model switcher chips (*`Keep current`*, *`⚡ Flash Lite`*, *`Flash`*, *`💎 Pro`*).
+   - **Auto-Model Switcher**: Automatically switch Gemini to your preferred model (*`⚡ Flash Lite`*, *`Flash`*, or *`💎 Pro`*) whenever a prompt is inserted.
+   - **Secure JSON Import & Export**: Easily backup or share your prompt library as a JSON file. Includes strict input sanitization against XSS/injections, pre-import confirmation, and a granular summary reporting newly added, updated, and identical prompts.
 
 5. **Smart Auto-Focus**:
    - The chat prompt input automatically gets focused whenever you open the page or switch back to the Gemini tab/window.
