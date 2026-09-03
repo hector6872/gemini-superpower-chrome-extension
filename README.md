@@ -33,8 +33,8 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
    - **Smart Disabled States**: Navigation buttons automatically disable when reaching the top, bottom, or in an empty conversation.
 
 4. **Single-Word Quick Prompts (`//`) & Prompt Library Manager**:
-   - Type `//` inside the chat box or click `// Prompts` to open the autocomplete menu (`//doc`, `//explain`, `//fix`, `//optimize`, `//review`, `//summary`, `//test`, `//translate`).
-   - Type `//fix` + `Space`, `Tab`, or `Enter` to instantly prepend the prompt template at the beginning of your text with the cursor positioned at the end.
+   - Type `//` inside the chat box or click `// Prompts` to open the autocomplete menu (`//summary`, `//explain`, `//improve`, `//fix`, `//ideas`, `//analyze`, `//reply`, `//translate`).
+   - Type `//improve` + `Space`, `Tab`, or `Enter` to instantly prepend the prompt template at the beginning of your text with the cursor positioned at the end.
    - **Prompt Library Manager**: Click `📚 Library` in the popover header to manage your prompts right within Gemini:
      - **Library View**: Instant search & filter, rich prompt preview cards, model badges, and quick actions to edit, delete, or restore defaults.
      - **Editor View**: Focused creation & editing screen with duplicate shortcut validation, required field indicators, and interactive model switcher chips (*`Keep current`*, *`⚡ Flash Lite`*, *`Flash`*, *`💎 Pro`*).
