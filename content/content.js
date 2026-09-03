@@ -9,6 +9,7 @@
 
   function initAll() {
     if (window.GSP) {
+      if (window.GSP.initThemeSync) window.GSP.initThemeSync();
       if (window.GSP.initAutoFocus) window.GSP.initAutoFocus();
       if (window.GSP.initWideMode) window.GSP.initWideMode();
       if (window.GSP.initPromptCommands) window.GSP.initPromptCommands();
