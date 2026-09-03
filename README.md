@@ -9,6 +9,8 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
   <img src="assets/toolbar.png" alt="Gemini Superpowers Toolbar" width="720" />
   <br/><br/>
   <img src="assets/prompt-manager.png" alt="Prompt Library Manager" width="720" />
+  <br/><br/>
+  <img src="assets/prompt-editor.png" alt="Prompt Editor View" width="720" />
 </p>
 
 ---
