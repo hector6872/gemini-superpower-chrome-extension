@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const form = document.getElementById('prompt-form');
   const modalTitle = document.getElementById('modal-title');
   const btnModalCancel = document.getElementById('btn-modal-cancel');
+  const btnDeleteAll = document.getElementById('btn-delete-all');
   const btnResetDefaults = document.getElementById('btn-reset-defaults');
   const btnExport = document.getElementById('btn-export');
   const importFile = document.getElementById('import-file');
@@ -21,59 +22,59 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const DEFAULT_PROMPTS = [
     {
-      id: 'doc',
-      title: 'doc',
-      desc: 'Generate clear documentation and usage guides',
-      template: 'Please write clear, comprehensive documentation for the following, including an overview, parameter details, expected outputs, and usage examples:',
-      model: 'keep'
+      id: 'summary',
+      title: 'summary',
+      desc: 'Summarize key points and main takeaways',
+      template: 'Please provide a clear and concise summary of the following, highlighting the core ideas, main takeaways, and key conclusions:',
+      model: 'flash-lite'
     },
     {
       id: 'explain',
       title: 'explain',
-      desc: 'Explain step-by-step in clear, simple terms',
-      template: 'Please explain the following step-by-step in clear, structured, and easy-to-understand terms with practical examples:',
+      desc: 'Explain simply with clear step-by-step examples',
+      template: 'Please explain the following in simple, easy-to-understand terms with clear examples and step-by-step reasoning:',
       model: 'flash'
+    },
+    {
+      id: 'improve',
+      title: 'improve',
+      desc: 'Enhance clarity, flow, and writing quality',
+      template: 'Please rewrite and polish the following text to make it clearer, more engaging, and well-structured, while preserving the original meaning:',
+      model: 'pro'
     },
     {
       id: 'fix',
       title: 'fix',
-      desc: 'Fix bugs, errors, and issues in the content',
-      template: 'Please analyze and fix the following. Explain what caused the issue, provide the corrected version, and ensure edge cases and best practices are handled:',
+      desc: 'Correct grammar, typos, and errors',
+      template: 'Please review and fix any spelling, grammatical, or logical errors in the following text. Provide the corrected version and briefly summarize the changes:',
       model: 'pro'
     },
     {
-      id: 'optimize',
-      title: 'optimize',
-      desc: 'Optimize performance, efficiency, and clarity',
-      template: 'Please analyze and optimize the following for maximum efficiency, speed, and clarity. Explain the key improvements made:',
+      id: 'ideas',
+      title: 'ideas',
+      desc: 'Brainstorm creative ideas and actionable solutions',
+      template: 'Please brainstorm creative ideas, practical solutions, and fresh perspectives for the following:',
       model: 'pro'
     },
     {
-      id: 'review',
-      title: 'review',
-      desc: 'Review for quality, security, and improvements',
-      template: 'Please review the following for potential issues, security, performance, and best practices. Provide an improved version with explanations:',
+      id: 'analyze',
+      title: 'analyze',
+      desc: 'In-depth analysis with key pros and cons',
+      template: 'Please analyze the following in detail. Break down the key strengths, weaknesses, implications, and practical recommendations:',
       model: 'pro'
     },
     {
-      id: 'summary',
-      title: 'summary',
-      desc: 'Condense into key takeaways and conclusions',
-      template: 'Please provide a concise summary of the following content, highlighting core takeaways, key conclusions, and recommended next steps:',
-      model: 'flash-lite'
-    },
-    {
-      id: 'test',
-      title: 'test',
-      desc: 'Generate comprehensive tests and validation cases',
-      template: 'Please write comprehensive tests and validation scenarios for the following, including expected behavior, edge cases, and error handling:',
+      id: 'reply',
+      title: 'reply',
+      desc: 'Draft a polite and professional response',
+      template: 'Please draft a clear, thoughtful, and professional reply to the following message:',
       model: 'pro'
     },
     {
       id: 'translate',
       title: 'translate',
-      desc: 'Translate accurately preserving tone and nuance',
-      template: 'Translate the following text accurately, preserving its natural tone, terminology, and contextual nuance:',
+      desc: 'Translate naturally preserving tone and nuance',
+      template: 'Please translate the following text into natural, fluent language, preserving its original tone, context, and nuance:',
       model: 'keep'
     }
   ];
@@ -82,7 +83,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function loadPrompts() {
     const data = await chrome.storage.local.get('gsp_custom_prompts');
-    if (data.gsp_custom_prompts && Array.isArray(data.gsp_custom_prompts) && data.gsp_custom_prompts.length > 0) {
+    const isFirstRun = data.gsp_custom_prompts === undefined || data.gsp_custom_prompts === null;
+    if (isFirstRun) {
+      prompts = [...DEFAULT_PROMPTS];
+      await savePrompts();
+    } else if (Array.isArray(data.gsp_custom_prompts)) {
       prompts = data.gsp_custom_prompts;
     } else {
       prompts = [...DEFAULT_PROMPTS];
@@ -121,8 +126,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderList() {
     promptsListEl.innerHTML = '';
 
+    if (btnDeleteAll) {
+      btnDeleteAll.style.display = prompts.length > 0 ? 'inline-block' : 'none';
+    }
+
     if (prompts.length === 0) {
-      promptsListEl.innerHTML = '<p style="text-align:center; color: var(--text-muted); font-size: 12.5px;">No templates saved.</p>';
+      promptsListEl.innerHTML = `
+        <div style="text-align:center; padding: 36px 16px; color: var(--text-muted); font-size: 13px;">
+          <div style="font-size: 28px; margin-bottom: 8px; opacity: 0.5;">📋</div>
+          <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">No prompt templates saved</div>
+          <div style="font-size: 12px; max-width: 260px; margin: 0 auto;">Click <strong>+ New Prompt</strong>, import from JSON, or restore defaults below.</div>
+        </div>
+      `;
       return;
     }
 
@@ -197,9 +212,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = inputId.value || 'prompt-' + Date.now();
+    const title = inputTitle.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    if (!title) return;
+
+    const isDuplicate = prompts.some(p => p.id !== inputId.value && p.title.toLowerCase() === title);
+    if (isDuplicate) {
+      alert(`A prompt with the name "//${title}" already exists. Please choose a different name.`);
+      inputTitle.focus();
+      inputTitle.select();
+      return;
+    }
+
     const newPrompt = {
       id,
-      title: inputTitle.value.trim(),
+      title,
       desc: inputDesc.value.trim(),
       model: inputModel.value,
       template: inputTemplate.value
@@ -216,6 +242,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     closeModal();
     renderList();
   });
+
+  if (btnDeleteAll) {
+    btnDeleteAll.addEventListener('click', async () => {
+      if (confirm('Are you sure you want to delete all prompt commands?\n\nThis will remove all your quick prompts.')) {
+        prompts = [];
+        await savePrompts();
+        renderList();
+      }
+    });
+  }
 
   btnResetDefaults.addEventListener('click', async () => {
     if (confirm('Restore all default prompt templates?')) {
