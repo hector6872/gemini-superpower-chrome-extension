@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const form = document.getElementById('prompt-form');
   const modalTitle = document.getElementById('modal-title');
   const btnModalCancel = document.getElementById('btn-modal-cancel');
+  const btnDeleteAll = document.getElementById('btn-delete-all');
   const btnResetDefaults = document.getElementById('btn-reset-defaults');
   const btnExport = document.getElementById('btn-export');
   const importFile = document.getElementById('import-file');
@@ -82,7 +83,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function loadPrompts() {
     const data = await chrome.storage.local.get('gsp_custom_prompts');
-    if (data.gsp_custom_prompts && Array.isArray(data.gsp_custom_prompts) && data.gsp_custom_prompts.length > 0) {
+    const isFirstRun = data.gsp_custom_prompts === undefined || data.gsp_custom_prompts === null;
+    if (isFirstRun) {
+      prompts = [...DEFAULT_PROMPTS];
+      await savePrompts();
+    } else if (Array.isArray(data.gsp_custom_prompts)) {
       prompts = data.gsp_custom_prompts;
     } else {
       prompts = [...DEFAULT_PROMPTS];
@@ -121,8 +126,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderList() {
     promptsListEl.innerHTML = '';
 
+    if (btnDeleteAll) {
+      btnDeleteAll.style.display = prompts.length > 0 ? 'inline-block' : 'none';
+    }
+
     if (prompts.length === 0) {
-      promptsListEl.innerHTML = '<p style="text-align:center; color: var(--text-muted); font-size: 12.5px;">No templates saved.</p>';
+      promptsListEl.innerHTML = `
+        <div style="text-align:center; padding: 36px 16px; color: var(--text-muted); font-size: 13px;">
+          <div style="font-size: 28px; margin-bottom: 8px; opacity: 0.5;">📋</div>
+          <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">No prompt templates saved</div>
+          <div style="font-size: 12px; max-width: 260px; margin: 0 auto;">Click <strong>+ New Prompt</strong>, import from JSON, or restore defaults below.</div>
+        </div>
+      `;
       return;
     }
 
@@ -197,9 +212,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = inputId.value || 'prompt-' + Date.now();
+    const title = inputTitle.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    if (!title) return;
+
+    const isDuplicate = prompts.some(p => p.id !== inputId.value && p.title.toLowerCase() === title);
+    if (isDuplicate) {
+      alert(`A prompt with the name "//${title}" already exists. Please choose a different name.`);
+      inputTitle.focus();
+      inputTitle.select();
+      return;
+    }
+
     const newPrompt = {
       id,
-      title: inputTitle.value.trim(),
+      title,
       desc: inputDesc.value.trim(),
       model: inputModel.value,
       template: inputTemplate.value
@@ -216,6 +242,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     closeModal();
     renderList();
   });
+
+  if (btnDeleteAll) {
+    btnDeleteAll.addEventListener('click', async () => {
+      if (confirm('Are you sure you want to delete all prompt commands?\n\nThis will remove all your quick prompts.')) {
+        prompts = [];
+        await savePrompts();
+        renderList();
+      }
+    });
+  }
 
   btnResetDefaults.addEventListener('click', async () => {
     if (confirm('Restore all default prompt templates?')) {

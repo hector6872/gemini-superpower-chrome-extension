@@ -77,8 +77,9 @@
         const data = await chrome.storage.local.get('gsp_custom_prompts');
         const stored = data.gsp_custom_prompts;
         const isOldFormat = Array.isArray(stored) && stored.some(p => p.id === 'code-review' || p.desc?.includes('JSDoc') || p.title.includes(' ') || p.model === 'thinking');
+        const isFirstRun = stored === undefined || stored === null;
         
-        if (!stored || !Array.isArray(stored) || stored.length === 0 || isOldFormat) {
+        if (isFirstRun || isOldFormat || !Array.isArray(stored)) {
           activePrompts = [...DEFAULT_PROMPTS];
           await chrome.storage.local.set({ gsp_custom_prompts: activePrompts });
         } else {
@@ -487,6 +488,10 @@
     if (menuElement) {
       closePromptMenu();
     } else {
+      if (!activePrompts || activePrompts.length === 0) {
+        openPromptEditorModal();
+        return;
+      }
       const input = window.GSP?.getGeminiInput ? window.GSP.getGeminiInput() : null;
       if (input) {
         input.focus();
@@ -612,29 +617,114 @@
     return sanitizedPrompts;
   }
 
-  function renderModalContent(formPrompt = null) {
+  let currentSearchQuery = '';
+
+  function renderLibraryView(searchQuery = '') {
+    currentSearchQuery = searchQuery;
     const t = window.GSP?.t || ((k, p) => k);
-    let promptRowsHtml = '';
     const sortedPrompts = [...activePrompts].sort((a, b) => a.title.localeCompare(b.title));
-    sortedPrompts.forEach(p => {
-      const badge = p.model && p.model !== 'keep' ? `<span class="gsp-model-badge">${getModelBadgeText(p.model)}</span>` : '';
-      promptRowsHtml += `
-        <div class="gsp-manager-row">
-          <div class="gsp-manager-info">
-            <span class="gsp-manager-cmd">//${escapeHtml(p.title)}</span>
-            ${badge}
-            <span class="gsp-manager-desc">${escapeHtml(p.desc || '')}</span>
-          </div>
-          <div class="gsp-manager-actions">
-            <button type="button" class="gsp-btn-sm gsp-btn-edit-item" data-id="${escapeHtml(p.id)}" title="${t('btn_edit')}">${t('btn_edit')}</button>
-            <button type="button" class="gsp-btn-sm gsp-btn-del-item" data-id="${escapeHtml(p.id)}" title="${t('btn_delete')}">${t('btn_delete')}</button>
+    const hasPrompts = sortedPrompts.length > 0;
+    const q = searchQuery.toLowerCase().trim();
+    const filteredPrompts = sortedPrompts.filter(p => {
+      if (!q) return true;
+      return p.title.toLowerCase().includes(q) ||
+             (p.desc && p.desc.toLowerCase().includes(q)) ||
+             (p.template && p.template.toLowerCase().includes(q));
+    });
+
+    let mainContentHtml = '';
+
+    if (!hasPrompts) {
+      mainContentHtml = `
+        <div class="gsp-library-empty-wrap">
+          <div class="gsp-manager-empty-state">
+            <div class="gsp-manager-empty-icon">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+              </svg>
+            </div>
+            <h4 class="gsp-manager-empty-title">${t('empty_prompts_title')}</h4>
+            <p class="gsp-manager-empty-desc">${t('empty_prompts_desc')}</p>
+            <div class="gsp-empty-actions">
+              <button type="button" class="gsp-btn-secondary" id="gsp-btn-empty-restore">${t('btn_restore_defaults')}</button>
+              <button type="button" class="gsp-btn-primary" id="gsp-btn-empty-new">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                <span>${t('new_command_btn')}</span>
+              </button>
+            </div>
           </div>
         </div>
       `;
-    });
+    } else {
+      let cardsHtml = '';
+      if (filteredPrompts.length === 0) {
+        cardsHtml = `
+          <div class="gsp-no-results">
+            <p>${t('no_prompts_found', { query: escapeHtml(searchQuery) })}</p>
+            <button type="button" class="gsp-btn-secondary gsp-btn-clear-filter" id="gsp-btn-reset-search">${t('clear_filter_btn')}</button>
+          </div>
+        `;
+      } else {
+        filteredPrompts.forEach(p => {
+          const badge = p.model && p.model !== 'keep' ? `<span class="gsp-model-badge">${getModelBadgeText(p.model)}</span>` : '';
+          cardsHtml += `
+            <div class="gsp-prompt-card" data-id="${escapeHtml(p.id)}">
+              <div class="gsp-card-body">
+                <div class="gsp-card-header">
+                  <div class="gsp-card-title-group">
+                    <span class="gsp-card-cmd">//${escapeHtml(p.title)}</span>
+                    ${badge}
+                  </div>
+                  <div class="gsp-card-actions">
+                    <button type="button" class="gsp-btn-card-action gsp-btn-edit-item" data-id="${escapeHtml(p.id)}" title="${t('btn_edit')}">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                      </svg>
+                      <span>${t('btn_edit')}</span>
+                    </button>
+                    <button type="button" class="gsp-btn-card-action gsp-btn-del-action gsp-btn-del-item" data-id="${escapeHtml(p.id)}" title="${t('btn_delete')}">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                ${p.desc ? `<p class="gsp-card-desc">${escapeHtml(p.desc)}</p>` : ''}
+                <div class="gsp-card-preview">${escapeHtml(p.template)}</div>
+              </div>
+            </div>
+          `;
+        });
+      }
 
-    const isEditing = !!formPrompt;
-    const targetPrompt = formPrompt || { id: '', title: '', desc: '', model: 'keep', template: '' };
+      mainContentHtml = `
+        <div class="gsp-library-toolbar">
+          <div class="gsp-search-wrapper">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" class="gsp-search-icon">
+              <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <input type="text" id="gsp-library-search" class="gsp-search-field" placeholder="${t('search_prompts_placeholder')}" value="${escapeHtml(searchQuery)}" autocomplete="off" spellcheck="false">
+            ${searchQuery ? `<button type="button" class="gsp-search-clear" id="gsp-btn-clear-search">✕</button>` : ''}
+          </div>
+          <button type="button" class="gsp-btn-primary gsp-btn-toolbar-add" id="gsp-btn-new-prompt">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <span>${t('new_command_btn')}</span>
+          </button>
+        </div>
+
+        <div class="gsp-library-cards-list">
+          ${cardsHtml}
+        </div>
+
+        <div class="gsp-library-footer">
+          <div class="gsp-library-footer-actions">
+            <button type="button" class="gsp-btn-footer-link" id="gsp-btn-reset-defaults">${t('btn_restore_defaults')}</button>
+            <button type="button" class="gsp-btn-footer-link gsp-btn-footer-danger" id="gsp-btn-delete-all-prompts" title="${t('delete_all_prompts_title')}">${t('btn_delete_all_prompts')}</button>
+          </div>
+          <span class="gsp-library-counter">${sortedPrompts.length} ${sortedPrompts.length === 1 ? 'command' : 'commands'}</span>
+        </div>
+      `;
+    }
 
     modal.innerHTML = `
       <div class="gsp-modal-header">
@@ -664,65 +754,17 @@
         </div>
       </div>
 
-      <div class="gsp-manager-container">
-        <div class="gsp-manager-list-section">
-          <div class="gsp-manager-section-header">
-            <span>${t('your_commands')}</span>
-            <button type="button" class="gsp-btn-pill-action" id="gsp-btn-new-prompt">${t('new_command_btn')}</button>
-          </div>
-          <div class="gsp-manager-list">
-            ${promptRowsHtml}
-          </div>
-        </div>
-
-        <div class="gsp-manager-form-section">
-          <h4 class="gsp-form-title">${isEditing ? `${t('edit_command_title')}${escapeHtml(targetPrompt.title)}` : t('add_command_title')}</h4>
-          <form id="gsp-prompt-editor-form">
-            <input type="hidden" id="gsp-form-id" value="${escapeHtml(targetPrompt.id)}">
-            
-            <div class="gsp-input-group">
-              <label class="gsp-input-label" for="gsp-form-title">${t('field_cmd_name')}</label>
-              <input type="text" id="gsp-form-title" class="gsp-input-field" required placeholder="e.g. fix" value="${escapeHtml(targetPrompt.title)}">
-            </div>
-
-            <div class="gsp-input-group">
-              <label class="gsp-input-label" for="gsp-form-desc">${t('field_short_desc')}</label>
-              <input type="text" id="gsp-form-desc" class="gsp-input-field" placeholder="${t('placeholder_desc')}" value="${escapeHtml(targetPrompt.desc)}">
-            </div>
-
-            <div class="gsp-input-group">
-              <label class="gsp-input-label" for="gsp-form-model">${t('field_auto_model')}</label>
-              <select id="gsp-form-model" class="gsp-input-field">
-                <option value="keep" ${targetPrompt.model === 'keep' ? 'selected' : ''}>${t('opt_model_keep')}</option>
-                <option value="flash-lite" ${(targetPrompt.model === 'flash-lite' || targetPrompt.model === 'flash_lite') ? 'selected' : ''}>${t('opt_model_flash_lite')}</option>
-                <option value="flash" ${targetPrompt.model === 'flash' ? 'selected' : ''}>${t('opt_model_flash')}</option>
-                <option value="pro" ${targetPrompt.model === 'pro' ? 'selected' : ''}>${t('opt_model_pro')}</option>
-              </select>
-            </div>
-
-            <div class="gsp-input-group">
-              <label class="gsp-input-label" for="gsp-form-template">${t('field_prompt_text')}</label>
-              <textarea id="gsp-form-template" class="gsp-input-field" rows="4" required placeholder="${t('placeholder_template')}">${escapeHtml(targetPrompt.template)}</textarea>
-            </div>
-
-            <div class="gsp-modal-actions">
-              <button type="button" class="gsp-btn-secondary" id="gsp-btn-reset-defaults">${t('btn_restore_defaults')}</button>
-              <button type="submit" class="gsp-btn-primary">${t('btn_save_command')}</button>
-            </div>
-          </form>
-        </div>
+      <div class="gsp-library-view-container">
+        ${mainContentHtml}
       </div>
     `;
 
-      // Event handlers
-      modal.querySelector('#gsp-btn-close-modal').addEventListener('click', closeModal);
+    // Bind common header events
+    modal.querySelector('#gsp-btn-close-modal').addEventListener('click', closeModal);
 
-      modal.querySelector('#gsp-btn-new-prompt').addEventListener('click', () => {
-        renderModalContent(null);
-      });
-
-      // Export JSON handler
-      modal.querySelector('#gsp-btn-export-json').addEventListener('click', () => {
+    const btnExportJson = modal.querySelector('#gsp-btn-export-json');
+    if (btnExportJson) {
+      btnExportJson.addEventListener('click', () => {
         const exportData = {
           version: 1,
           exportedAt: new Date().toISOString(),
@@ -736,10 +778,12 @@
         a.click();
         URL.revokeObjectURL(url);
       });
+    }
 
-      // Import JSON handler
-      const importInput = modal.querySelector('#gsp-import-file-input');
-      modal.querySelector('#gsp-btn-import-json').addEventListener('click', () => {
+    const importInput = modal.querySelector('#gsp-import-file-input');
+    const btnImportJson = modal.querySelector('#gsp-btn-import-json');
+    if (btnImportJson && importInput) {
+      btnImportJson.addEventListener('click', () => {
         importInput.value = '';
         importInput.click();
       });
@@ -788,7 +832,7 @@
 
             activePrompts = Array.from(existingMap.values());
             await savePrompts();
-            renderModalContent(null);
+            renderLibraryView('');
 
             if (addedPrompts.length > 0) {
               alert(t('import_result_summary', {
@@ -809,64 +853,246 @@
         };
         reader.readAsText(file);
       });
+    }
 
-      modal.querySelector('#gsp-btn-reset-defaults').addEventListener('click', async () => {
+    // New command button
+    const btnNewPrompt = modal.querySelector('#gsp-btn-new-prompt') || modal.querySelector('#gsp-btn-empty-new');
+    if (btnNewPrompt) {
+      btnNewPrompt.addEventListener('click', () => {
+        renderEditorView(null);
+      });
+    }
+
+    // Reset defaults button
+    const btnResetDefaults = modal.querySelector('#gsp-btn-reset-defaults') || modal.querySelector('#gsp-btn-empty-restore');
+    if (btnResetDefaults) {
+      btnResetDefaults.addEventListener('click', async () => {
         if (confirm(t('confirm_reset_defaults'))) {
           activePrompts = [...DEFAULT_PROMPTS];
           await savePrompts();
-          renderModalContent(null);
+          renderLibraryView('');
         }
-      });
-
-      modal.querySelectorAll('.gsp-btn-edit-item').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const id = btn.getAttribute('data-id');
-          const p = activePrompts.find(item => item.id === id);
-          if (p) renderModalContent(p);
-        });
-      });
-
-      modal.querySelectorAll('.gsp-btn-del-item').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const id = btn.getAttribute('data-id');
-          if (confirm(t('confirm_delete_prompt'))) {
-            activePrompts = activePrompts.filter(item => item.id !== id);
-            await savePrompts();
-            renderModalContent(null);
-          }
-        });
-      });
-
-      const form = modal.querySelector('#gsp-prompt-editor-form');
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = modal.querySelector('#gsp-form-id').value.trim();
-        const rawTitle = modal.querySelector('#gsp-form-title').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
-        const desc = modal.querySelector('#gsp-form-desc').value.trim();
-        const model = modal.querySelector('#gsp-form-model').value;
-        const template = modal.querySelector('#gsp-form-template').value.trim();
-
-        if (!rawTitle) return;
-
-        if (id) {
-          const idx = activePrompts.findIndex(p => p.id === id);
-          if (idx !== -1) {
-            activePrompts[idx] = { id, title: rawTitle, desc, model, template };
-          }
-        } else {
-          activePrompts.push({
-            id: rawTitle + '-' + Date.now(),
-            title: rawTitle,
-            desc,
-            model,
-            template
-          });
-        }
-
-        await savePrompts();
-        renderModalContent(null);
       });
     }
+
+    // Delete all button
+    const btnDeleteAll = modal.querySelector('#gsp-btn-delete-all-prompts');
+    if (btnDeleteAll) {
+      btnDeleteAll.addEventListener('click', async () => {
+        if (confirm(t('confirm_delete_all_prompts'))) {
+          activePrompts = [];
+          await savePrompts();
+          renderLibraryView('');
+        }
+      });
+    }
+
+    // Search input
+    const searchInput = modal.querySelector('#gsp-library-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        renderLibraryView(e.target.value);
+        const nextInput = modal.querySelector('#gsp-library-search');
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.setSelectionRange(nextInput.value.length, nextInput.value.length);
+        }
+      });
+    }
+
+    const btnClearSearch = modal.querySelector('#gsp-btn-clear-search');
+    if (btnClearSearch) {
+      btnClearSearch.addEventListener('click', () => {
+        renderLibraryView('');
+      });
+    }
+
+    const btnResetSearch = modal.querySelector('#gsp-btn-reset-search');
+    if (btnResetSearch) {
+      btnResetSearch.addEventListener('click', () => {
+        renderLibraryView('');
+      });
+    }
+
+    // Edit and Delete buttons on cards
+    modal.querySelectorAll('.gsp-btn-edit-item').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        const p = activePrompts.find(item => item.id === id);
+        if (p) renderEditorView(p);
+      });
+    });
+
+    modal.querySelectorAll('.gsp-btn-del-item').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        if (confirm(t('confirm_delete_prompt'))) {
+          activePrompts = activePrompts.filter(item => item.id !== id);
+          await savePrompts();
+          renderLibraryView(currentSearchQuery);
+        }
+      });
+    });
+
+    // Clicking card opens edit
+    modal.querySelectorAll('.gsp-prompt-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.gsp-card-actions')) return;
+        const id = card.getAttribute('data-id');
+        const p = activePrompts.find(item => item.id === id);
+        if (p) renderEditorView(p);
+      });
+    });
+  }
+
+  function renderEditorView(formPrompt = null) {
+    const t = window.GSP?.t || ((k, p) => k);
+    const isEditing = !!(formPrompt && formPrompt.id);
+    const targetPrompt = formPrompt || { id: '', title: '', desc: '', model: 'keep', template: '' };
+
+    modal.innerHTML = `
+      <div class="gsp-modal-header">
+        <div class="gsp-modal-header-left">
+          <button type="button" class="gsp-btn-header-back" id="gsp-btn-back-to-library" title="${t('back_to_library')}">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+            <span>${t('back_to_library')}</span>
+          </button>
+        </div>
+        <div class="gsp-editor-header-title">
+          <span class="gsp-editor-badge">${isEditing ? t('btn_edit') : t('new_command_btn')}</span>
+          <h3 class="gsp-modal-title">
+            <span>${isEditing ? `//${escapeHtml(targetPrompt.title)}` : t('add_command_title')}</span>
+          </h3>
+        </div>
+        <div class="gsp-modal-header-actions">
+          <button type="button" class="gsp-modal-close-btn" id="gsp-btn-close-modal">✕</button>
+        </div>
+      </div>
+
+      <div class="gsp-editor-container">
+        <form id="gsp-prompt-editor-form" class="gsp-editor-form">
+          <input type="hidden" id="gsp-form-id" value="${escapeHtml(targetPrompt.id)}">
+
+          <div class="gsp-editor-fields-row">
+            <div class="gsp-input-group gsp-group-cmd-name">
+              <label class="gsp-input-label" for="gsp-form-title">${t('field_cmd_name')}</label>
+              <div class="gsp-cmd-input-container">
+                <span class="gsp-cmd-prefix">//</span>
+                <input type="text" id="gsp-form-title" class="gsp-input-field gsp-cmd-input" required placeholder="fix" value="${escapeHtml(targetPrompt.title)}" autocomplete="off" spellcheck="false" autofocus>
+              </div>
+            </div>
+
+            <div class="gsp-input-group gsp-group-cmd-desc">
+              <label class="gsp-input-label" for="gsp-form-desc">${t('field_short_desc')}</label>
+              <input type="text" id="gsp-form-desc" class="gsp-input-field" placeholder="${t('placeholder_desc')}" value="${escapeHtml(targetPrompt.desc)}">
+            </div>
+          </div>
+
+          <div class="gsp-input-group">
+            <label class="gsp-input-label">${t('field_auto_model')}</label>
+            <div class="gsp-model-chips-group">
+              <button type="button" class="gsp-model-chip ${targetPrompt.model === 'keep' ? 'gsp-chip-selected' : ''}" data-model="keep">
+                <span class="gsp-chip-dot"></span>
+                <span>${t('opt_model_keep')}</span>
+              </button>
+              <button type="button" class="gsp-model-chip ${(targetPrompt.model === 'flash-lite' || targetPrompt.model === 'flash_lite') ? 'gsp-chip-selected' : ''}" data-model="flash-lite">
+                <span class="gsp-chip-dot"></span>
+                <span>⚡ Flash Lite</span>
+              </button>
+              <button type="button" class="gsp-model-chip ${targetPrompt.model === 'flash' ? 'gsp-chip-selected' : ''}" data-model="flash">
+                <span class="gsp-chip-dot"></span>
+                <span>Flash</span>
+              </button>
+              <button type="button" class="gsp-model-chip ${targetPrompt.model === 'pro' ? 'gsp-chip-selected' : ''}" data-model="pro">
+                <span class="gsp-chip-dot"></span>
+                <span>💎 Pro</span>
+              </button>
+            </div>
+            <input type="hidden" id="gsp-form-model" value="${targetPrompt.model || 'keep'}">
+          </div>
+
+          <div class="gsp-input-group">
+            <label class="gsp-input-label" for="gsp-form-template">${t('field_prompt_text')}</label>
+            <textarea id="gsp-form-template" class="gsp-input-field gsp-textarea-template" rows="7" required placeholder="${t('placeholder_template')}">${escapeHtml(targetPrompt.template)}</textarea>
+          </div>
+
+          <div class="gsp-editor-actions-bar">
+            <button type="button" class="gsp-btn-secondary" id="gsp-btn-cancel-edit">${t('btn_cancel')}</button>
+            <button type="submit" class="gsp-btn-primary">${t('btn_save_command')}</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    // Bind back and close
+    modal.querySelector('#gsp-btn-close-modal').addEventListener('click', closeModal);
+    modal.querySelector('#gsp-btn-back-to-library').addEventListener('click', () => {
+      renderLibraryView(currentSearchQuery);
+    });
+    modal.querySelector('#gsp-btn-cancel-edit').addEventListener('click', () => {
+      renderLibraryView(currentSearchQuery);
+    });
+
+    // Model chips interaction
+    modal.querySelectorAll('.gsp-model-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        modal.querySelectorAll('.gsp-model-chip').forEach(c => c.classList.remove('gsp-chip-selected'));
+        chip.classList.add('gsp-chip-selected');
+        modal.querySelector('#gsp-form-model').value = chip.getAttribute('data-model');
+      });
+    });
+
+    // Form submit
+    const form = modal.querySelector('#gsp-prompt-editor-form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = modal.querySelector('#gsp-form-id').value.trim();
+      const rawTitle = modal.querySelector('#gsp-form-title').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+      const desc = modal.querySelector('#gsp-form-desc').value.trim();
+      const model = modal.querySelector('#gsp-form-model').value;
+      const template = modal.querySelector('#gsp-form-template').value.trim();
+
+      if (!rawTitle) return;
+
+      // Check if prompt shortcut name already exists
+      const isDuplicate = activePrompts.some(p => {
+        if (id && p.id === id) return false;
+        return p.title.toLowerCase() === rawTitle.toLowerCase();
+      });
+
+      if (isDuplicate) {
+        alert(t('cmd_name_exists', { name: rawTitle }));
+        const titleInput = modal.querySelector('#gsp-form-title');
+        if (titleInput) {
+          titleInput.focus();
+          titleInput.select();
+        }
+        return;
+      }
+
+      if (id) {
+        const idx = activePrompts.findIndex(p => p.id === id);
+        if (idx !== -1) {
+          activePrompts[idx] = { id, title: rawTitle, desc, model, template };
+        }
+      } else {
+        activePrompts.push({
+          id: rawTitle + '-' + Date.now(),
+          title: rawTitle,
+          desc,
+          model,
+          template
+        });
+      }
+
+      await savePrompts();
+      renderLibraryView(currentSearchQuery);
+    });
+  }
 
     function closeModal() {
       window.removeEventListener('keydown', handleModalKeydown, true);
@@ -895,9 +1121,9 @@
 
     if (editingPromptId) {
       const p = activePrompts.find(item => item.id === editingPromptId);
-      renderModalContent(p || null);
+      renderEditorView(p || null);
     } else {
-      renderModalContent(null);
+      renderLibraryView('');
     }
 
     backdrop.appendChild(modal);
