@@ -25,28 +25,42 @@
   --gsp-text-on-danger: #ffffff;
 }
 
-/* Dark theme overrides strictly matching Gemini native Dark Mode (#131314 / #1e1f20) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --gsp-bg-pill: #1e1f20;
-    --gsp-bg-pill-hover: #282a2c;
-    --gsp-bg-pill-active: #0842a0;
-    --gsp-border-pill: rgba(255, 255, 255, 0.1);
-    --gsp-text-primary: #e3e3e3;
-    --gsp-text-secondary: #c4c7c5;
-    --gsp-text-muted: #8e918f;
-    --gsp-bg-card: #1e1f20;
-    --gsp-bg-inner: #131314;
-    --gsp-border-card: rgba(255, 255, 255, 0.1);
-    --gsp-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.6), 0 1px 6px rgba(0, 0, 0, 0.4);
-    --gsp-accent: #a8c7fa;
-    --gsp-accent-rgb: 168, 199, 250;
-    --gsp-text-on-accent: #041e49;
-    --gsp-danger: #f28b82;
-    --gsp-text-on-danger: #601410;
-  }
+/* Explicit Light theme overrides strictly matching Gemini native Light Mode */
+:root[data-gsp-theme="light"],
+html[data-gsp-theme="light"],
+body[data-gsp-theme="light"],
+html.light-theme,
+body.light-theme,
+html.theme-light,
+body.theme-light,
+[data-theme="light"],
+[data-color-mode="light"],
+html[class*="light"],
+body[class*="light"],
+[class*="light-theme"],
+.gsp-theme-light {
+  --gsp-bg-pill: rgba(255, 255, 255, 0.9) !important;
+  --gsp-bg-pill-hover: #f0f4f9 !important;
+  --gsp-bg-pill-active: #d3e3fd !important;
+  --gsp-border-pill: rgba(0, 0, 0, 0.12) !important;
+  --gsp-text-primary: #1f1f1f !important;
+  --gsp-text-secondary: #444746 !important;
+  --gsp-text-muted: #727775 !important;
+  --gsp-bg-card: #ffffff !important;
+  --gsp-bg-inner: #f8fafd !important;
+  --gsp-border-card: rgba(0, 0, 0, 0.12) !important;
+  --gsp-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+  --gsp-accent: #0b57d0 !important;
+  --gsp-accent-rgb: 11, 87, 208 !important;
+  --gsp-text-on-accent: #ffffff !important;
+  --gsp-danger: #d93025 !important;
+  --gsp-text-on-danger: #ffffff !important;
 }
 
+/* Dark theme overrides strictly matching Gemini native Dark Mode (#131314 / #1e1f20) */
+:root[data-gsp-theme="dark"],
+html[data-gsp-theme="dark"],
+body[data-gsp-theme="dark"],
 html.dark-theme,
 body.dark-theme,
 html.theme-dark,
@@ -55,7 +69,8 @@ body.theme-dark,
 [data-color-mode="dark"],
 html[class*="dark"],
 body[class*="dark"],
-[class*="dark-theme"] {
+[class*="dark-theme"],
+.gsp-theme-dark {
   --gsp-bg-pill: #1e1f20 !important;
   --gsp-bg-pill-hover: #282a2c !important;
   --gsp-bg-pill-active: #333538 !important;
@@ -1363,12 +1378,34 @@ body.gsp-silent-deleting [role="menu"] {
   user-select: none !important;
 }
 
-@media (prefers-color-scheme: dark), [data-theme="dark"], body.theme-dark, .theme-dark, [data-theme="system"][data-color-mode="dark"] {
-  .gsp-toast {
-    background: #1e1f20 !important;
-    color: #e3e3e3 !important;
-    box-shadow: 0 6px 24px 0 rgba(0, 0, 0, 0.45), 0 1px 8px 0 rgba(0, 0, 0, 0.3) !important;
-  }
+:root[data-gsp-theme="dark"] .gsp-toast,
+html[data-gsp-theme="dark"] .gsp-toast,
+body[data-gsp-theme="dark"] .gsp-toast,
+body.dark-theme .gsp-toast,
+html.dark-theme .gsp-toast,
+body.theme-dark .gsp-toast,
+html.theme-dark .gsp-toast,
+[data-theme="dark"] .gsp-toast,
+[data-color-mode="dark"] .gsp-toast,
+.gsp-theme-dark .gsp-toast {
+  background: #1e1f20 !important;
+  color: #e3e3e3 !important;
+  box-shadow: 0 6px 24px 0 rgba(0, 0, 0, 0.45), 0 1px 8px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+:root[data-gsp-theme="light"] .gsp-toast,
+html[data-gsp-theme="light"] .gsp-toast,
+body[data-gsp-theme="light"] .gsp-toast,
+body.light-theme .gsp-toast,
+html.light-theme .gsp-toast,
+body.theme-light .gsp-toast,
+html.theme-light .gsp-toast,
+[data-theme="light"] .gsp-toast,
+[data-color-mode="light"] .gsp-toast,
+.gsp-theme-light .gsp-toast {
+  background: #ffffff !important;
+  color: #1f1f1f !important;
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.06) !important;
 }
 
 .gsp-toast.gsp-toast-show {
