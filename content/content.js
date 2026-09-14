@@ -8,6 +8,10 @@
   console.log('⚡ [Gemini Superpowers] Extension initialized');
 
   function initAll() {
+    // Only initialize UI components in the top window
+    if (window !== window.top) {
+      return;
+    }
     if (window.GSP) {
       if (window.GSP.initThemeSync) window.GSP.initThemeSync();
       if (window.GSP.initAutoFocus) window.GSP.initAutoFocus();

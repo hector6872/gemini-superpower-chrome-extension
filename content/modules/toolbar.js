@@ -122,7 +122,7 @@
               <svg viewBox="0 0 24 24">
                 <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
               </svg>
-              <span id="gsp-usage-pill-text">0%</span>
+              <span id="gsp-usage-pill-text">--</span>
             </button>
             <div class="gsp-usage-popover" id="gsp-usage-popover">
               <!-- Dynamic popover content -->
@@ -154,6 +154,12 @@
       // Insert OUTSIDE and directly BEFORE the outermost input card
       inputCard.parentNode.insertBefore(toolbar, inputCard);
 
+      // Populate popover & pill immediately from storage if available
+      const popoverEl = toolbar.querySelector('#gsp-usage-popover');
+      if (popoverEl) {
+        updateUsagePopoverContent(popoverEl);
+      }
+
       // Event Listeners
       const promptsBtn = toolbar.querySelector('#gsp-btn-prompts');
       if (promptsBtn) {
@@ -173,6 +179,7 @@
           e.stopPropagation();
           isPopoverOpen = !isPopoverOpen;
           if (isPopoverOpen) {
+            if (window.GSP?.autoFetchUsage) window.GSP.autoFetchUsage(true);
             await updateUsagePopoverContent(popover);
             popover.classList.add('gsp-visible');
           } else {
