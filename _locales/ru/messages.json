@@ -1,0 +1,10 @@
+{
+  "extensionName": {
+    "message": "Gemini Superpowers",
+    "description": "Название расширения для Chrome"
+  },
+  "extensionDescription": {
+    "message": "Расширьте возможности Google Gemini: шаблоны команд //, переключение моделей, навигация по сообщениям, отслеживание лимитов и массовое удаление чатов.",
+    "description": "Описание расширения для Chrome"
+  }
+}

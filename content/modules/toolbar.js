@@ -122,7 +122,7 @@
               <svg viewBox="0 0 24 24">
                 <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
               </svg>
-              <span id="gsp-usage-pill-text">0%</span>
+              <span id="gsp-usage-pill-text">--</span>
             </button>
             <div class="gsp-usage-popover" id="gsp-usage-popover">
               <!-- Dynamic popover content -->
@@ -154,11 +154,27 @@
       // Insert OUTSIDE and directly BEFORE the outermost input card
       inputCard.parentNode.insertBefore(toolbar, inputCard);
 
+      // Populate popover & pill immediately from storage if available
+      const popoverEl = toolbar.querySelector('#gsp-usage-popover');
+      if (popoverEl) {
+        updateUsagePopoverContent(popoverEl);
+      }
+
+      function closeUsagePopover() {
+        if (!isPopoverOpen) return;
+        isPopoverOpen = false;
+        const popoverEl = document.getElementById('gsp-usage-popover');
+        if (popoverEl) {
+          popoverEl.classList.remove('gsp-visible');
+        }
+      }
+
       // Event Listeners
       const promptsBtn = toolbar.querySelector('#gsp-btn-prompts');
       if (promptsBtn) {
         promptsBtn.addEventListener('click', (e) => {
           e.stopPropagation();
+          closeUsagePopover();
           if (window.GSP?.togglePromptMenu) {
             window.GSP.togglePromptMenu();
           }
@@ -173,6 +189,7 @@
           e.stopPropagation();
           isPopoverOpen = !isPopoverOpen;
           if (isPopoverOpen) {
+            if (window.GSP?.autoFetchUsage) window.GSP.autoFetchUsage(true);
             await updateUsagePopoverContent(popover);
             popover.classList.add('gsp-visible');
           } else {
@@ -180,11 +197,31 @@
           }
         });
 
-        // Close popover when clicking outside
-        document.addEventListener('click', (e) => {
-          if (!toolbar.contains(e.target) && isPopoverOpen) {
-            isPopoverOpen = false;
-            popover.classList.remove('gsp-visible');
+        // Close when clicking/tapping outside (capture phase so stopPropagation in chat doesn't block it)
+        document.addEventListener('pointerdown', (e) => {
+          if (!isPopoverOpen) return;
+          const wrapper = document.querySelector('.gsp-usage-wrapper');
+          if (wrapper && !wrapper.contains(e.target)) {
+            closeUsagePopover();
+          }
+        }, true);
+
+        // Close on focus moving outside the usage popover
+        document.addEventListener('focusin', (e) => {
+          if (!isPopoverOpen) return;
+          const wrapper = document.querySelector('.gsp-usage-wrapper');
+          if (wrapper && !wrapper.contains(e.target)) {
+            closeUsagePopover();
+          }
+        });
+
+        // Close when window loses focus (e.g. switching tabs or apps)
+        window.addEventListener('blur', closeUsagePopover);
+
+        // Close when pressing Escape key
+        document.addEventListener('keydown', (e) => {
+          if (isPopoverOpen && e.key === 'Escape') {
+            closeUsagePopover();
           }
         });
       }

@@ -26,65 +26,78 @@
 
   function parseUsageFromText(text) {
     if (!text || typeof text !== 'string') return null;
+    if (text.length > 500000 || text.length < 20) return null;
+    if (text.includes('StreamGenerateContent') || text.includes('prompt-suggestion')) return null;
 
-    let fiveHourUsage = null;
-    let weeklyUsage = null;
-    let resetsIn = null;
-    let weeklyResetsIn = null;
+    const cleanText = text
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<[^>]+>/g, '\n');
 
-    const currentUsageMatch = text.match(/Current usage[^\n\r]*?(\d+%\s*used)/i) ||
-                              text.match(/"current[_\s]?usage"[^}]*?(\d+%\s*used)/i) ||
-                              text.match(/(\d+)%\s*used/i);
+    const lines = cleanText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const pctEntries = [];
 
-    const weeklyUsageMatch = text.match(/Weekly limit[^\n\r]*?(\d+%\s*used)/i) ||
-                             text.match(/"weekly[_\s]?(?:limit|usage)"[^}]*?(\d+%\s*used)/i);
-
-    const resetTimeMatch = text.match(/Resets\s+(?:at\s+)?(\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?)/i) ||
-                           text.match(/"resets[_\s]?(?:at|time|in)"\s*:\s*"([^"]+)"/i);
-
-    const weeklyResetMatch = text.match(/Resets\s+([A-Za-z]{3}\s+\d{1,2}(?:\s+at\s+\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?)?)/i);
-
-    if (currentUsageMatch) {
-      const numMatch = currentUsageMatch[1] ? currentUsageMatch[1].match(/(\d+)%/) : currentUsageMatch[0].match(/(\d+)%/);
-      if (numMatch) fiveHourUsage = `${numMatch[1]}%`;
-    }
-
-    if (weeklyUsageMatch) {
-      const numMatch = weeklyUsageMatch[1] ? weeklyUsageMatch[1].match(/(\d+)%/) : weeklyUsageMatch[0].match(/(\d+)%/);
-      if (numMatch) weeklyUsage = `${numMatch[1]}%`;
-    }
-
-    if (resetTimeMatch) {
-      resetsIn = resetTimeMatch[1];
-    }
-
-    if (weeklyResetMatch) {
-      weeklyResetsIn = weeklyResetMatch[1];
-    }
-
-    if (!fiveHourUsage) {
-      const ratioMatch = text.match(/"current_usage_ratio"\s*:\s*([0-9.]+)/i) ||
-                         text.match(/"usageRatio"\s*:\s*([0-9.]+)/i);
-      if (ratioMatch) {
-        fiveHourUsage = `${Math.round(parseFloat(ratioMatch[1]) * 100)}%`;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (/[{}:;]/.test(line)) continue;
+      const m = line.match(/(\d{1,3})%/);
+      if (m) {
+        pctEntries.push({ index: i, pct: `${m[1]}%`, line });
       }
     }
 
-    if (fiveHourUsage || weeklyUsage || resetsIn) {
-      return {
-        fiveHourUsage: fiveHourUsage || '1%',
-        weeklyUsage: weeklyUsage || '2%',
-        resetsIn: resetsIn || null,
-        weeklyResetsIn: weeklyResetsIn || null,
-        rawText: text.substring(0, 300)
-      };
+    if (pctEntries.length < 2) {
+      return null;
     }
 
-    return null;
+    const fiveHourUsage = pctEntries[0].pct;
+    const weeklyUsage = pctEntries[1].pct;
+
+    // A genuine quota must have a valid reset time (e.g. 2:47 PM or 14:47)
+    let resetsIn = null;
+    const searchEnd5h = pctEntries[1].index;
+    for (let i = pctEntries[0].index; i <= searchEnd5h; i++) {
+      const m = lines[i]?.match(/\b(\d{1,2}:\d{2}(?:\s*(?:AM|PM|am|pm))?)\b/);
+      if (m) {
+        resetsIn = m[1].trim();
+        break;
+      }
+    }
+    if (!resetsIn) {
+      const generalTime = cleanText.match(/\b(\d{1,2}:\d{2}(?:\s*(?:AM|PM|am|pm))?)\b/);
+      if (generalTime) resetsIn = generalTime[1].trim();
+    }
+
+    if (!resetsIn) return null;
+
+    let weeklyResetsIn = null;
+    const afterPctIndex = cleanText.indexOf(weeklyUsage) + weeklyUsage.length;
+    const textAfter = cleanText.substring(afterPctIndex);
+    const weeklyTimeMatch = textAfter.match(/\b\d{1,2}:\d{2}(?:\s*[AaPp][Mm])?\b/);
+
+    if (weeklyTimeMatch) {
+      const timeEnd = weeklyTimeMatch.index + weeklyTimeMatch[0].length;
+      const segment = textAfter.substring(0, timeEnd).trim();
+      const sLines = segment.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const timeLine = sLines.reverse().find(l => l.includes(weeklyTimeMatch[0])) || segment;
+
+      const cleaned = timeLine.replace(/^.*?(?:resets?|restablece(?: el)?|сброс|リセット[:\s]*|إعادة الضبط[:\s]*|wird.*?zurückgesetzt[:\s]*)?\s*(\b\d{1,2}月.*|\b\d{1,2}\s+.*|\b[A-Za-z\u0400-\u04FF]{3,9}\b\s+\d{1,2}.*|\b\d{1,2}\..*)/i, '$1');
+      weeklyResetsIn = (cleaned || timeLine).replace(/^[^A-Za-z0-9\u0400-\u04FF\u4E00-\u9FFF]+/, '').trim();
+    }
+
+    return {
+      fiveHourUsage,
+      weeklyUsage,
+      resetsIn,
+      weeklyResetsIn,
+      rawText: text.substring(0, 300)
+    };
   }
 
   function notifyOfficialQuota(data) {
     if (!data) return;
+    if (!data.fiveHourUsage || !data.resetsIn) return;
+
     window.postMessage({
       type: 'GSP_OFFICIAL_QUOTA_UPDATE',
       data: {
@@ -94,27 +107,18 @@
     }, '*');
   }
 
-  // Scan all script tags and DOM
+  // Scan targeted script tags on load
   function scanPage() {
     try {
       const scripts = document.querySelectorAll('script');
       for (const s of scripts) {
         const text = s.textContent || '';
-        if (text.includes('Usage limits') || text.includes('Current usage') || text.includes('% used') || text.includes('Weekly limit')) {
+        if (text.includes('%') && /\b\d{1,2}:\d{2}\b/.test(text)) {
           const quota = parseUsageFromText(text);
           if (quota) {
             notifyOfficialQuota(quota);
             return;
           }
-        }
-      }
-
-      const bodyText = document.body ? document.body.innerText : '';
-      if (bodyText.includes('Current usage') && bodyText.includes('used')) {
-        const quota = parseUsageFromText(bodyText);
-        if (quota) {
-          notifyOfficialQuota(quota);
-          return;
         }
       }
     } catch (e) {}
@@ -199,7 +203,6 @@
   });
 
   scanPage();
-  setTimeout(scanPage, 1000);
-  setTimeout(scanPage, 3000);
-  setInterval(scanPage, 5000);
+  setTimeout(scanPage, 1500);
+  setTimeout(scanPage, 4000);
 })();

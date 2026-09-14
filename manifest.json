@@ -17,20 +17,32 @@
     }
   },
   "permissions": [
-    "storage"
+    "storage",
+    "declarativeNetRequest"
   ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules/rules.json"
+      }
+    ]
+  },
   "host_permissions": [
     "https://gemini.google.com/*"
   ],
   "content_scripts": [
     {
       "matches": ["https://gemini.google.com/*"],
+      "all_frames": true,
       "js": ["content/interceptor.js"],
       "world": "MAIN",
       "run_at": "document_start"
     },
     {
       "matches": ["https://gemini.google.com/*"],
+      "all_frames": true,
       "css": ["content/superpower.css"],
       "js": [
         "content/modules/i18n.js",

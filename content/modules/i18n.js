@@ -529,6 +529,81 @@
       confirm_delete_all: '最近の会話 {count} 件をすべて削除してもよろしいですか？\n\nこの操作は取り消せません。',
       no_conversations: '削除可能な最近の会話は見つかりませんでした。',
       deleting_progress: '{current}/{total} 件目を削除中...'
+    },
+
+    ru: {
+      // Toolbar
+      prompts_btn: '// Промпты',
+      prompts_btn_title: 'Быстрые промпты и шаблоны (//)',
+      nav_top_title: 'В начало чата',
+      nav_prev_title: 'Предыдущий промпт',
+      nav_next_title: 'Следующий промпт',
+      wide_mode_title: 'Широкий экран (На всю ширину)',
+      delete_all_btn: 'Удалить всё',
+      delete_all_title: 'Удалить все недавние диалоги',
+
+      // Prompts Menu
+      quick_prompts_header: '✨ Быстрые промпты (//)',
+      edit_prompts_btn: 'Библиотека',
+      edit_prompts_title: 'Открыть менеджер библиотеки промптов',
+      menu_footer: '↑↓ навигация • Enter / Tab / Пробел для вставки',
+
+      // Prompt Manager Modal
+      manager_title: 'Менеджер библиотеки промптов',
+      your_commands: 'Промпты (//)',
+      new_command_btn: 'Новый промпт',
+      edit_command_title: 'Редактировать //',
+      add_command_title: 'Новый промпт',
+      field_cmd_name: 'Имя команды (одно слово)',
+      field_short_desc: 'Описание (необязательно)',
+      field_auto_model: 'Автоматически переключать модель',
+      field_prompt_text: 'Текст промпта',
+      placeholder_cmd_name: 'напр. правка',
+      placeholder_desc: 'напр. Улучшить тон и читаемость',
+      placeholder_template: 'напр.\nДействуй как опытный редактор. Пожалуйста, отредактируй и улучши следующий текст по этим правилам:\n• Повысь ясность, связность и точность\n• Сохраняй профессиональный и живой тон\n• Добавь краткий список основных изменений',
+      opt_model_keep: 'Текущая модель',
+      opt_model_flash_lite: 'Gemini Flash Lite',
+      opt_model_flash: 'Gemini Flash',
+      opt_model_pro: 'Gemini Pro',
+      btn_restore_defaults: 'Сбросить настройки',
+      btn_save_command: 'Сохранить',
+      btn_update_command: 'Обновить',
+      btn_edit: 'Изменить',
+      btn_delete: 'Удалить',
+      btn_export: 'Экспорт JSON',
+      btn_import: 'Импорт JSON',
+      export_prompts_title: 'Экспортировать библиотеку промптов в JSON',
+      import_prompts_title: 'Импортировать промпты из JSON',
+      confirm_import_prompts: 'Импортировать {count} команд(у/ы) из этого файла?\n\nСуществующие команды с совпадающими именами будут обновлены, а новые — добавлены.',
+      import_result_summary: 'Импорт успешно завершен!\n\n• Добавлено команд: {added} ({addedList})\n• Обновлено: {updated}\n• Без изменений: {identical}',
+      import_result_no_new: 'Импорт успешно завершен!\n\n• 0 новых команд добавлено\n• Обновлено: {updated}\n• Без изменений: {identical}',
+      import_error_msg: 'Не удалось импортировать промпты: {error}',
+      confirm_reset_defaults: 'Восстановить промпты по умолчанию?\n\nВсе текущие промпты будут удалены и заменены стандартными.',
+      confirm_delete_prompt: 'Удалить этот шаблон промпта?',
+      btn_delete_all_prompts: 'Удалить всё',
+      delete_all_prompts_title: 'Удалить все промпты',
+      confirm_delete_all_prompts: 'Вы уверены, что хотите удалить все промпты?\n\nЭто действие удалит все ваши быстрые команды.',
+      empty_prompts_title: 'Быстрых промптов пока нет',
+      empty_prompts_desc: 'У вас нет быстрых команд. Создайте первую через форму, импортируйте из JSON или восстановите стандартные.',
+      btn_cancel: 'Отмена',
+      back_to_library: 'Назад в библиотеку',
+      search_prompts_placeholder: 'Поиск промптов...',
+      clear_filter_btn: 'Очистить фильтр',
+      no_prompts_found: 'Промпты по запросу «{query}» не найдены',
+      cmd_name_exists: 'Команда с именем "//{name}" уже существует. Выберите другое имя.',
+
+      // Usage Limits Card
+      usage_card_title: 'Лимиты использования',
+      usage_card_info: 'Официальные квоты, обновляемые по мере активности',
+      usage_5h_label: 'Расход за 5 часов',
+      usage_weekly_label: 'Недельный лимит',
+      usage_resets_label: 'Сброс',
+      usage_synced_status: 'Синхронизировано с последним промптом',
+
+      // Bulk Delete
+      confirm_delete_all: 'Вы уверены, что хотите удалить все недавние диалоги ({count})?\n\nЭто действие нельзя отменить.',
+      no_conversations: 'Не найдено недавних диалогов для удаления.',
+      deleting_progress: 'Удаление {current}/{total}...'
     }
   };
 
