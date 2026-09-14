@@ -23,11 +23,14 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
    - Seamless design supporting both Light and Dark themes automatically.
 
 2. **Official Usage Limits & Reset Timers (5-Hour & Weekly)**:
-   - Interactive usage badge (`🕒 X%`) showing your current Gemini quota.
-   - On-demand floating popover card showing official data synchronized directly with Gemini's *Usage limits*:
+   - Interactive usage badge (`🕒 X%`) showing your current Gemini quota directly on the toolbar.
+   - **100% Language-Agnostic Engine**: Accurately tracks quota percentages and reset schedules across all 45+ languages supported by Google Gemini without relying on localized keyword or month dictionaries.
+   - **Background Synchronization**: Automatically synchronizes Gemini's official usage limits in the background via Declarative Net Request rules, keeping your metrics up to date during normal chat without needing to open the native settings modal.
+   - On-demand floating popover card with live countdown timers:
      - **5-hour usage**: Current usage percentage and exact reset time with live countdown (e.g. *1% used • Resets at 4:47 PM (in 2h 45m)*).
-     - **Weekly limit**: Weekly usage percentage and exact reset date/time (e.g. *2% used • Resets Sep 3 at 5:47 PM*).
-     - **Live status**: `🟢 Synced with your latest prompt` (updated automatically in the background via network interceptor).
+     - **Weekly limit**: Weekly usage percentage and exact reset date/time with countdown (e.g. *2% used • Resets Sep 17 at 5:47 PM*).
+     - **Live status**: `🟢 Synced with your latest prompt` (updates seamlessly as you chat).
+   - **Smart Popover Auto-Dismiss**: Closes cleanly whenever focus shifts away, the window blurs, the user clicks outside, or the `Escape` key is pressed.
 
 3. **User Prompt Navigator (`⤒`, `^` and `v`)**:
    - Jump smoothly and instantly between your previous and next user query prompts without tedious manual scrolling, skipping long model responses.
@@ -57,7 +60,7 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
    - Native confirmation dialog with silent, background batch deletion.
 
 8. **Internationalization & Multi-Language Support (i18n)**:
-   - Full native localization for English, Spanish, German, French, Italian, Portuguese, and Japanese.
+   - Full native localization for English, Spanish, German, French, Italian, Portuguese, Japanese, and Russian.
    - Automatically adapts all toolbar controls, prompt menus, library managers, usage cards, and dialogs to match your browser's language setting.
 
 ---

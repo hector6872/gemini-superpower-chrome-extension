@@ -76,6 +76,7 @@ Feature requests are always welcome:
 
 ```
 ├── manifest.json              # Chrome Manifest V3 configuration
+├── _locales/                  # Multi-language message catalogs (en, es, de, fr, it, ja, pt, ru)
 ├── content/
 │   ├── interceptor.js         # MAIN world network interceptor for official Gemini RPCs
 │   ├── superpower.css         # Native Material You styling & Wide mode layout
@@ -83,11 +84,16 @@ Feature requests are always welcome:
 │   └── modules/
 │       ├── autoFocus.js       # Smart prompt input auto-focus & keyboard shortcuts
 │       ├── bulkDelete.js      # Bulk delete conversation manager in sidebar
+│       ├── i18n.js            # Internationalization helper & locale dictionary
 │       ├── navigator.js       # User prompt jumping (^ / v / ⤒) & scroll thresholding
 │       ├── promptCommands.js  # // single-word prompts autocomplete & in-page editor
+│       ├── themeSync.js       # Real-time light/dark theme detector & synchronizer
 │       ├── toolbar.js         # Floating pill toolbar placed above the input card
-│       ├── usageTracker.js    # Official usage limits extractor and countdown timers
+│       ├── usageTracker.js    # Language-agnostic usage limits extractor & countdown timers
 │       └── wideMode.js        # Full-width chat layout switcher
+├── popup/                     # Extension popup UI (status, quick toggles, info)
+├── rules/
+│   └── rules.json             # Declarative Net Request rules for background usage sync
 ├── icons/                     # Extension icons (16px, 48px, 128px)
 ├── CONTRIBUTING.md            # Contribution guidelines
 ├── LICENSE                    # MIT License

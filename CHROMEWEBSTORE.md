@@ -12,6 +12,7 @@
 | Permission | Justification |
 | :--- | :--- |
 | `storage` | Required to store custom prompt templates created by the user, local usage tracking metrics, and user preferences locally in the browser. |
+| `declarativeNetRequest` | Required to strip frame-ancestors and X-Frame-Options headers from the usage limits route so that quota metrics can be seamlessly synchronized in the background without interrupting the user. |
 
 ## Host Permissions Justification
 
