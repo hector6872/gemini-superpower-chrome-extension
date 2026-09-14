@@ -160,11 +160,21 @@
         updateUsagePopoverContent(popoverEl);
       }
 
+      function closeUsagePopover() {
+        if (!isPopoverOpen) return;
+        isPopoverOpen = false;
+        const popoverEl = document.getElementById('gsp-usage-popover');
+        if (popoverEl) {
+          popoverEl.classList.remove('gsp-visible');
+        }
+      }
+
       // Event Listeners
       const promptsBtn = toolbar.querySelector('#gsp-btn-prompts');
       if (promptsBtn) {
         promptsBtn.addEventListener('click', (e) => {
           e.stopPropagation();
+          closeUsagePopover();
           if (window.GSP?.togglePromptMenu) {
             window.GSP.togglePromptMenu();
           }
@@ -187,11 +197,31 @@
           }
         });
 
-        // Close popover when clicking outside
-        document.addEventListener('click', (e) => {
-          if (!toolbar.contains(e.target) && isPopoverOpen) {
-            isPopoverOpen = false;
-            popover.classList.remove('gsp-visible');
+        // Close when clicking/tapping outside (capture phase so stopPropagation in chat doesn't block it)
+        document.addEventListener('pointerdown', (e) => {
+          if (!isPopoverOpen) return;
+          const wrapper = document.querySelector('.gsp-usage-wrapper');
+          if (wrapper && !wrapper.contains(e.target)) {
+            closeUsagePopover();
+          }
+        }, true);
+
+        // Close on focus moving outside the usage popover
+        document.addEventListener('focusin', (e) => {
+          if (!isPopoverOpen) return;
+          const wrapper = document.querySelector('.gsp-usage-wrapper');
+          if (wrapper && !wrapper.contains(e.target)) {
+            closeUsagePopover();
+          }
+        });
+
+        // Close when window loses focus (e.g. switching tabs or apps)
+        window.addEventListener('blur', closeUsagePopover);
+
+        // Close when pressing Escape key
+        document.addEventListener('keydown', (e) => {
+          if (isPopoverOpen && e.key === 'Escape') {
+            closeUsagePopover();
           }
         });
       }
