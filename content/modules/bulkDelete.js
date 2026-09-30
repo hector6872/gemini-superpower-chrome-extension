@@ -9,20 +9,20 @@
   let isDeleting = false;
 
   function getConversationLinks() {
-    const candidateLinks = Array.from(document.querySelectorAll('side-nav a, mat-sidenav a, nav a, aside a, [class*="side-nav"] a, [class*="sidebar"] a, a[href*="/app/"]'));
+    const candidateLinks = Array.from(document.querySelectorAll('side-nav a, mat-sidenav a, nav a, aside a, [class*="side-nav"] a, [class*="sidebar"] a, [class*="drawer"] a, [data-test-id*="sidebar"] a, a[href*="/app/"], a[href*="/chat/"]'));
     return candidateLinks.filter(a => {
       const href = a.getAttribute('href') || '';
-      return href.includes('/app/') && a.offsetHeight > 0 && a.offsetParent !== null;
+      return (href.includes('/app/') || href.includes('/chat/')) && a.offsetHeight > 0 && a.offsetParent !== null;
     });
   }
 
   function extractConversationId(item) {
-    const href = item.getAttribute('href') || item.querySelector('a')?.getAttribute('href') || '';
-    const match = href.match(/\/app\/([a-zA-Z0-9_-]+)/);
-    return match ? match[1] : '';
+    const href = item.getAttribute('href') || item.querySelector('a')?.getAttribute('href') || item.getAttribute('data-conversation-id') || '';
+    const match = href.match(/\/(?:app|chat)\/([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : (item.getAttribute('data-conversation-id') || '');
   }
 
-  function findRecentSectionHeader() {
+  function findHeaderAndFilterAnchor() {
     // Look in all sidebars or drawers in DOM
     const sidebars = Array.from(document.querySelectorAll(
       'side-nav, mat-sidenav, nav, aside, [class*="side-nav"], [class*="sidebar"], [class*="drawer"], [data-test-id*="sidebar"]'
@@ -31,25 +31,41 @@
     // Find the currently visible sidebar (or fallback to any found sidebar or document.body)
     const activeSidebar = sidebars.find(sb => sb.offsetHeight > 0 && sb.offsetWidth > 0) || sidebars[0] || document.body;
 
-    // 1. Direct text/attribute match for "Recent" header inside sidebar
+    // 1. Look for the filter / search button in the sidebar (Google's new update)
+    const filterBtn = activeSidebar.querySelector(
+      'button[aria-label*="filter" i], button[aria-label*="filtrar" i], button[aria-label*="filtre" i], button[aria-label*="filteren" i], button[aria-label*="search" i], button[aria-label*="buscar" i], button[data-test-id*="filter" i], button[data-test-id*="search" i], [class*="chat-filter" i] button, [class*="filter-button" i], [class*="filter-btn" i]'
+    );
+
+    if (filterBtn && filterBtn.offsetHeight > 0 && filterBtn.offsetParent !== null) {
+      const headerContainer = filterBtn.closest('[class*="header" i], [class*="section" i], [class*="title" i], [class*="heading" i], div') || filterBtn.parentElement;
+      return { container: headerContainer, anchor: filterBtn };
+    }
+
+    // 2. Direct text/attribute match for "Recent" / "Chats" header inside sidebar
     const allHeaders = Array.from(activeSidebar.querySelectorAll(
-      '[data-test-id*="recent" i], [class*="recent" i], [aria-label*="recent" i], [aria-label*="reciente" i], [aria-label*="récent" i], h2, h3, h4, [class*="section-header" i], [class*="header" i], [class*="title" i], [class*="label" i], [class*="heading" i], [role="heading"]'
+      '[data-test-id*="recent" i], [class*="recent" i], [aria-label*="recent" i], [aria-label*="reciente" i], [aria-label*="récent" i], [class*="section-header" i], [class*="header" i], [class*="title" i], [class*="label" i], [class*="heading" i], h2, h3, h4, [role="heading"]'
     ));
 
-    const explicitRecent = allHeaders.find(el => {
+    const explicitHeader = allHeaders.find(el => {
       if (el.offsetHeight === 0 && el.offsetParent === null) return false;
       if (el.closest('[class*="brand" i], [class*="logo" i], [class*="new-chat" i], button, a, [role="listitem"]')) return false;
       const text = (el.textContent || '').toLowerCase().trim();
       const attr = (el.className + ' ' + (el.getAttribute('data-test-id') || '') + ' ' + (el.getAttribute('aria-label') || '')).toLowerCase();
       return text === 'recent' || text === 'recientes' || text === 'récents' || text === 'letzte' || text === 'recenti' ||
-             text.includes('recent') || text.includes('reciente') || text.includes('récent') || attr.includes('recent');
+             text === 'chats' || text === 'mis chats' || text === 'chat history' || text === 'historial' ||
+             text.includes('recent') || text.includes('reciente') || text.includes('récent') || text.includes('chat') ||
+             attr.includes('recent') || attr.includes('chat');
     });
 
-    if (explicitRecent) {
-      return explicitRecent;
+    if (explicitHeader) {
+      const parent = explicitHeader.parentElement;
+      if (parent && parent !== activeSidebar && parent.offsetHeight > 0 && parent.children.length > 1) {
+        return { container: parent, anchor: null };
+      }
+      return { container: explicitHeader, anchor: null };
     }
 
-    // 2. Proximity match to the first conversation link
+    // 3. Proximity match to the first conversation link
     const links = getConversationLinks();
     if (links.length > 0) {
       const firstLink = links[0];
@@ -57,7 +73,7 @@
       if (listContainer && listContainer.previousElementSibling) {
         const prev = listContainer.previousElementSibling;
         if (!prev.closest('[class*="brand" i], [class*="logo" i], [class*="new-chat" i], button, a')) {
-          return prev;
+          return { container: prev, anchor: null };
         }
       }
     }
@@ -67,25 +83,27 @@
 
   function injectBulkDeleteButton() {
     const existingBtn = document.getElementById('gsp-bulk-delete-btn');
-    if (existingBtn && existingBtn.isConnected && existingBtn.offsetParent !== null) {
+    const target = findHeaderAndFilterAnchor();
+    if (!target || !target.container) {
       return;
     }
 
-    const recentHeader = findRecentSectionHeader();
-    if (!recentHeader) return;
+    const { container, anchor } = target;
+
+    if (existingBtn && existingBtn.isConnected && container.contains(existingBtn) && existingBtn.offsetParent !== null) {
+      return;
+    }
 
     if (existingBtn) {
       existingBtn.remove();
     }
 
-    if (recentHeader.querySelector('#gsp-bulk-delete-btn')) return;
     const t = window.GSP?.t || ((k) => k);
 
-    recentHeader.style.display = 'flex';
-    recentHeader.style.alignItems = 'center';
-    recentHeader.style.justifyContent = 'space-between';
-    recentHeader.style.boxSizing = 'border-box';
-    recentHeader.style.paddingRight = '12px';
+    container.style.display = 'flex';
+    container.style.alignItems = 'center';
+    container.style.justifyContent = 'space-between';
+    container.style.boxSizing = 'border-box';
 
     const btn = document.createElement('button');
     btn.id = 'gsp-bulk-delete-btn';
@@ -105,7 +123,13 @@
       startBulkDelete();
     });
 
-    recentHeader.appendChild(btn);
+    if (anchor && anchor.parentNode === container) {
+      container.insertBefore(btn, anchor);
+    } else if (anchor && anchor.parentNode && container.contains(anchor.parentNode)) {
+      anchor.parentNode.insertBefore(btn, anchor);
+    } else {
+      container.appendChild(btn);
+    }
   }
 
   function deleteViaRPC(conversationId) {
@@ -261,24 +285,20 @@
         <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
           <path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/>
         </svg>
-        <span>Delete all</span>
+        <span>${t('delete_all_btn')}</span>
       `;
     }
   }
 
   function initBulkDelete() {
+    injectBulkDeleteButton();
     setInterval(injectBulkDeleteButton, 1000);
 
     const observer = new MutationObserver(() => {
       injectBulkDeleteButton();
     });
 
-    const sidebar = document.querySelector('side-nav, mat-sidenav, nav, aside, [class*="side-nav"], [class*="sidebar"]');
-    if (sidebar) {
-      observer.observe(sidebar, { childList: true, subtree: true });
-    } else {
-      observer.observe(document.body, { childList: true, subtree: true });
-    }
+    observer.observe(document.body, { childList: true, subtree: true });
   }
 
   window.GSP = window.GSP || {};
