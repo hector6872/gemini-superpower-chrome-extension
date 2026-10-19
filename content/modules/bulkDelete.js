@@ -215,14 +215,38 @@
     const filterBtn = findFilterButton();
 
     if (filterBtn && filterBtn.parentElement) {
-      // If already connected directly before filterBtn, nothing to do
-      if (existingBtn && existingBtn.isConnected && existingBtn.nextElementSibling === filterBtn) {
+      // If filterBtn is inside a narrow icon button wrapper (< 60px), walk up to the row container
+      let anchor = filterBtn;
+      let parent = filterBtn.parentElement;
+
+      while (parent && parent !== document.body) {
+        const rect = parent.getBoundingClientRect();
+        if (rect.width > 0 && rect.width < 60) {
+          anchor = parent;
+          parent = parent.parentElement;
+        } else {
+          break;
+        }
+      }
+
+      if (!parent) parent = filterBtn.parentElement;
+
+      // If already connected directly before anchor in the correct parent, nothing to do
+      if (existingBtn && existingBtn.isConnected && existingBtn.parentElement === parent && existingBtn.nextElementSibling === anchor) {
         return;
       }
 
       if (existingBtn) {
         existingBtn.remove();
       }
+
+      // Ensure parent container is a horizontal flex row
+      parent.style.display = 'flex';
+      parent.style.flexDirection = 'row';
+      parent.style.alignItems = 'center';
+
+      // Ensure anchor does not push away from btn with auto margin
+      anchor.style.marginLeft = '0';
 
       const t = window.GSP?.t || ((k) => k);
 
@@ -243,8 +267,8 @@
         startBulkDelete(includePinned);
       });
 
-      // Insert directly to the left of the filter button
-      filterBtn.parentElement.insertBefore(btn, filterBtn);
+      // Insert directly to the left of the filter anchor horizontally
+      parent.insertBefore(btn, anchor);
       return;
     }
 
