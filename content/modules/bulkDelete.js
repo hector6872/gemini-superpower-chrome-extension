@@ -8,71 +8,174 @@
 
   let isDeleting = false;
 
+  function extractConversationId(item) {
+    if (!item) return '';
+    const href = item.getAttribute('href') || item.querySelector('a')?.getAttribute('href') || item.getAttribute('data-conversation-id') || '';
+    const match = href.match(/\/(?:app|chat)\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1] && match[1] !== 'app' && match[1] !== 'chat') {
+      return match[1];
+    }
+    return item.getAttribute('data-conversation-id') || '';
+  }
+
   function getConversationLinks() {
-    const candidateLinks = Array.from(document.querySelectorAll('side-nav a, mat-sidenav a, nav a, aside a, [class*="side-nav"] a, [class*="sidebar"] a, [class*="drawer"] a, [data-test-id*="sidebar"] a, a[href*="/app/"], a[href*="/chat/"]'));
-    return candidateLinks.filter(a => {
-      const href = a.getAttribute('href') || '';
-      return (href.includes('/app/') || href.includes('/chat/')) && a.offsetHeight > 0 && a.offsetParent !== null;
+    const candidateLinks = Array.from(document.querySelectorAll(
+      'bard-sidenav a, side-nav a, mat-sidenav a, nav a, aside a, [class*="side-nav"] a, [class*="sidebar"] a, [class*="drawer"] a, [data-test-id*="sidebar"] a, a[href*="/app/"], a[href*="/chat/"]'
+    ));
+
+    const uniqueLinks = Array.from(new Set(candidateLinks));
+
+    return uniqueLinks.filter(a => {
+      if (a.closest('#gsp-floating-toolbar, .gsp-toolbar')) return false;
+      const href = a.getAttribute('href') || a.querySelector('a')?.getAttribute('href') || '';
+      const hasConvPath = /\/(?:app|chat)\/[a-zA-Z0-9_-]+/i.test(href) || a.hasAttribute('data-conversation-id');
+      if (!hasConvPath) return false;
+      const isVisible = (a.offsetHeight > 0 && a.offsetWidth > 0) || (a.getClientRects && a.getClientRects().length > 0);
+      return isVisible;
     });
   }
 
-  function extractConversationId(item) {
-    const href = item.getAttribute('href') || item.querySelector('a')?.getAttribute('href') || item.getAttribute('data-conversation-id') || '';
-    const match = href.match(/\/(?:app|chat)\/([a-zA-Z0-9_-]+)/);
-    return match ? match[1] : (item.getAttribute('data-conversation-id') || '');
+  function isMoreOptionsElement(el) {
+    if (!el) return false;
+    const tag = (el.tagName || '').toLowerCase();
+    const aria = (el.getAttribute('aria-label') || '').toLowerCase();
+    const title = (el.getAttribute('title') || '').toLowerCase();
+
+    if (el.getAttribute('aria-haspopup') === 'menu') return true;
+    if (aria.includes('more') || aria.includes('más') || aria.includes('opcion') || aria.includes('option') ||
+        title.includes('more') || title.includes('más') || title.includes('opcion')) {
+      return true;
+    }
+    const text = (el.textContent || '').trim().toLowerCase();
+    if (text === 'more_vert' || text === 'more_horiz') return true;
+
+    const path = el.querySelector?.('path')?.getAttribute('d') || (tag === 'path' ? el.getAttribute('d') : '') || '';
+    if (path.includes('12 8') || path.includes('12 12') || path.includes('12 16') || path.includes('2 2s') || path.includes('2-2s')) {
+      return true;
+    }
+    return false;
+  }
+
+  function getConversationRow(item) {
+    if (!item) return item;
+    const semantic = item.closest('side-navigation-item, [role="listitem"], mat-list-item, [class*="conversation-item"], [class*="chat-item"], li');
+    if (semantic && !semantic.contains(document.getElementById('gsp-bulk-delete-btn'))) {
+      const links = semantic.querySelectorAll('a[href*="/app/"], a[href*="/chat/"]');
+      if (links.length <= 1) return semantic;
+    }
+
+    let curr = item.parentElement || item;
+    for (let i = 0; i < 3; i++) {
+      const parent = curr.parentElement;
+      if (!parent || parent === document.body) break;
+      if (parent.id === 'gsp-bulk-delete-btn' || parent.contains(document.getElementById('gsp-bulk-delete-btn'))) break;
+      const links = parent.querySelectorAll('a[href*="/app/"], a[href*="/chat/"]');
+      if (links.length > 1) break;
+      curr = parent;
+    }
+    return curr;
   }
 
   function isPinnedConversation(item) {
     if (!item) return false;
 
-    const row = item.closest('[role="listitem"], mat-list-item, div, li') || item;
+    // 1. Check custom element container side-navigation-item and standard wrappers
+    const row = getConversationRow(item) || item.parentElement || item;
 
-    // 1. Direct class or attribute check
-    const rowClasses = (row.className + ' ' + (item.className || '')).toLowerCase();
-    if (rowClasses.includes('pinned') || rowClasses.includes('is-pinned') || rowClasses.includes('fijad')) {
-      return true;
-    }
-    if (row.getAttribute('data-is-pinned') === 'true' || row.getAttribute('data-pinned') === 'true' || item.getAttribute('data-pinned') === 'true') {
-      return true;
-    }
+    // Direct attributes on row or item
+    const rowAttrs = (row.getAttribute('data-is-pinned') || '') + ' ' + (row.getAttribute('data-pinned') || '') + ' ' +
+                     (item.getAttribute('data-is-pinned') || '') + ' ' + (item.getAttribute('data-pinned') || '');
+    if (rowAttrs.includes('true')) return true;
 
-    // 2. Pin / Keep icon inside the item row
-    const icons = Array.from(row.querySelectorAll('mat-icon, svg, [role="img"]'));
-    for (const icon of icons) {
-      const text = (icon.textContent || '').trim().toLowerCase();
-      if (text === 'keep' || text === 'push_pin' || text === 'pin' || text.includes('keep') || text.includes('pin')) {
-        return true;
+    // 2. Check if row is inside a pinned section / container / group
+    let cur = row.parentElement;
+    while (cur && cur !== document.body) {
+      if (cur.id === 'gsp-bulk-delete-btn' || cur.contains(document.getElementById('gsp-bulk-delete-btn'))) {
+        cur = cur.parentElement;
+        continue;
       }
-      const label = (icon.getAttribute('aria-label') || icon.getAttribute('title') || '').toLowerCase();
-      if (label.includes('pin') || label.includes('fijad') || label.includes('keep')) {
-        return true;
+      const label = (cur.getAttribute('aria-label') || cur.getAttribute('data-test-id') || (cur.className || '').toString()).toLowerCase();
+      if (label.includes('pinned') || label.includes('fijad')) {
+        const links = cur.querySelectorAll('a[href*="/app/"], a[href*="/chat/"]');
+        const allLinks = getConversationLinks();
+        if (links.length < allLinks.length) {
+          return true;
+        }
       }
+      cur = cur.parentElement;
     }
 
-    // 3. Section container check (inside a pinned section/group)
-    const pinnedSection = item.closest(
-      '[data-test-id*="pinned" i], [class*="pinned" i], [aria-label*="pinned" i], [aria-label*="fijad" i], [aria-label*="keep" i]'
-    );
-    if (pinnedSection) {
-      return true;
-    }
-
-    // 4. Position relative to "Recent" / "Recientes" section header
-    // In Gemini, pinned conversations appear in a section ABOVE the "Recent" section header.
-    const recentHeaders = Array.from(document.querySelectorAll(
-      '[data-test-id*="recent" i], [class*="recent" i], [aria-label*="recent" i], [aria-label*="reciente" i], h2, h3, h4'
-    )).filter(el => {
-      const t = (el.textContent || '').toLowerCase().trim();
-      return t === 'recent' || t === 'recientes' || t === 'récents' || t === 'letzte' || t.includes('recent') || t.includes('reciente');
+    // 3. Positional check: Is the item located after "Pinned" header and before "Recent" header?
+    const activeSidebar = getActiveSidebar() || document.body;
+    const pinnedHeader = Array.from(activeSidebar.querySelectorAll('*')).find(el => {
+      if (el.children.length > 3) return false;
+      const t = (el.textContent || '').trim().toLowerCase();
+      return (t === 'pinned' || t === 'fijadas' || t === 'fijados') && el.offsetHeight > 0;
     });
 
-    if (recentHeaders.length > 0) {
-      const recentHeader = recentHeaders[0];
-      const pos = row.compareDocumentPosition(recentHeader);
-      if (pos & Node.DOCUMENT_POSITION_FOLLOWING) {
-        const sidebar = row.closest('bard-sidenav, side-nav, mat-sidenav, nav, aside, [class*="sidebar"]');
-        if (sidebar && sidebar.contains(recentHeader)) {
-          return true;
+    const recentHeader = Array.from(activeSidebar.querySelectorAll('*')).find(el => {
+      if (el.children.length > 3) return false;
+      const t = (el.textContent || '').trim().toLowerCase();
+      return (t === 'recent' || t === 'recientes') && el.offsetHeight > 0;
+    });
+
+    if (pinnedHeader && recentHeader) {
+      const posPinned = pinnedHeader.compareDocumentPosition(item);
+      const posRecent = recentHeader.compareDocumentPosition(item);
+      // Following pinnedHeader and preceding recentHeader
+      if ((posPinned & Node.DOCUMENT_POSITION_FOLLOWING) && (posRecent & Node.DOCUMENT_POSITION_PRECEDING)) {
+        return true;
+      }
+    } else if (pinnedHeader && !recentHeader) {
+      const pinnedContainer = pinnedHeader.closest('section, [class*="section"], [class*="group"], div');
+      if (pinnedContainer && pinnedContainer !== activeSidebar && pinnedContainer.contains(item)) {
+        return true;
+      }
+    }
+
+    // 4. Scan elements inside the conversation row (both inside anchor and siblings)
+    const elements = Array.from(new Set(Array.from(row.querySelectorAll('*')).concat(Array.from(item.querySelectorAll('*')))));
+    for (const el of elements) {
+      if (el === item) continue;
+
+      // Skip the 3-dots kebab menu and its children
+      if (isMoreOptionsElement(el) || el.closest('button[aria-haspopup="menu"]') || el.closest('.conversation-actions-menu-button')) {
+        continue;
+      }
+
+      // Check text ligature on icon elements
+      const text = (el.textContent || '').trim().toLowerCase();
+      if (text === 'push_pin' || text === 'keep' || text === 'pin' || text === 'pushpin' || text === '📌' || text.includes('push_pin') || text.includes('📌')) {
+        return true;
+      }
+
+      // Check icon attributes
+      const fontIcon = (el.getAttribute('fonticon') || el.getAttribute('data-mat-icon-name') || '').toLowerCase();
+      if (fontIcon.includes('pin') || fontIcon.includes('keep')) {
+        return true;
+      }
+
+      // Check aria label / title specifically for pin/unpin
+      const aria = (el.getAttribute('aria-label') || el.getAttribute('title') || '').toLowerCase();
+      if (aria.includes('pinned') || aria.includes('fijad') || aria.includes('unpin') || aria.includes('desfijar') || aria === 'pin' || aria === 'fijar') {
+        return true;
+      }
+
+      // Check classes on icon or element
+      const cls = (el.className || '').toString().toLowerCase();
+      if (cls.includes('pinned') || cls.includes('pushpin') || cls.includes('pin-icon')) {
+        return true;
+      }
+
+      // SVG path check for pushpin geometry
+      const svgEl = el.tagName.toLowerCase() === 'svg' ? el : el.querySelector('svg');
+      if (svgEl) {
+        const paths = Array.from(svgEl.querySelectorAll('path'));
+        for (const p of paths) {
+          const d = p.getAttribute('d') || '';
+          if (/16\s*12|16\s*9V|14\s*4|17\s*4|19\s*12|v-?[67]l-?1|l-?1\s*-?1v-?[67]|h-?5v-?6|H7v|H7V|v[4-9](?:\.[0-9]+)?h[12]|v7l1|1v[78]l-?2/i.test(d)) {
+            return true;
+          }
         }
       }
     }
@@ -263,7 +366,7 @@
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         e.preventDefault();
-        const includePinned = !!e.shiftKey;
+        const includePinned = !!e.shiftKey || isShiftPressed;
         startBulkDelete(includePinned);
       });
 
@@ -299,7 +402,7 @@
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
-      const includePinned = !!e.shiftKey;
+      const includePinned = !!e.shiftKey || isShiftPressed;
       startBulkDelete(includePinned);
     });
 
@@ -332,62 +435,114 @@
     });
   }
 
+  function findMenuButtonForConversation(item) {
+    if (!item) return null;
+
+    // 1. Direct sibling button
+    if (item.nextElementSibling && item.nextElementSibling.matches('button, [role="button"]')) {
+      return item.nextElementSibling;
+    }
+    const siblingBtn = item.nextElementSibling?.querySelector('button, [role="button"]');
+    if (siblingBtn) return siblingBtn;
+
+    // 2. Search inside row
+    const row = getConversationRow(item);
+    if (row && row !== item) {
+      const btn = row.querySelector(
+        'button.conversation-actions-menu-button, .conversation-action-menu-button, button[id^="menu-"], [data-test-id*="menu"], button[aria-haspopup="menu"], button[aria-label*="option" i], button[aria-label*="opcion" i], button[aria-label*="more" i], button[aria-label*="más" i]'
+      );
+      if (btn) return btn;
+
+      const rowBtns = Array.from(row.querySelectorAll('button'));
+      const fallback = rowBtns.find(b => isMoreOptionsElement(b) || b.getAttribute('aria-haspopup') === 'menu' || b.querySelector('svg, mat-icon'));
+      if (fallback) return fallback;
+    }
+
+    // 3. Search outward starting from item: parent, grandparent, up to 4 levels
+    let cur = item.parentElement;
+    for (let i = 0; i < 3 && cur && cur !== document.body; i++) {
+      const btn = cur.querySelector(
+        'button.conversation-actions-menu-button, .conversation-action-menu-button, button[id^="menu-"], [data-test-id*="menu"], button[aria-haspopup="menu"]'
+      );
+      if (btn) return btn;
+      cur = cur.parentElement;
+    }
+    return null;
+  }
+
   async function deleteSingleConversationSilent(item) {
     try {
       const convId = extractConversationId(item);
+      const row = getConversationRow(item) || item.parentElement || item;
+
+      // 1. Try direct RPC first
       if (convId) {
         const rpcOk = await deleteViaRPC(convId);
         if (rpcOk) {
-          // Remove from DOM immediately
-          const row = item.closest('[role="listitem"], mat-list-item, div, li') || item;
           row.remove();
+          item.remove();
           return true;
         }
       }
 
-      // Fallback: silent UI automation (cdk overlays kept completely hidden by CSS)
-      item.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-      item.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
-      item.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      // 2. UI Automation fallback
+      row.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      row.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+      row.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+      row.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
       item.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
 
-      await new Promise(r => setTimeout(r, 60));
+      await new Promise(r => setTimeout(r, 100));
 
-      let menuBtn = item.querySelector('button[aria-haspopup="menu"], button[aria-label*="more" i], button[aria-label*="más" i], button[aria-label*="opcion" i], button[aria-label*="option" i], button[data-test-id*="more"]') ||
-                    item.parentElement?.querySelector('button[aria-haspopup="menu"], button[aria-label*="more" i]') ||
-                    item.closest('[role="listitem"], mat-list-item, [class*="item"]')?.querySelector('button[aria-haspopup="menu"], button[aria-label*="more" i]');
-
+      const menuBtn = findMenuButtonForConversation(item);
       if (!menuBtn) {
-        const containerRow = item.closest('[role="listitem"], mat-list-item, div, li') || item;
-        const btns = Array.from(containerRow.querySelectorAll('button'));
-        menuBtn = btns.find(b => b.getAttribute('aria-haspopup') === 'menu' || b.querySelector('svg') || b.querySelector('mat-icon'));
-      }
-
-      if (!menuBtn) return false;
-
-      menuBtn.click();
-      await new Promise(r => setTimeout(r, 120));
-
-      const overlayMenuItems = Array.from(document.querySelectorAll('.cdk-overlay-container [role="menuitem"], .cdk-overlay-pane button, [role="menu"] [role="menuitem"], [role="menu"] button, .mat-mdc-menu-item'));
-      const deleteOption = overlayMenuItems.find(el => {
-        // 1. Vector SVG path or mat-icon for trashcan (language-agnostic)
-        const hasDeleteIcon = el.querySelector('svg path[d*="M16 9"], svg path[d*="M6 19"], svg path[d*="M15 4"]') ||
-                              (el.querySelector('mat-icon') && (el.querySelector('mat-icon').textContent || '').includes('delete'));
-        if (hasDeleteIcon) return true;
-        const t = (el.textContent || '').toLowerCase().trim();
-        return t.includes('delete') || t.includes('eliminar') || t.includes('borrar') || t.includes('supprimer') || t.includes('löschen');
-      }) || overlayMenuItems[overlayMenuItems.length - 1];
-
-      if (!deleteOption) {
-        document.body.click();
+        console.warn('GSP: Menu button not found for conversation', convId);
         return false;
       }
 
-      deleteOption.click();
-      await new Promise(r => setTimeout(r, 140));
+      menuBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+      menuBtn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+      menuBtn.click();
 
-      const dialogButtons = Array.from(document.querySelectorAll('.cdk-overlay-container mat-dialog-actions button, .cdk-overlay-pane mat-dialog-container button, [role="dialog"] button, dialog button'));
-      const dialogConfirmBtn = dialogButtons.find(b => {
+      // Wait for CDK overlay menu to appear
+      await new Promise(r => setTimeout(r, 220));
+
+      // 3. Find Delete option in dropdown
+      const menuItems = Array.from(document.querySelectorAll(
+        '[data-test-id="delete-button"], .cdk-overlay-container [role="menuitem"], .cdk-overlay-pane button, [role="menu"] [role="menuitem"], [role="menu"] button, .mat-mdc-menu-item'
+      ));
+
+      const deleteOption = menuItems.find(el => {
+        if (el.getAttribute('data-test-id') === 'delete-button' || el.closest('[data-test-id="delete-button"]')) return true;
+        const text = (el.textContent || '').trim().toLowerCase();
+        if (text.includes('delete') || text.includes('eliminar') || text.includes('borrar') || text.includes('supprimer') || text.includes('löschen')) {
+          return true;
+        }
+        const hasTrashIcon = el.querySelector('svg path[d*="M16 9"], svg path[d*="M6 19"], svg path[d*="M15 4"]') ||
+                             (el.querySelector('mat-icon, span') && (el.querySelector('mat-icon, span').textContent || '').includes('delete'));
+        return !!hasTrashIcon;
+      });
+
+      if (!deleteOption) {
+        document.body.click();
+        console.warn('GSP: Delete option not found in menu');
+        return false;
+      }
+
+      deleteOption.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+      deleteOption.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+      deleteOption.click();
+
+      // Wait for confirm dialog to appear
+      await new Promise(r => setTimeout(r, 220));
+
+      // 4. Find confirm button in dialog
+      const dialogButtons = Array.from(document.querySelectorAll(
+        '[data-test-id="confirm-button"], message-dialog button, .cdk-overlay-container mat-dialog-actions button, .cdk-overlay-pane mat-dialog-container button, [role="dialog"] button, dialog button'
+      ));
+
+      const confirmBtn = dialogButtons.find(b => {
+        if (b.getAttribute('data-test-id') === 'confirm-button') return true;
         if (b.classList.contains('mat-warn') || b.classList.contains('mat-primary') || b.getAttribute('color') === 'warn') return true;
         const t = (b.textContent || '').toLowerCase().trim();
         const isConfirm = t.includes('delete') || t.includes('eliminar') || t.includes('borrar') || t.includes('confirm') || t.includes('yes') || t.includes('sí') || t.includes('si');
@@ -395,15 +550,20 @@
         return isConfirm && !isCancel;
       }) || dialogButtons[dialogButtons.length - 1];
 
-      if (dialogConfirmBtn) {
-        dialogConfirmBtn.click();
-        await new Promise(r => setTimeout(r, 200));
+      if (confirmBtn) {
+        confirmBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+        confirmBtn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+        confirmBtn.click();
+        await new Promise(r => setTimeout(r, 250));
+        row.remove();
+        item.remove();
         return true;
       }
 
+      console.warn('GSP: Confirm button not found in dialog');
       return false;
     } catch (err) {
-      console.debug('Error deleting conversation:', err);
+      console.error('GSP: Error deleting conversation:', err);
       return false;
     }
   }
@@ -429,12 +589,17 @@
     const t = window.GSP?.t || ((k, p) => k);
 
     const allItems = getConversationLinks();
+    console.log('GSP: Found conversations:', allItems.length, allItems.map(a => a.getAttribute('href')));
     if (allItems.length === 0) {
       window.alert(t('no_conversations'));
       return;
     }
 
-    const targetItems = includePinned ? allItems : allItems.filter(item => !isPinnedConversation(item));
+    const targetItems = includePinned ? allItems : allItems.filter(item => {
+      const pinned = isPinnedConversation(item);
+      console.log('GSP: Conv', extractConversationId(item), 'isPinned:', pinned);
+      return !pinned;
+    });
     const total = targetItems.length;
 
     if (total === 0) {
@@ -458,12 +623,20 @@
       btn.style.opacity = '0.7';
     }
 
+    const attemptedIds = new Set();
     let deletedCount = 0;
     for (let i = 0; i < total; i++) {
-      const remainingItems = getConversationLinks().filter(item => includePinned || !isPinnedConversation(item));
+      const remainingItems = getConversationLinks().filter(item => {
+        const id = extractConversationId(item);
+        if (id && attemptedIds.has(id)) return false;
+        return includePinned || !isPinnedConversation(item);
+      });
       if (remainingItems.length === 0) break;
 
       const item = remainingItems[0];
+      const convId = extractConversationId(item);
+      if (convId) attemptedIds.add(convId);
+
       if (btn) {
         btn.innerHTML = SPINNER_ICON;
         btn.title = t('deleting_progress', { current: deletedCount + 1, total });
@@ -507,6 +680,9 @@
     });
     window.addEventListener('keyup', (e) => {
       if (e.key === 'Shift') updateShiftVisuals(false);
+    });
+    window.addEventListener('blur', () => {
+      updateShiftVisuals(false);
     });
   }
 

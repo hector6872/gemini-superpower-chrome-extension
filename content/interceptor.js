@@ -195,7 +195,17 @@
           body: bodyParams.toString()
         });
 
-        window.postMessage({ type: 'GSP_DELETE_RPC_RESULT', requestId, success: resp.ok }, '*');
+        let success = resp.ok;
+        if (resp.ok) {
+          try {
+            const text = await resp.text();
+            if (text.includes('"Generic error"') || text.includes('["er"') || text.includes('["di",1]')) {
+              success = false;
+            }
+          } catch (_) {}
+        }
+
+        window.postMessage({ type: 'GSP_DELETE_RPC_RESULT', requestId, success }, '*');
       } catch (err) {
         window.postMessage({ type: 'GSP_DELETE_RPC_RESULT', requestId, success: false }, '*');
       }
