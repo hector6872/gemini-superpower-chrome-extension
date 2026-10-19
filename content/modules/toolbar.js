@@ -131,6 +131,11 @@
         </div>
 
         <div class="gsp-toolbar-right">
+          <button type="button" class="gsp-pill-btn gsp-pill-icon gsp-btn-wide-mode" id="gsp-btn-wide-mode" title="${t('wide_mode_title')}">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+            </svg>
+          </button>
           <div class="gsp-nav-group">
             <button type="button" class="gsp-nav-btn gsp-btn-nav-top" id="gsp-btn-nav-top" title="${t('nav_top_title')}">
               <svg viewBox="0 0 24 24">
@@ -222,6 +227,17 @@
         document.addEventListener('keydown', (e) => {
           if (isPopoverOpen && e.key === 'Escape') {
             closeUsagePopover();
+          }
+        });
+      }
+
+      const wideBtn = toolbar.querySelector('#gsp-btn-wide-mode');
+      if (wideBtn) {
+        wideBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeUsagePopover();
+          if (window.GSP?.toggleWideMode) {
+            window.GSP.toggleWideMode();
           }
         });
       }

@@ -33,15 +33,7 @@
       document.documentElement.classList.remove('gsp-wide-mode');
     }
 
-    const t = window.GSP?.t || ((k) => k);
-
-    const btn = document.getElementById('gsp-btn-wide-mode');
-    if (btn) {
-      btn.innerHTML = isWideMode ? COLLAPSE_ICON : EXPAND_ICON;
-      btn.title = t('wide_mode_title');
-      btn.setAttribute('aria-pressed', isWideMode ? 'true' : 'false');
-      btn.classList.toggle('gsp-header-btn-active', isWideMode);
-    }
+    updateWideButtonState();
 
     // Persist preference
     try {
@@ -64,66 +56,19 @@
     setWideMode(!isWideMode);
   }
 
-  function findOverflowButton() {
-    const candidates = Array.from(document.querySelectorAll('header button, [role="banner"] button, #gb button, top-bar button, .top-bar button, button[aria-haspopup="menu"]'));
-    
-    // Look specifically for 3-dots / more / settings / options buttons in top header
-    return candidates.find(b => {
-      const rect = b.getBoundingClientRect();
-      if (rect.top > 80 || rect.right < window.innerWidth - 250) return false;
-      const text = (b.getAttribute('aria-label') || b.title || b.className || '').toLowerCase();
-      return text.includes('more') || text.includes('overflow') || text.includes('opciones') || text.includes('options') || text.includes('settings') || text.includes('ajustes');
-    });
-  }
-
-  function updateButtonPosition(btn) {
-    if (!isDesktop()) {
-      btn.style.display = 'none';
-      return;
-    }
-    btn.style.display = 'inline-flex';
-
-    const overflowBtn = findOverflowButton();
-    if (overflowBtn && overflowBtn.offsetParent !== null) {
-      const rect = overflowBtn.getBoundingClientRect();
-      const rightDistance = window.innerWidth - rect.left + 6;
-      const topPos = Math.max(8, rect.top + (rect.height - 36) / 2);
-      btn.style.right = `${rightDistance}px`;
-      btn.style.top = `${topPos}px`;
-    } else {
-      btn.style.right = '56px';
-      btn.style.top = '12px';
-    }
-  }
-
-  function injectWideModeButton() {
-    let btn = document.getElementById('gsp-btn-wide-mode');
-
-    if (!btn) {
-      btn = document.createElement('button');
-      btn.id = 'gsp-btn-wide-mode';
-      btn.className = 'gsp-header-btn';
-      btn.type = 'button';
-      btn.title = isWideMode ? 'Exit Wide Mode (Full Width)' : 'Enter Wide Mode (Full Width)';
-      btn.setAttribute('aria-label', 'Toggle Wide Mode');
-      btn.setAttribute('aria-pressed', isWideMode ? 'true' : 'false');
+  function updateWideButtonState() {
+    const btn = document.getElementById('gsp-btn-wide-mode');
+    if (btn) {
       btn.innerHTML = isWideMode ? COLLAPSE_ICON : EXPAND_ICON;
-
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        toggleWideMode();
-      });
-
-      document.body.appendChild(btn);
+      const t = window.GSP?.t || ((k) => k);
+      btn.title = t('wide_mode_title');
+      btn.setAttribute('aria-pressed', isWideMode ? 'true' : 'false');
+      btn.classList.toggle('gsp-pill-active', isWideMode);
+      btn.classList.toggle('gsp-wide-active', isWideMode);
     }
-
-    updateButtonPosition(btn);
   }
 
   async function initWideMode() {
-    injectWideModeButton();
-
     try {
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         const data = await chrome.storage.local.get('gsp_wide_mode');
@@ -135,11 +80,11 @@
       console.debug('Error loading wide mode:', e);
     }
 
-    setInterval(injectWideModeButton, 1000);
+    updateWideButtonState();
+    setInterval(updateWideButtonState, 1000);
+
     window.addEventListener('resize', () => {
       setWideMode(isWideMode);
-      const btn = document.getElementById('gsp-btn-wide-mode');
-      if (btn) updateButtonPosition(btn);
     });
   }
 
@@ -147,4 +92,7 @@
   window.GSP.initWideMode = initWideMode;
   window.GSP.setWideMode = setWideMode;
   window.GSP.toggleWideMode = toggleWideMode;
+  window.GSP.isWideMode = () => isWideMode;
+  window.GSP.getWideMode = () => isWideMode;
+  window.GSP.updateWideButtonState = updateWideButtonState;
 })();

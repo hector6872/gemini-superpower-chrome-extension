@@ -1321,6 +1321,13 @@ textarea.gsp-input-field {
   border-color: rgba(217, 48, 37, 0.3) !important;
 }
 
+.gsp-bulk-delete-btn.gsp-bulk-delete-shift {
+  background: var(--gsp-danger) !important;
+  color: var(--gsp-text-on-danger) !important;
+  border-color: var(--gsp-danger) !important;
+  box-shadow: 0 0 8px rgba(217, 48, 37, 0.4) !important;
+}
+
 .gsp-bulk-delete-btn svg {
   width: 13px !important;
   height: 13px !important;
@@ -1476,6 +1483,36 @@ html.theme-light .gsp-toast,
   fill: currentColor !important;
   display: block !important;
   pointer-events: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Wide Mode Button in Toolbar
+   -------------------------------------------------------------------------- */
+.gsp-btn-wide-mode {
+  width: var(--gsp-pill-height) !important;
+  height: var(--gsp-pill-height) !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 9999px !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+}
+
+.gsp-btn-wide-mode svg {
+  width: 16px !important;
+  height: 16px !important;
+  fill: currentColor !important;
+  display: block !important;
+  pointer-events: none !important;
+}
+
+.gsp-btn-wide-mode.gsp-pill-active,
+.gsp-btn-wide-mode.gsp-wide-active {
+  color: var(--gsp-accent) !important;
+  background: var(--gsp-bg-pill-active) !important;
+  border-color: var(--gsp-accent) !important;
 }
 
 /* --------------------------------------------------------------------------

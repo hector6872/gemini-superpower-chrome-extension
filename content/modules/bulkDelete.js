@@ -22,26 +22,125 @@
     return match ? match[1] : (item.getAttribute('data-conversation-id') || '');
   }
 
-  function findHeaderAndFilterAnchor() {
-    // Look in all sidebars or drawers in DOM
-    const sidebars = Array.from(document.querySelectorAll(
-      'side-nav, mat-sidenav, nav, aside, [class*="side-nav"], [class*="sidebar"], [class*="drawer"], [data-test-id*="sidebar"]'
-    ));
+  function isPinnedConversation(item) {
+    if (!item) return false;
 
-    // Find the currently visible sidebar (or fallback to any found sidebar or document.body)
-    const activeSidebar = sidebars.find(sb => sb.offsetHeight > 0 && sb.offsetWidth > 0) || sidebars[0] || document.body;
+    const row = item.closest('[role="listitem"], mat-list-item, div, li') || item;
 
-    // 1. Look for the filter / search button in the sidebar (Google's new update)
-    const filterBtn = activeSidebar.querySelector(
-      'button[aria-label*="filter" i], button[aria-label*="filtrar" i], button[aria-label*="filtre" i], button[aria-label*="filteren" i], button[aria-label*="search" i], button[aria-label*="buscar" i], button[data-test-id*="filter" i], button[data-test-id*="search" i], [class*="chat-filter" i] button, [class*="filter-button" i], [class*="filter-btn" i]'
-    );
-
-    if (filterBtn && filterBtn.offsetHeight > 0 && filterBtn.offsetParent !== null) {
-      const headerContainer = filterBtn.closest('[class*="header" i], [class*="section" i], [class*="title" i], [class*="heading" i], div') || filterBtn.parentElement;
-      return { container: headerContainer, anchor: filterBtn };
+    // 1. Direct class or attribute check
+    const rowClasses = (row.className + ' ' + (item.className || '')).toLowerCase();
+    if (rowClasses.includes('pinned') || rowClasses.includes('is-pinned') || rowClasses.includes('fijad')) {
+      return true;
+    }
+    if (row.getAttribute('data-is-pinned') === 'true' || row.getAttribute('data-pinned') === 'true' || item.getAttribute('data-pinned') === 'true') {
+      return true;
     }
 
-    // 2. Direct text/attribute match for "Recent" / "Chats" header inside sidebar
+    // 2. Pin / Keep icon inside the item row
+    const icons = Array.from(row.querySelectorAll('mat-icon, svg, [role="img"]'));
+    for (const icon of icons) {
+      const text = (icon.textContent || '').trim().toLowerCase();
+      if (text === 'keep' || text === 'push_pin' || text === 'pin' || text.includes('keep') || text.includes('pin')) {
+        return true;
+      }
+      const label = (icon.getAttribute('aria-label') || icon.getAttribute('title') || '').toLowerCase();
+      if (label.includes('pin') || label.includes('fijad') || label.includes('keep')) {
+        return true;
+      }
+    }
+
+    // 3. Section container check (inside a pinned section/group)
+    const pinnedSection = item.closest(
+      '[data-test-id*="pinned" i], [class*="pinned" i], [aria-label*="pinned" i], [aria-label*="fijad" i], [aria-label*="keep" i]'
+    );
+    if (pinnedSection) {
+      return true;
+    }
+
+    // 4. Position relative to "Recent" / "Recientes" section header
+    // In Gemini, pinned conversations appear in a section ABOVE the "Recent" section header.
+    const recentHeaders = Array.from(document.querySelectorAll(
+      '[data-test-id*="recent" i], [class*="recent" i], [aria-label*="recent" i], [aria-label*="reciente" i], h2, h3, h4'
+    )).filter(el => {
+      const t = (el.textContent || '').toLowerCase().trim();
+      return t === 'recent' || t === 'recientes' || t === 'récents' || t === 'letzte' || t.includes('recent') || t.includes('reciente');
+    });
+
+    if (recentHeaders.length > 0) {
+      const recentHeader = recentHeaders[0];
+      const pos = row.compareDocumentPosition(recentHeader);
+      if (pos & Node.DOCUMENT_POSITION_FOLLOWING) {
+        const sidebar = row.closest('bard-sidenav, side-nav, mat-sidenav, nav, aside, [class*="sidebar"]');
+        if (sidebar && sidebar.contains(recentHeader)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  function getActiveSidebar() {
+    const sidebars = Array.from(document.querySelectorAll(
+      'bard-sidenav, side-nav, mat-sidenav, mat-drawer, nav, aside, [class*="side-nav"], [class*="sidebar"], [class*="drawer"], [data-test-id*="sidebar"]'
+    ));
+    return sidebars.find(sb => sb.offsetHeight > 0 && sb.offsetWidth > 0) || sidebars[0] || document.body;
+  }
+
+  function findFilterButton() {
+    const activeSidebar = getActiveSidebar();
+    const candidates = Array.from(activeSidebar.querySelectorAll('button, [role="button"], a[role="button"]'));
+
+    for (const el of candidates) {
+      if (el.id === 'gsp-bulk-delete-btn') continue;
+      if (el.offsetHeight === 0 && el.offsetParent === null) continue;
+
+      const label = (el.getAttribute('aria-label') || el.title || el.getAttribute('data-test-id') || '').toLowerCase();
+      if (label.includes('filtr') || label.includes('filter') || label.includes('busc') || label.includes('search') || label.includes('tune')) {
+        return el;
+      }
+
+      const cls = (el.className || '').toString().toLowerCase();
+      if (cls.includes('filter') || cls.includes('search')) {
+        return el;
+      }
+
+      const matIcon = el.querySelector('mat-icon');
+      if (matIcon) {
+        const iconName = (matIcon.textContent || '').trim().toLowerCase();
+        if (iconName.includes('filter') || iconName.includes('tune') || iconName.includes('search')) {
+          return el;
+        }
+      }
+    }
+
+    // Also check left-side header/nav elements outside the immediate sidebar container
+    const globalCandidates = Array.from(document.querySelectorAll('button, [role="button"]')).filter(b => {
+      const rect = b.getBoundingClientRect();
+      return rect.left < 360 && rect.top < 260 && b.offsetHeight > 0 && b.offsetParent !== null;
+    });
+    for (const el of globalCandidates) {
+      if (el.id === 'gsp-bulk-delete-btn') continue;
+      const label = (el.getAttribute('aria-label') || el.title || el.getAttribute('data-test-id') || '').toLowerCase();
+      if (label.includes('filtr') || label.includes('filter') || label.includes('busc') || label.includes('search') || label.includes('tune')) {
+        return el;
+      }
+      const matIcon = el.querySelector('mat-icon');
+      if (matIcon) {
+        const iconName = (matIcon.textContent || '').trim().toLowerCase();
+        if (iconName.includes('filter') || iconName.includes('tune') || iconName.includes('search')) {
+          return el;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  function findHeaderFallback() {
+    const activeSidebar = getActiveSidebar();
+
+    // Direct text/attribute match for "Recent" / "Chats" header inside sidebar
     const allHeaders = Array.from(activeSidebar.querySelectorAll(
       '[data-test-id*="recent" i], [class*="recent" i], [aria-label*="recent" i], [aria-label*="reciente" i], [aria-label*="récent" i], [class*="section-header" i], [class*="header" i], [class*="title" i], [class*="label" i], [class*="heading" i], h2, h3, h4, [role="heading"]'
     ));
@@ -65,7 +164,7 @@
       return { container: explicitHeader, anchor: null };
     }
 
-    // 3. Proximity match to the first conversation link
+    // Proximity match to first conversation link
     const links = getConversationLinks();
     if (links.length > 0) {
       const firstLink = links[0];
@@ -83,12 +182,33 @@
 
   function injectBulkDeleteButton() {
     const existingBtn = document.getElementById('gsp-bulk-delete-btn');
-    const target = findHeaderAndFilterAnchor();
-    if (!target || !target.container) {
-      return;
+    const filterBtn = findFilterButton();
+
+    let container = null;
+    let anchor = null;
+
+    if (filterBtn) {
+      // Find suitable container wide enough to host both buttons cleanly
+      let targetParent = filterBtn.parentElement;
+      while (targetParent && targetParent !== document.body && targetParent.offsetWidth < 60) {
+        targetParent = targetParent.parentElement;
+      }
+      container = targetParent || filterBtn.parentElement;
+
+      // Determine the reference child inside container
+      let insertRef = filterBtn;
+      while (insertRef.parentElement && insertRef.parentElement !== container) {
+        insertRef = insertRef.parentElement;
+      }
+      anchor = insertRef;
+    } else {
+      const fallback = findHeaderFallback();
+      if (!fallback || !fallback.container) return;
+      container = fallback.container;
+      anchor = fallback.anchor;
     }
 
-    const { container, anchor } = target;
+    if (!container) return;
 
     if (existingBtn && existingBtn.isConnected && container.contains(existingBtn) && existingBtn.offsetParent !== null) {
       return;
@@ -102,7 +222,6 @@
 
     container.style.display = 'flex';
     container.style.alignItems = 'center';
-    container.style.justifyContent = 'space-between';
     container.style.boxSizing = 'border-box';
 
     const btn = document.createElement('button');
@@ -110,6 +229,9 @@
     btn.className = 'gsp-bulk-delete-btn';
     btn.type = 'button';
     btn.title = t('delete_all_title');
+    btn.style.marginLeft = 'auto';
+    btn.style.marginRight = '6px';
+    btn.style.flexShrink = '0';
     btn.innerHTML = `
       <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
         <path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/>
@@ -120,13 +242,12 @@
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
-      startBulkDelete();
+      const includePinned = !!e.shiftKey;
+      startBulkDelete(includePinned);
     });
 
     if (anchor && anchor.parentNode === container) {
       container.insertBefore(btn, anchor);
-    } else if (anchor && anchor.parentNode && container.contains(anchor.parentNode)) {
-      anchor.parentNode.insertBefore(btn, anchor);
     } else {
       container.appendChild(btn);
     }
@@ -234,19 +355,45 @@
     }
   }
 
-  async function startBulkDelete() {
+  let isShiftPressed = false;
+  function updateShiftVisuals(pressed) {
+    if (isShiftPressed === pressed) return;
+    isShiftPressed = pressed;
+    const btn = document.getElementById('gsp-bulk-delete-btn');
+    if (!btn || isDeleting) return;
+    const t = window.GSP?.t || ((k) => k);
+    if (isShiftPressed) {
+      btn.classList.add('gsp-bulk-delete-shift');
+      btn.title = t('delete_all_with_pinned_title');
+    } else {
+      btn.classList.remove('gsp-bulk-delete-shift');
+      btn.title = t('delete_all_title');
+    }
+  }
+
+  async function startBulkDelete(includePinned = false) {
     if (isDeleting) return;
     const t = window.GSP?.t || ((k, p) => k);
 
-    const items = getConversationLinks();
-    const total = items.length;
-
-    if (total === 0) {
+    const allItems = getConversationLinks();
+    if (allItems.length === 0) {
       window.alert(t('no_conversations'));
       return;
     }
 
-    const confirmed = window.confirm(t('confirm_delete_all', { count: total }));
+    const targetItems = includePinned ? allItems : allItems.filter(item => !isPinnedConversation(item));
+    const total = targetItems.length;
+
+    if (total === 0) {
+      window.alert(t('no_unpinned_conversations'));
+      return;
+    }
+
+    const confirmMsg = includePinned
+      ? t('confirm_delete_all_with_pinned', { count: total })
+      : t('confirm_delete_all', { count: total });
+
+    const confirmed = window.confirm(confirmMsg);
     if (!confirmed) return;
 
     isDeleting = true;
@@ -260,10 +407,10 @@
 
     let deletedCount = 0;
     for (let i = 0; i < total; i++) {
-      const currentItems = getConversationLinks();
-      if (currentItems.length === 0) break;
+      const remainingItems = getConversationLinks().filter(item => includePinned || !isPinnedConversation(item));
+      if (remainingItems.length === 0) break;
 
-      const item = currentItems[0];
+      const item = remainingItems[0];
       if (btn) {
         btn.innerHTML = `<span>${t('deleting_progress', { current: deletedCount + 1, total })}</span>`;
       }
@@ -281,6 +428,12 @@
     if (btn) {
       btn.disabled = false;
       btn.style.opacity = '1';
+      btn.title = isShiftPressed ? t('delete_all_with_pinned_title') : t('delete_all_title');
+      if (isShiftPressed) {
+        btn.classList.add('gsp-bulk-delete-shift');
+      } else {
+        btn.classList.remove('gsp-bulk-delete-shift');
+      }
       btn.innerHTML = `
         <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
           <path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/>
@@ -299,6 +452,13 @@
     });
 
     observer.observe(document.body, { childList: true, subtree: true });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Shift') updateShiftVisuals(true);
+    });
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'Shift') updateShiftVisuals(false);
+    });
   }
 
   window.GSP = window.GSP || {};
