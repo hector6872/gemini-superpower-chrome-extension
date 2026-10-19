@@ -87,50 +87,80 @@
     return sidebars.find(sb => sb.offsetHeight > 0 && sb.offsetWidth > 0) || sidebars[0] || document.body;
   }
 
+  const TRASH_ICON = `
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+      <path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/>
+    </svg>
+  `;
+
+  const SPINNER_ICON = `
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="gsp-spin">
+      <path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c4.41 0 8-3.59 8-8h2c0 5.52-4.48 10-10 10v-2z"/>
+    </svg>
+  `;
+
   function findFilterButton() {
     const activeSidebar = getActiveSidebar();
-    const candidates = Array.from(activeSidebar.querySelectorAll('button, [role="button"], a[role="button"]'));
+    const root = activeSidebar || document.body;
 
-    for (const el of candidates) {
-      if (el.id === 'gsp-bulk-delete-btn') continue;
-      if (el.offsetHeight === 0 && el.offsetParent === null) continue;
+    const allButtons = Array.from(root.querySelectorAll('button, [role="button"]')).filter(b => {
+      if (b.id === 'gsp-bulk-delete-btn') return false;
+      return b.offsetHeight > 0 && b.offsetWidth > 0 && b.offsetParent !== null;
+    });
 
-      const label = (el.getAttribute('aria-label') || el.title || el.getAttribute('data-test-id') || '').toLowerCase();
-      if (label.includes('filtr') || label.includes('filter') || label.includes('busc') || label.includes('search') || label.includes('tune')) {
-        return el;
+    // 1. Strictly look for filter buttons ("filter", "filtrar", "filtro", funnel icon)
+    const explicitFilter = allButtons.find(b => {
+      const label = (b.getAttribute('aria-label') || b.title || b.getAttribute('data-test-id') || '').toLowerCase();
+      const cls = (b.className || '').toString().toLowerCase();
+
+      // Exclude top-level header controls like main menu, new chat
+      if (label.includes('menu') || label.includes('menú') || label.includes('new') || label.includes('nuevo')) {
+        return false;
       }
 
-      const cls = (el.className || '').toString().toLowerCase();
-      if (cls.includes('filter') || cls.includes('search')) {
-        return el;
+      if (label.includes('filtr') || label.includes('filter') || cls.includes('filter')) {
+        return true;
       }
 
-      const matIcon = el.querySelector('mat-icon');
+      const matIcon = b.querySelector('mat-icon');
       if (matIcon) {
         const iconName = (matIcon.textContent || '').trim().toLowerCase();
-        if (iconName.includes('filter') || iconName.includes('tune') || iconName.includes('search')) {
-          return el;
+        if (iconName.includes('filter') || iconName === 'tune') {
+          return true;
         }
       }
+
+      if (b.querySelector('svg path[d*="M10 18"], svg path[d*="M3 18"], svg path[d*="M4.25"], svg path[d*="M3 4"]')) {
+        return true;
+      }
+
+      return false;
+    });
+
+    if (explicitFilter) {
+      return explicitFilter;
     }
 
-    // Also check left-side header/nav elements outside the immediate sidebar container
-    const globalCandidates = Array.from(document.querySelectorAll('button, [role="button"]')).filter(b => {
-      const rect = b.getBoundingClientRect();
-      return rect.left < 360 && rect.top < 260 && b.offsetHeight > 0 && b.offsetParent !== null;
+    // 2. Look for any action button in the "Recent" / "Recientes" section header row
+    const recentHeaders = Array.from(root.querySelectorAll(
+      '[data-test-id*="recent" i], [class*="recent" i], [aria-label*="recent" i], [aria-label*="reciente" i], h2, h3, h4'
+    )).filter(el => {
+      if (el.offsetHeight === 0 && el.offsetParent === null) return false;
+      const t = (el.textContent || '').toLowerCase().trim();
+      return t === 'recent' || t === 'recientes' || t.includes('recent') || t.includes('reciente');
     });
-    for (const el of globalCandidates) {
-      if (el.id === 'gsp-bulk-delete-btn') continue;
-      const label = (el.getAttribute('aria-label') || el.title || el.getAttribute('data-test-id') || '').toLowerCase();
-      if (label.includes('filtr') || label.includes('filter') || label.includes('busc') || label.includes('search') || label.includes('tune')) {
-        return el;
-      }
-      const matIcon = el.querySelector('mat-icon');
-      if (matIcon) {
-        const iconName = (matIcon.textContent || '').trim().toLowerCase();
-        if (iconName.includes('filter') || iconName.includes('tune') || iconName.includes('search')) {
-          return el;
+
+    for (const h of recentHeaders) {
+      let cur = h;
+      for (let i = 0; i < 3 && cur && cur !== root; i++) {
+        const btn = cur.querySelector('button, [role="button"]');
+        if (btn && btn.id !== 'gsp-bulk-delete-btn' && btn.offsetHeight > 0) {
+          const l = (btn.getAttribute('aria-label') || '').toLowerCase();
+          if (!l.includes('menu') && !l.includes('menú') && !l.includes('new') && !l.includes('nuevo')) {
+            return btn;
+          }
         }
+        cur = cur.parentElement;
       }
     }
 
@@ -184,33 +214,46 @@
     const existingBtn = document.getElementById('gsp-bulk-delete-btn');
     const filterBtn = findFilterButton();
 
-    let container = null;
-    let anchor = null;
-
-    if (filterBtn) {
-      // Find suitable container wide enough to host both buttons cleanly
-      let targetParent = filterBtn.parentElement;
-      while (targetParent && targetParent !== document.body && targetParent.offsetWidth < 60) {
-        targetParent = targetParent.parentElement;
+    if (filterBtn && filterBtn.parentElement) {
+      // If already connected directly before filterBtn, nothing to do
+      if (existingBtn && existingBtn.isConnected && existingBtn.nextElementSibling === filterBtn) {
+        return;
       }
-      container = targetParent || filterBtn.parentElement;
 
-      // Determine the reference child inside container
-      let insertRef = filterBtn;
-      while (insertRef.parentElement && insertRef.parentElement !== container) {
-        insertRef = insertRef.parentElement;
+      if (existingBtn) {
+        existingBtn.remove();
       }
-      anchor = insertRef;
-    } else {
-      const fallback = findHeaderFallback();
-      if (!fallback || !fallback.container) return;
-      container = fallback.container;
-      anchor = fallback.anchor;
+
+      const t = window.GSP?.t || ((k) => k);
+
+      const btn = document.createElement('button');
+      btn.id = 'gsp-bulk-delete-btn';
+      btn.className = 'gsp-bulk-delete-btn';
+      btn.type = 'button';
+      btn.title = isShiftPressed ? t('delete_all_with_pinned_title') : t('delete_all_title');
+      if (isShiftPressed) {
+        btn.classList.add('gsp-bulk-delete-shift');
+      }
+      btn.innerHTML = TRASH_ICON;
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const includePinned = !!e.shiftKey;
+        startBulkDelete(includePinned);
+      });
+
+      // Insert directly to the left of the filter button
+      filterBtn.parentElement.insertBefore(btn, filterBtn);
+      return;
     }
 
-    if (!container) return;
+    // Fallback: only if no filter button found, put in Recent header row
+    const fallback = findHeaderFallback();
+    if (!fallback || !fallback.container) return;
+    const { container } = fallback;
 
-    if (existingBtn && existingBtn.isConnected && container.contains(existingBtn) && existingBtn.offsetParent !== null) {
+    if (existingBtn && existingBtn.isConnected && container.contains(existingBtn)) {
       return;
     }
 
@@ -219,25 +262,15 @@
     }
 
     const t = window.GSP?.t || ((k) => k);
-
-    container.style.display = 'flex';
-    container.style.alignItems = 'center';
-    container.style.boxSizing = 'border-box';
-
     const btn = document.createElement('button');
     btn.id = 'gsp-bulk-delete-btn';
     btn.className = 'gsp-bulk-delete-btn';
     btn.type = 'button';
-    btn.title = t('delete_all_title');
-    btn.style.marginLeft = 'auto';
-    btn.style.marginRight = '6px';
-    btn.style.flexShrink = '0';
-    btn.innerHTML = `
-      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-        <path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/>
-      </svg>
-      <span>${t('delete_all_btn')}</span>
-    `;
+    btn.title = isShiftPressed ? t('delete_all_with_pinned_title') : t('delete_all_title');
+    if (isShiftPressed) {
+      btn.classList.add('gsp-bulk-delete-shift');
+    }
+    btn.innerHTML = TRASH_ICON;
 
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -246,11 +279,7 @@
       startBulkDelete(includePinned);
     });
 
-    if (anchor && anchor.parentNode === container) {
-      container.insertBefore(btn, anchor);
-    } else {
-      container.appendChild(btn);
-    }
+    container.appendChild(btn);
   }
 
   function deleteViaRPC(conversationId) {
@@ -412,7 +441,8 @@
 
       const item = remainingItems[0];
       if (btn) {
-        btn.innerHTML = `<span>${t('deleting_progress', { current: deletedCount + 1, total })}</span>`;
+        btn.innerHTML = SPINNER_ICON;
+        btn.title = t('deleting_progress', { current: deletedCount + 1, total });
       }
 
       const success = await deleteSingleConversationSilent(item);
@@ -434,12 +464,7 @@
       } else {
         btn.classList.remove('gsp-bulk-delete-shift');
       }
-      btn.innerHTML = `
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-          <path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/>
-        </svg>
-        <span>${t('delete_all_btn')}</span>
-      `;
+      btn.innerHTML = TRASH_ICON;
     }
   }
 
