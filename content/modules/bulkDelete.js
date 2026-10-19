@@ -357,10 +357,7 @@
       btn.id = 'gsp-bulk-delete-btn';
       btn.className = 'gsp-bulk-delete-btn';
       btn.type = 'button';
-      btn.title = isShiftPressed ? t('delete_all_with_pinned_title') : t('delete_all_title');
-      if (isShiftPressed) {
-        btn.classList.add('gsp-bulk-delete-shift');
-      }
+      btn.title = t('delete_all_title');
       btn.innerHTML = TRASH_ICON;
 
       btn.addEventListener('click', (e) => {
@@ -393,10 +390,7 @@
     btn.id = 'gsp-bulk-delete-btn';
     btn.className = 'gsp-bulk-delete-btn';
     btn.type = 'button';
-    btn.title = isShiftPressed ? t('delete_all_with_pinned_title') : t('delete_all_title');
-    if (isShiftPressed) {
-      btn.classList.add('gsp-bulk-delete-shift');
-    }
+    btn.title = t('delete_all_title');
     btn.innerHTML = TRASH_ICON;
 
     btn.addEventListener('click', (e) => {
@@ -570,18 +564,7 @@
 
   let isShiftPressed = false;
   function updateShiftVisuals(pressed) {
-    if (isShiftPressed === pressed) return;
     isShiftPressed = pressed;
-    const btn = document.getElementById('gsp-bulk-delete-btn');
-    if (!btn || isDeleting) return;
-    const t = window.GSP?.t || ((k) => k);
-    if (isShiftPressed) {
-      btn.classList.add('gsp-bulk-delete-shift');
-      btn.title = t('delete_all_with_pinned_title');
-    } else {
-      btn.classList.remove('gsp-bulk-delete-shift');
-      btn.title = t('delete_all_title');
-    }
   }
 
   async function startBulkDelete(includePinned = false) {
@@ -655,12 +638,7 @@
     if (btn) {
       btn.disabled = false;
       btn.style.opacity = '1';
-      btn.title = isShiftPressed ? t('delete_all_with_pinned_title') : t('delete_all_title');
-      if (isShiftPressed) {
-        btn.classList.add('gsp-bulk-delete-shift');
-      } else {
-        btn.classList.remove('gsp-bulk-delete-shift');
-      }
+      btn.title = t('delete_all_title');
       btn.innerHTML = TRASH_ICON;
     }
   }

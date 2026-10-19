@@ -1316,11 +1316,6 @@ textarea.gsp-input-field {
   color: var(--gsp-danger) !important;
 }
 
-.gsp-bulk-delete-btn.gsp-bulk-delete-shift {
-  background: var(--gsp-danger) !important;
-  color: var(--gsp-text-on-danger) !important;
-  box-shadow: 0 0 8px rgba(217, 48, 37, 0.4) !important;
-}
 
 .gsp-bulk-delete-btn svg {
   width: 16px !important;
