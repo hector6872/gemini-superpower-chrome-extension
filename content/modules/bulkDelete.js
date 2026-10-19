@@ -196,12 +196,6 @@
     </svg>
   `;
 
-  const SPINNER_ICON = `
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" class="gsp-spin">
-      <path d="M12 4V2C6.48 2 2 6.48 2 12h2c0-4.41 3.59-8 8-8zm0 16c4.41 0 8-3.59 8-8h2c0 5.52-4.48 10-10 10v-2z"/>
-    </svg>
-  `;
-
   function findFilterButton() {
     const activeSidebar = getActiveSidebar();
     const root = activeSidebar || document.body;
@@ -621,7 +615,6 @@
       if (convId) attemptedIds.add(convId);
 
       if (btn) {
-        btn.innerHTML = SPINNER_ICON;
         btn.title = t('deleting_progress', { current: deletedCount + 1, total });
       }
 
