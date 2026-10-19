@@ -307,8 +307,40 @@
     return null;
   }
 
+  function isConversationsLoading() {
+    const activeSidebar = getActiveSidebar();
+    const root = activeSidebar || document.body;
+
+    // Check for spinners, progressbars, or skeletons in sidebar
+    const loadingIndicators = root.querySelectorAll(
+      'mat-progress-spinner, mat-spinner, [role="progressbar"], [aria-busy="true"], [class*="skeleton"], [class*="shimmer"], [data-test-id*="skeleton"], [class*="loading-spinner"]'
+    );
+    for (const indicator of loadingIndicators) {
+      if (indicator.offsetHeight > 0 && indicator.offsetWidth > 0) {
+        return true;
+      }
+    }
+
+    // Check if any conversation link has loaded yet
+    const links = getConversationLinks();
+    if (links.length === 0) {
+      return true;
+    }
+
+    return false;
+  }
+
   function injectBulkDeleteButton() {
     const existingBtn = document.getElementById('gsp-bulk-delete-btn');
+
+    // Do not show button while conversations are loading or none exist
+    if (isConversationsLoading()) {
+      if (existingBtn) {
+        existingBtn.remove();
+      }
+      return;
+    }
+
     const filterBtn = findFilterButton();
 
     if (filterBtn && filterBtn.parentElement) {

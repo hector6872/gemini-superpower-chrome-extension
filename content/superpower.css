@@ -1625,6 +1625,88 @@ html.theme-light .gsp-toast,
     max-width: 100% !important;
   }
 
+  /* Expand thought / thinking containers and reasoning blocks in wide mode */
+  body.gsp-wide-mode thought-container,
+  body.gsp-wide-mode thoughts-container,
+  body.gsp-wide-mode thinking-container,
+  body.gsp-wide-mode thinking-process,
+  body.gsp-wide-mode thought-process,
+  body.gsp-wide-mode [class*="thought"],
+  body.gsp-wide-mode [class*="thinking"],
+  body.gsp-wide-mode [class*="reasoning"],
+  body.gsp-wide-mode [data-test-id*="thought"],
+  body.gsp-wide-mode [data-test-id*="thinking"],
+  body.gsp-wide-mode mat-expansion-panel,
+  body.gsp-wide-mode expansion-panel,
+  body.gsp-wide-mode [class*="expansion-panel"],
+  body.gsp-wide-mode [class*="accordion"] {
+    max-width: 96% !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  body.gsp-wide-mode thought-container *,
+  body.gsp-wide-mode thoughts-container *,
+  body.gsp-wide-mode [class*="thought"] *,
+  body.gsp-wide-mode [class*="thinking"] *,
+  body.gsp-wide-mode [class*="reasoning"] *,
+  body.gsp-wide-mode mat-expansion-panel *,
+  body.gsp-wide-mode [class*="expansion-panel"] * {
+    max-width: 100% !important;
+  }
+
+  /* Expand response actions (share, copy, export, etc.), sources and footers in wide mode */
+  body.gsp-wide-mode message-actions,
+  body.gsp-wide-mode response-actions,
+  body.gsp-wide-mode model-response-actions,
+  body.gsp-wide-mode response-footer,
+  body.gsp-wide-mode model-response-footer,
+  body.gsp-wide-mode sources-container,
+  body.gsp-wide-mode source-container,
+  body.gsp-wide-mode [class*="message-actions"],
+  body.gsp-wide-mode [class*="response-actions"],
+  body.gsp-wide-mode [class*="action-bar"],
+  body.gsp-wide-mode [class*="response-container-footer"],
+  body.gsp-wide-mode [class*="response-footer"],
+  body.gsp-wide-mode [class*="model-response-footer"],
+  body.gsp-wide-mode [class*="source-container"],
+  body.gsp-wide-mode [class*="sources-container"],
+  body.gsp-wide-mode [class*="actions-container"],
+  body.gsp-wide-mode [data-test-id*="actions"],
+  body.gsp-wide-mode [data-test-id*="footer"],
+  body.gsp-wide-mode [data-test-id*="source"],
+  body.gsp-wide-mode mat-toolbar,
+  body.gsp-wide-mode [role="toolbar"] {
+    max-width: 96% !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  body.gsp-wide-mode message-actions *,
+  body.gsp-wide-mode response-actions *,
+  body.gsp-wide-mode [class*="response-actions"] *,
+  body.gsp-wide-mode [class*="action-bar"] *,
+  body.gsp-wide-mode [class*="actions-container"] *,
+  body.gsp-wide-mode [class*="footer"] *,
+  body.gsp-wide-mode [role="toolbar"] * {
+    max-width: 100% !important;
+  }
+
+  /* Any direct child of turns in conversation */
+  body.gsp-wide-mode chat-turn > *,
+  body.gsp-wide-mode conversation-turn > *,
+  body.gsp-wide-mode message-turn > *,
+  body.gsp-wide-mode [class*="conversation-turn"] > *,
+  body.gsp-wide-mode [class*="chat-turn"] > *,
+  body.gsp-wide-mode ms-chat-turn > * {
+    max-width: 96% !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
   body.gsp-wide-mode .gsp-toolbar-container {
     max-width: 100% !important;
     width: 100% !important;
