@@ -1294,52 +1294,44 @@ textarea.gsp-input-field {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 4px !important;
-  background: var(--gsp-bg-pill) !important;
-  border: 1px solid var(--gsp-border-pill) !important;
-  border-radius: 6px !important;
-  padding: 3px 8px !important;
+  width: 24px !important;
   height: 24px !important;
-  font-family: var(--gsp-font-family) !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  border: none !important;
   color: var(--gsp-text-muted) !important;
   cursor: pointer !important;
   transition: all 0.15s ease !important;
-  margin-left: auto !important;
-  margin-right: 6px !important;
+  margin-right: 4px !important;
   flex-shrink: 0 !important;
-  z-index: 10 !important;
-  white-space: nowrap !important;
-  line-height: 1 !important;
   box-sizing: border-box !important;
+  outline: none !important;
+  align-self: center !important;
+  transform: translateY(-1px) !important;
 }
 
 .gsp-bulk-delete-btn:hover {
   background: rgba(217, 48, 37, 0.12) !important;
   color: var(--gsp-danger) !important;
-  border-color: rgba(217, 48, 37, 0.3) !important;
 }
+
 
 .gsp-bulk-delete-btn svg {
-  width: 13px !important;
-  height: 13px !important;
+  width: 16px !important;
+  height: 16px !important;
   fill: currentColor !important;
   flex-shrink: 0 !important;
+  display: block !important;
+  pointer-events: none !important;
 }
 
-/* Suppress all CDK overlay menus and dialogs during bulk delete */
-body.gsp-silent-deleting .cdk-overlay-container,
-body.gsp-silent-deleting .cdk-overlay-backdrop,
-body.gsp-silent-deleting .cdk-overlay-pane,
-body.gsp-silent-deleting mat-dialog-container,
-body.gsp-silent-deleting [role="dialog"],
-body.gsp-silent-deleting [role="menu"] {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
-  transition: none !important;
-  animation: none !important;
+/* Fast animation during bulk delete without blocking events */
+body.gsp-silent-deleting .cdk-overlay-container {
+  opacity: 0.1 !important;
+  transition: opacity 0.1s ease !important;
 }
 
 .gsp-progress-bar-container {
@@ -1429,197 +1421,9 @@ html.theme-light .gsp-toast,
 }
 
 /* --------------------------------------------------------------------------
-   Header Buttons (e.g. Wide Mode Toggle)
-   -------------------------------------------------------------------------- */
-.gsp-header-btn {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: fixed !important;
-  top: 12px !important;
-  right: 96px !important;
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 50% !important;
-  background: var(--gsp-bg-pill) !important;
-  border: 1px solid var(--gsp-border-pill) !important;
-  color: var(--gsp-text-primary) !important;
-  cursor: pointer !important;
-  outline: none !important;
-  transition: all 0.15s ease !important;
-  z-index: 99999 !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
-}
-
-.gsp-header-btn:hover {
-  background: var(--gsp-bg-pill-hover) !important;
-  border-color: rgba(var(--gsp-accent-rgb), 0.35) !important;
-  transform: scale(1.05) !important;
-}
-
-.gsp-header-btn:active {
-  background: var(--gsp-bg-pill-active) !important;
-  transform: scale(0.95) !important;
-}
-
-.gsp-header-btn.gsp-header-btn-active {
-  color: var(--gsp-accent) !important;
-  background: rgba(var(--gsp-accent-rgb), 0.15) !important;
-  border-color: var(--gsp-accent) !important;
-}
-
-.gsp-header-btn svg {
-  width: 18px !important;
-  height: 18px !important;
-  fill: currentColor !important;
-  display: block !important;
-  pointer-events: none !important;
-}
-
-/* --------------------------------------------------------------------------
-   Wide Mode (Full Width) Layout Overrides (Desktop Only)
-   -------------------------------------------------------------------------- */
-@media (min-width: 769px) {
-  /* Dynamic CSS Variables for Gemini's layout engine */
-  body.gsp-wide-mode,
-  html.gsp-wide-mode {
-    --chat-content-max-width: 96% !important;
-    --conversation-max-width: 96% !important;
-    --content-max-width: 96% !important;
-    --chat-max-width: 96% !important;
-    --response-max-width: 96% !important;
-    --max-bubble-width: 96% !important;
-    --gemini-chat-width: 96% !important;
-    --turn-max-width: 96% !important;
-    --gemini-content-max-width: 96% !important;
-  }
-
-  /* Explicitly isolate sidebar, drawer and all navigation from wide mode */
-  body.gsp-wide-mode mat-sidenav,
-  body.gsp-wide-mode side-nav,
-  body.gsp-wide-mode .side-nav,
-  body.gsp-wide-mode .sidebar,
-  body.gsp-wide-mode [class*="side-nav"],
-  body.gsp-wide-mode [class*="sidebar"],
-  body.gsp-wide-mode [class*="drawer"],
-  body.gsp-wide-mode nav,
-  body.gsp-wide-mode aside,
-  body.gsp-wide-mode .navigation,
-  body.gsp-wide-mode mat-sidenav *,
-  body.gsp-wide-mode side-nav *,
-  body.gsp-wide-mode .side-nav *,
-  body.gsp-wide-mode .sidebar *,
-  body.gsp-wide-mode [class*="side-nav"] *,
-  body.gsp-wide-mode [class*="sidebar"] *,
-  body.gsp-wide-mode [class*="drawer"] *,
-  body.gsp-wide-mode nav *,
-  body.gsp-wide-mode aside * {
-    max-width: initial;
-    margin-left: initial;
-    margin-right: initial;
-  }
-
-  /* Expand chat containers, conversation turns, query containers, and response containers */
-  body.gsp-wide-mode .conversation-container,
-  body.gsp-wide-mode .chat-window,
-  body.gsp-wide-mode .chat-history,
-  body.gsp-wide-mode .bottom-container,
-  body.gsp-wide-mode .input-area-container,
-  body.gsp-wide-mode form.input-area,
-  body.gsp-wide-mode .input-box,
-  body.gsp-wide-mode [class*="chat-input-container"],
-  body.gsp-wide-mode [class*="conversation-turn"],
-  body.gsp-wide-mode [class*="response-container"],
-  body.gsp-wide-mode [class*="query-container"],
-  body.gsp-wide-mode [class*="model-turn"],
-  body.gsp-wide-mode [class*="bot-turn"],
-  body.gsp-wide-mode [class*="turn-content"],
-  body.gsp-wide-mode [class*="model-response"],
-  body.gsp-wide-mode [class*="agent-response"],
-  body.gsp-wide-mode [class*="message-container"],
-  body.gsp-wide-mode user-query,
-  body.gsp-wide-mode model-response,
-  body.gsp-wide-mode chat-turn,
-  body.gsp-wide-mode conversation-turn,
-  body.gsp-wide-mode message-turn,
-  body.gsp-wide-mode ms-response,
-  body.gsp-wide-mode ms-user-query,
-  body.gsp-wide-mode ms-chat-turn,
-  body.gsp-wide-mode [data-test-id*="model-response"],
-  body.gsp-wide-mode [data-test-id*="user-query"],
-  body.gsp-wide-mode [data-test-id*="conversation-turn"],
-  body.gsp-wide-mode [data-test-id*="turn"],
-  body.gsp-wide-mode [data-test-id*="response"],
-  body.gsp-wide-mode .user-query-container,
-  body.gsp-wide-mode .model-response-container,
-  body.gsp-wide-mode .response-container-content,
-  body.gsp-wide-mode .message-content,
-  body.gsp-wide-mode .presented-content,
-  body.gsp-wide-mode message-content,
-  body.gsp-wide-mode structured-content {
-    max-width: 96% !important;
-    width: 100% !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-
-  /* Ensure all inner elements, markdown blocks, code blocks, paragraphs, and wrappers in model responses expand fully */
-  body.gsp-wide-mode model-response *,
-  body.gsp-wide-mode [class*="model-response"] *,
-  body.gsp-wide-mode .model-response-container *,
-  body.gsp-wide-mode [class*="response-container"] *,
-  body.gsp-wide-mode [class*="model-turn"] *,
-  body.gsp-wide-mode [class*="bot-turn"] *,
-  body.gsp-wide-mode [class*="turn-content"] *,
-  body.gsp-wide-mode [data-test-id*="model-response"] *,
-  body.gsp-wide-mode [data-test-id*="response"] *,
-  body.gsp-wide-mode ms-response *,
-  body.gsp-wide-mode .presented-content *,
-  body.gsp-wide-mode message-content *,
-  body.gsp-wide-mode structured-content * {
-    max-width: 100% !important;
-  }
-
-  /* Response content and markdown wrappers: expand width to 100% */
-  body.gsp-wide-mode model-response .markdown,
-  body.gsp-wide-mode model-response [class*="markdown"],
-  body.gsp-wide-mode model-response .message-content,
-  body.gsp-wide-mode model-response .presented-content,
-  body.gsp-wide-mode model-response structured-content,
-  body.gsp-wide-mode model-response [class*="content"],
-  body.gsp-wide-mode [class*="model-response"] [class*="content"],
-  body.gsp-wide-mode [class*="model-response"] [class*="markdown"],
-  body.gsp-wide-mode [class*="response-container"] [class*="content"],
-  body.gsp-wide-mode [class*="response-container"] [class*="markdown"],
-  body.gsp-wide-mode [class*="model-turn"] [class*="content"],
-  body.gsp-wide-mode [class*="model-turn"] [class*="markdown"],
-  body.gsp-wide-mode [class*="turn-content"] [class*="content"],
-  body.gsp-wide-mode .model-response-container .markdown,
-  body.gsp-wide-mode .model-response-container [class*="content"],
-  body.gsp-wide-mode .response-container [class*="content"] {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  body.gsp-wide-mode .gsp-toolbar-container {
-    max-width: 100% !important;
-    width: 100% !important;
-    padding: 0 !important;
-    margin: 0 auto 8px auto !important;
-  }
-}
-
-/* --------------------------------------------------------------------------
    Mobile Viewport Responsive Adjustments (<= 768px)
    -------------------------------------------------------------------------- */
 @media (max-width: 768px) {
-  /* Hide desktop-only header buttons */
-  .gsp-header-btn {
-    display: none !important;
-  }
-
   /* Align floating toolbar with Gemini mobile input horizontal padding */
   .gsp-toolbar-container {
     padding: 0 16px !important;

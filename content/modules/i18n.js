@@ -13,9 +13,9 @@
       nav_top_title: 'Scroll to top of chat',
       nav_prev_title: 'Previous prompt',
       nav_next_title: 'Next prompt',
-      wide_mode_title: 'Toggle Wide Mode (Full Width)',
       delete_all_btn: 'Delete all',
-      delete_all_title: 'Delete all recent conversations',
+      delete_all_title: 'Delete all conversations except pinned (Hold Shift to include pinned)',
+      delete_all_with_pinned_title: 'Delete ALL conversations including pinned',
 
       // Prompts Menu
       quick_prompts_header: '✨ Quick Prompts (//)',
@@ -76,8 +76,10 @@
       usage_synced_status: 'Synced with your latest prompt',
 
       // Bulk Delete
-      confirm_delete_all: 'Are you sure you want to delete all {count} recent conversations?\n\nThis action cannot be undone.',
-      no_conversations: 'No recent conversations found to delete.',
+      confirm_delete_all: 'Are you sure you want to delete {count} conversations?\n\nPinned conversations will be kept.',
+      confirm_delete_all_with_pinned: 'Are you sure you want to delete ALL {count} conversations, INCLUDING pinned conversations?\n\nThis action cannot be undone.',
+      no_conversations: 'No conversations found to delete.',
+      no_unpinned_conversations: 'Only pinned conversations found. Hold Shift + Click to delete pinned conversations as well.',
       deleting_progress: 'Deleting {current}/{total}...'
     },
 
@@ -88,9 +90,9 @@
       nav_top_title: 'Ir al inicio del chat',
       nav_prev_title: 'Prompt anterior',
       nav_next_title: 'Prompt siguiente',
-      wide_mode_title: 'Modo ancho (Pantalla completa)',
       delete_all_btn: 'Borrar todo',
-      delete_all_title: 'Borrar todas las conversaciones recientes',
+      delete_all_title: 'Borrar todo excepto fijadas (Mantén Shift para incluir fijadas)',
+      delete_all_with_pinned_title: 'Borrar TODAS las conversaciones (incluidas fijadas)',
 
       // Prompts Menu
       quick_prompts_header: '✨ Prompts Rápidos (//)',
@@ -151,8 +153,10 @@
       usage_synced_status: 'Sincronizado con tu último prompt',
 
       // Bulk Delete
-      confirm_delete_all: '¿Estás seguro de que quieres eliminar todas las {count} conversaciones recientes?\n\nEsta acción no se puede deshacer.',
-      no_conversations: 'No se encontraron conversaciones recientes para eliminar.',
+      confirm_delete_all: '¿Seguro que deseas borrar {count} conversaciones?\n\nLas conversaciones fijadas se conservarán.',
+      confirm_delete_all_with_pinned: '¿Seguro que deseas borrar TODAS las {count} conversaciones, INCLUYENDO las fijadas?\n\nEsta acción no se puede deshacer.',
+      no_conversations: 'No se encontraron conversaciones para eliminar.',
+      no_unpinned_conversations: 'Solo hay conversaciones fijadas. Mantén Shift + Clic para borrar también las fijadas.',
       deleting_progress: 'Borrando {current}/{total}...'
     },
 
@@ -163,9 +167,9 @@
       nav_top_title: 'Zum Chat-Anfang scrollen',
       nav_prev_title: 'Vorheriger Prompt',
       nav_next_title: 'Nächster Prompt',
-      wide_mode_title: 'Breitbildmodus (Volle Breite)',
       delete_all_btn: 'Alle löschen',
-      delete_all_title: 'Alle letzten Unterhaltungen löschen',
+      delete_all_title: 'Alle außer angepinnten löschen (Umschalttaste für alle)',
+      delete_all_with_pinned_title: 'ALLE Unterhaltungen einschließlich angepinnter löschen',
 
       // Prompts Menu
       quick_prompts_header: '✨ Schnell-Prompts (//)',
@@ -226,8 +230,10 @@
       usage_synced_status: 'Mit deinem letzten Prompt synchronisiert',
 
       // Bulk Delete
-      confirm_delete_all: 'Möchtest du wirklich alle {count} letzten Unterhaltungen löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.',
-      no_conversations: 'Keine letzten Unterhaltungen zum Löschen gefunden.',
+      confirm_delete_all: 'Möchtest du wirklich {count} Unterhaltungen löschen?\n\nAngepinnte Unterhaltungen bleiben erhalten.',
+      confirm_delete_all_with_pinned: 'Möchtest du wirklich ALLE {count} Unterhaltungen löschen, EINSCHLIESSLICH der angepinnten?\n\nDies kann nicht rückgängig gemacht werden.',
+      no_conversations: 'Keine Unterhaltungen zum Löschen gefunden.',
+      no_unpinned_conversations: 'Nur angepinnte Unterhaltungen vorhanden. Halte Shift + Klick, um auch angepinnte zu löschen.',
       deleting_progress: 'Lösche {current}/{total}...'
     },
 
@@ -238,9 +244,9 @@
       nav_top_title: 'Défiler en haut du chat',
       nav_prev_title: 'Prompt précédent',
       nav_next_title: 'Prompt suivant',
-      wide_mode_title: 'Mode large (Plein écran)',
       delete_all_btn: 'Tout supprimer',
-      delete_all_title: 'Supprimer toutes les conversations récentes',
+      delete_all_title: 'Supprimer tout sauf les épinglées (Maj enfoncée pour inclure les épinglées)',
+      delete_all_with_pinned_title: 'Supprimer TOUTES les conversations, y compris les épinglées',
 
       // Prompts Menu
       quick_prompts_header: '✨ Prompts Rapides (//)',
@@ -301,8 +307,10 @@
       usage_synced_status: 'Synchronisé avec votre dernier prompt',
 
       // Bulk Delete
-      confirm_delete_all: 'Voulez-vous vraiment supprimer toutes les {count} conversations récentes ?\n\nCette action est irréversible.',
-      no_conversations: 'Aucune conversation récente trouvée à supprimer.',
+      confirm_delete_all: 'Voulez-vous vraiment supprimer {count} conversations ?\n\nLes conversations épinglées seront conservées.',
+      confirm_delete_all_with_pinned: 'Voulez-vous vraiment supprimer TOUTES les {count} conversations, Y COMPRIS les épinglées ?\n\nCette action est irréversible.',
+      no_conversations: 'Aucune conversation trouvée à supprimer.',
+      no_unpinned_conversations: 'Seules des conversations épinglées sont présentes. Maintenez Maj + Clic pour les supprimer aussi.',
       deleting_progress: 'Suppression de {current}/{total}...'
     },
 
@@ -313,9 +321,9 @@
       nav_top_title: 'Torna all\'inizio della chat',
       nav_prev_title: 'Prompt precedente',
       nav_next_title: 'Prompt successivo',
-      wide_mode_title: 'Modalità ampia (Schermo intero)',
       delete_all_btn: 'Elimina tutto',
-      delete_all_title: 'Elimina tutte le conversazioni recenti',
+      delete_all_title: 'Elimina tutto tranne i fissati (Tieni premuto Shift per includere i fissati)',
+      delete_all_with_pinned_title: 'Elimina TUTTE le conversazioni inclusi i fissati',
 
       // Prompts Menu
       quick_prompts_header: '✨ Prompt Rapidi (//)',
@@ -376,8 +384,10 @@
       usage_synced_status: 'Sincronizzato con il tuo ultimo prompt',
 
       // Bulk Delete
-      confirm_delete_all: 'Sei sicuro di voler eliminare tutte le {count} conversazioni recenti?\n\nQuesta azione non può essere annullata.',
-      no_conversations: 'Nessuna conversazione recente trovata da eliminare.',
+      confirm_delete_all: 'Sei sicuro di voler eliminare {count} conversazioni?\n\nLe conversazioni fissate verranno conservate.',
+      confirm_delete_all_with_pinned: 'Sei sicuro di voler eliminare TUTTE le {count} conversazioni, COMPRESE quelle fissate?\n\nQuesta azione non può essere annullata.',
+      no_conversations: 'Nessuna conversazione trovata da eliminare.',
+      no_unpinned_conversations: 'Ci sono solo conversazioni fissate. Tieni premuto Shift + Clic per eliminare anche quelle.',
       deleting_progress: 'Eliminazione {current}/{total}...'
     },
 
@@ -388,9 +398,9 @@
       nav_top_title: 'Rolar até o topo do chat',
       nav_prev_title: 'Prompt anterior',
       nav_next_title: 'Próximo prompt',
-      wide_mode_title: 'Modo amplo (Tela cheia)',
       delete_all_btn: 'Excluir tudo',
-      delete_all_title: 'Excluir todas as conversas recentes',
+      delete_all_title: 'Excluir tudo exceto fixadas (Segure Shift para incluir fixadas)',
+      delete_all_with_pinned_title: 'Excluir TODAS as conversas, incluindo as fixadas',
 
       // Prompts Menu
       quick_prompts_header: '✨ Prompts Rápidos (//)',
@@ -451,8 +461,10 @@
       usage_synced_status: 'Sincronizado com seu último prompt',
 
       // Bulk Delete
-      confirm_delete_all: 'Tem certeza de que deseja excluir todas as {count} conversas recentes?\n\nEsta ação não pode ser desfeita.',
-      no_conversations: 'Nenhuma conversa recente encontrada para excluir.',
+      confirm_delete_all: 'Tem certeza de que deseja excluir {count} conversas?\n\nAs conversas fixadas serão mantidas.',
+      confirm_delete_all_with_pinned: 'Tem certeza de que deseja excluir TODAS as {count} conversas, INCLUINDO as fixadas?\n\nEsta ação não pode ser desfeita.',
+      no_conversations: 'Nenhuma conversa encontrada para excluir.',
+      no_unpinned_conversations: 'Apenas conversas fixadas foram encontradas. Segure Shift + Clique para excluí-las também.',
       deleting_progress: 'Excluindo {current}/{total}...'
     },
 
@@ -463,9 +475,9 @@
       nav_top_title: 'チャットの先頭へスクロール',
       nav_prev_title: '前のプロンプト',
       nav_next_title: '次のプロンプト',
-      wide_mode_title: 'ワイドモード（全幅表示）',
       delete_all_btn: 'すべて削除',
-      delete_all_title: '最近の会話をすべて削除',
+      delete_all_title: '固定された会話以外をすべて削除（Shift キー長押しで固定も削除）',
+      delete_all_with_pinned_title: '固定された会話を含むすべての会話を削除',
 
       // Prompts Menu
       quick_prompts_header: '✨ クイックプロンプト (//)',
@@ -526,8 +538,10 @@
       usage_synced_status: '最新のプロンプトと同期中',
 
       // Bulk Delete
-      confirm_delete_all: '最近の会話 {count} 件をすべて削除してもよろしいですか？\n\nこの操作は取り消せません。',
-      no_conversations: '削除可能な最近の会話は見つかりませんでした。',
+      confirm_delete_all: '{count} 件の会話を削除してもよろしいですか？\n\n固定された会話は保持されます。',
+      confirm_delete_all_with_pinned: '固定された会話を含むすべての会話 {count} 件を削除してもよろしいですか？\n\nこの操作は取り消せません。',
+      no_conversations: '削除可能な会話は見つかりませんでした。',
+      no_unpinned_conversations: '固定された会話のみ存在します。Shift キーを押しながらクリックすると固定された会話も削除できます。',
       deleting_progress: '{current}/{total} 件目を削除中...'
     },
 
@@ -538,9 +552,9 @@
       nav_top_title: 'В начало чата',
       nav_prev_title: 'Предыдущий промпт',
       nav_next_title: 'Следующий промпт',
-      wide_mode_title: 'Широкий экран (На всю ширину)',
       delete_all_btn: 'Удалить всё',
-      delete_all_title: 'Удалить все недавние диалоги',
+      delete_all_title: 'Удалить всё, кроме закрепленных (Удерживайте Shift, чтобы удалить и закрепленные)',
+      delete_all_with_pinned_title: 'Удалить ВСЕ диалоги, включая закрепленные',
 
       // Prompts Menu
       quick_prompts_header: '✨ Быстрые промпты (//)',
@@ -601,8 +615,10 @@
       usage_synced_status: 'Синхронизировано с последним промптом',
 
       // Bulk Delete
-      confirm_delete_all: 'Вы уверены, что хотите удалить все недавние диалоги ({count})?\n\nЭто действие нельзя отменить.',
-      no_conversations: 'Не найдено недавних диалогов для удаления.',
+      confirm_delete_all: 'Вы уверены, что хотите удалить {count} диалогов?\n\nЗакрепленные диалоги будут сохранены.',
+      confirm_delete_all_with_pinned: 'Вы уверены, что хотите удалить ВСЕ {count} диалогов, ВКЛЮЧАЯ закрепленные?\n\nЭто действие нельзя отменить.',
+      no_conversations: 'Диалогов для удаления не найдено.',
+      no_unpinned_conversations: 'Найдены только закрепленные диалоги. Удерживайте Shift + Клик, чтобы удалить и их.',
       deleting_progress: 'Удаление {current}/{total}...'
     }
   };

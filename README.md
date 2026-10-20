@@ -50,16 +50,13 @@ A Google Chrome extension designed specifically for the **Google Gemini** web ap
    - The chat prompt input automatically gets focused whenever you open the page or switch back to the Gemini tab/window.
    - Global shortcuts: Press `/` or `Cmd+K` (Mac) / `Ctrl+K` at any time to instantly focus the input without touching your mouse.
 
-6. **Wide Mode (Full Width) Toggle**:
-   - Toggle button in the top-right header (placed directly next to the overflow menu) to switch between standard view and full-width layout.
-   - Expands the chat history, conversation turns, model response markdown, input card, and toolbar across the screen without affecting the left sidebar.
-   - Remembers your wide mode preference in local storage.
-
-7. **Bulk Delete Recent Conversations**:
-   - Clean "Delete all" action integrated into the recent conversations sidebar header using the native Material delete icon.
+6. **Bulk Delete Conversations**:
+   - Clean "Delete all" action integrated directly beside the sidebar filter button using the native Material delete icon.
+   - **Pinned protection**: Deletes all conversations while keeping pinned conversations safe.
+   - **Shift override**: Hold `Shift` while clicking to delete all conversations including pinned ones (with visual indicator and dedicated confirmation).
    - Native confirmation dialog with silent, background batch deletion.
 
-8. **Internationalization & Multi-Language Support (i18n)**:
+7. **Internationalization & Multi-Language Support (i18n)**:
    - Full native localization for English, Spanish, German, French, Italian, Portuguese, Japanese, and Russian.
    - Automatically adapts all toolbar controls, prompt menus, library managers, usage cards, and dialogs to match your browser's language setting.
 

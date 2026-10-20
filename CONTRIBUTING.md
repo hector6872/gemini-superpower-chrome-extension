@@ -79,7 +79,7 @@ Feature requests are always welcome:
 ├── _locales/                  # Multi-language message catalogs (en, es, de, fr, it, ja, pt, ru)
 ├── content/
 │   ├── interceptor.js         # MAIN world network interceptor for official Gemini RPCs
-│   ├── superpower.css         # Native Material You styling & Wide mode layout
+│   ├── superpower.css         # Native Material You styling & toolbar layout
 │   ├── content.js             # Content script bootstrap and module initializer
 │   └── modules/
 │       ├── autoFocus.js       # Smart prompt input auto-focus & keyboard shortcuts
@@ -89,8 +89,7 @@ Feature requests are always welcome:
 │       ├── promptCommands.js  # // single-word prompts autocomplete & in-page editor
 │       ├── themeSync.js       # Real-time light/dark theme detector & synchronizer
 │       ├── toolbar.js         # Floating pill toolbar placed above the input card
-│       ├── usageTracker.js    # Language-agnostic usage limits extractor & countdown timers
-│       └── wideMode.js        # Full-width chat layout switcher
+│       └── usageTracker.js    # Language-agnostic usage limits extractor & countdown timers
 ├── popup/                     # Extension popup UI (status, quick toggles, info)
 ├── rules/
 │   └── rules.json             # Declarative Net Request rules for background usage sync
